@@ -17,6 +17,9 @@
 
   system.stateVersion = 5;
 
+  # Required for system.defaults.* (activation runs as root)
+  system.primaryUser = user;
+
   users.users.${user} = {
     name = user;
     home = "/Users/${user}";

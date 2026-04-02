@@ -10,8 +10,11 @@ in
 
   programs.home-manager.enable = true;
 
+  xdg.enable = true;
+
   programs.zsh = {
     enable = true;
+    dotDir = config.home.homeDirectory;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
@@ -31,7 +34,6 @@ in
     enableZshIntegration = true;
   };
 
-  xdg.enable = true;
   xdg.configFile."starship.toml".source = ../config/starship.toml;
 
   programs.neovim = {
