@@ -65,8 +65,8 @@
   home-manager.users.${user} = import ../home;
 
   # nix を正とする手順: まず `cleanup = "check"` で activation を試し、列挙された「余分な」brew を
-  # すべて `brews` / `casks` に追記する。宣言が手元と一致したら `cleanup = "uninstall"`（通常）か `"zap"`（cask を強掃除）へ。
-  # `uninstall` と `zap` の違いは MANUAL「Homebrew を nix で正本にする」を参照。
+  # すべて `brews` / `casks` に追記する。一致したら `cleanup = "uninstall"` へ。
+  # ブラウザ等のユーザデータを強く掃除したくないなら `zap` は使わない（MANUAL 参照）。
   homebrew = {
     enable = true;
     onActivation.cleanup = "check";
