@@ -144,34 +144,52 @@ in
 
   home.packages = with pkgs;
     [
-      # CLI は nixpkgs 優先（hosts の homebrew.brews から段階的に移す）
+      # CLI は nixpkgs 優先。Homebrew の `brews` は tap 専用（例: wtp）以外は空にする。
       act
       arp-scan
       bat
+      brotli
       cloc
+      dnsutils # dig / host など（brew の bind クライアント相当）
       eza
       fastfetch
       fd
       ffmpeg
       fzf
+      gcc
+      gettext
       gh
       git
       gnupg
       graphviz
+      guetzli
       hyperfine
-      libwebp # cwebp / dwebp / webpinfo など（Homebrew の formula `webp` 相当）
+      inetutils # telnet / ftp など
+      jdk
+      libwebp # cwebp, dwebp, …
+      lzo
+      lz4
       mise
       nixd
       nixfmt
       nmap
+      opencode
+      openssl
+      pinentry_mac
+      pkgconf
+      rWrapper
       ripgrep
       supabase-cli
+      tcl
       terminal-notifier
+      tk # tcl-tk / wish 用（brew の tcl-tk の一部）
       tmux
       tree-sitter
       typst
       uv
       wget
+      xz
+      zstd
     ]
     ++ nixCasks;
 }
