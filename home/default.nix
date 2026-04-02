@@ -62,8 +62,13 @@ in
         eval "$(uv generate-shell-completion zsh)"
       fi
 
-      # Nix の CLI を Homebrew より優先
-      export PATH="/etc/profiles/per-user/${user}/bin:/nix/var/nix/profiles/default/bin:$PATH"
+      # Nix の CLI を Homebrew より優先（sessionPath と二重にならないよう path を一意化）
+      typeset -U path PATH
+      path=(
+        /etc/profiles/per-user/${user}/bin
+        /nix/var/nix/profiles/default/bin
+        $path
+      )
 
       # Tethering (hotspot) TTL workaround — requires sudo
       function hotspot() {
@@ -93,40 +98,26 @@ in
     enableZshIntegration = true;
   };
 
-  xdg.configFile."starship.toml".source = ../config/starship.toml;
+  xdg.configFile = {
+    "starship.toml".source = ../config/starship.toml;
+    "gh/config.yml".source = ../config/gh/config.yml;
+    "gh/hosts.yml".source = ../config/gh/hosts.yml;
+    "mise/config.toml".source = ../config/mise/config.toml;
+    "karabiner/karabiner.json".source = ../config/karabiner/karabiner.json;
+    "karabiner/assets".source = ../config/karabiner/assets;
+    "nvim".source = ../config/nvim;
+    "opencode/opencode.json".source = ../config/opencode/opencode.json;
+    "opencode/package.json".source = ../config/opencode/package.json;
+    "opencode/bun.lock".source = ../config/opencode/bun.lock;
+    "opencode/.gitignore".source = ../config/opencode/.gitignore;
+  };
 
   programs.neovim = {
     enable = true;
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
-    # nixd: `nixd` / `nixfmt` は home.packages。オプションは flake ルートの darwin 構成に合わせる。
-    initLua = ''
-      vim.filetype.add({ extension = { nix = "nix" } })
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "nix" },
-        callback = function(args)
-          local path = vim.api.nvim_buf_get_name(args.buf)
-          local root = path ~= "" and vim.fs.root(path, { "flake.nix", ".git" }) or nil
-          vim.lsp.start({
-            name = "nixd",
-            cmd = { "nixd" },
-            root_dir = root,
-            settings = {
-              nixd = {
-                nixpkgs = { expr = "import <nixpkgs> { }" },
-                formatting = { command = { "nixfmt" } },
-                options = {
-                  ["nix-darwin"] = {
-                    expr = "(builtins.getFlake (builtins.toString ./.)).darwinConfigurations.reohakase.options",
-                  },
-                },
-              },
-            },
-          })
-        end,
-      })
-    '';
+    # nixd / Nix の filetype は `config/nvim/lua/polish.lua`（リポジトリの `~/.config/nvim`）
   };
 
   programs.git = {
@@ -134,9 +125,22 @@ in
     lfs.enable = true;
     # Silence HM warning: legacy default for stateVersion < 25.05
     signing.format = "openpgp";
+    settings = {
+      credential."https://gist.github.com".helper = [
+        ""
+        "${pkgs.gh}/bin/gh auth git-credential"
+      ];
+      credential."https://github.com".helper = [
+        ""
+        "${pkgs.gh}/bin/gh auth git-credential"
+      ];
+      gpg.format = "openpgp";
+      "gpg \"openpgp\"".program = "${pkgs.gnupg}/bin/gpg";
+    };
   };
 
-  programs.gh.enable = true;
+  # `~/.config/gh/*` は xdg でリポジトリ管理。HM の programs.gh は二重生成を避けるため無効
+  programs.gh.enable = false;
 
   programs.fzf.enable = true;
 

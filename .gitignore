@@ -3,3 +3,7 @@ result-*
 .direnv
 *.swp
 .DS_Store
+
+# Local-only (not vendored from ~/.config)
+config/opencode/node_modules
+config/raycast/extensions
