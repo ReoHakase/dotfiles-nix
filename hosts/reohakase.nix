@@ -39,18 +39,17 @@
 
   programs.zsh.enable = true;
 
-  # macOS システム設定（`defaults read` に基づく。変更後は `apply-system.sh` で反映）
+  # macOS 既定と同じ値は書かない（nix-darwin マニュアル各オプションの default / 説明文を参照）。
+  # 変更後は `apply-system.sh`。手元の確認: `defaults read NSGlobalDomain|com.apple.finder|com.apple.dock|com.apple.screencapture …`
   system.defaults = {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
       AppleShowAllExtensions = true;
       NSAutomaticWindowAnimationsEnabled = false;
-      # Finder サイドバーアイコン: 1=小 / 2=中 / 3=大（現在の手元は 2）
+      # 既定は 3（大）。手元は中サイズ。
       NSTableViewDefaultSizeMode = 2;
-      # 「自然なスクロール」がオフ = 従来型（コンテンツではなくスクロールバー基準。いわゆる「逆」にした状態）
+      # 既定は「自然なスクロール」オン。手元は従来型（オフ）。
       "com.apple.swipescrolldirection" = false;
-      # トラックパッドの強めクリック（Force Click）
-      "com.apple.trackpad.forceClick" = true;
     };
 
     finder = {
@@ -65,29 +64,8 @@
       show-recents = false;
     };
 
-    # `defaults read com.apple.AppleMultitouchTrackpad` 相当（内蔵／Bluetooth トラックパッドの既定に合わせる）
-    trackpad = {
-      ActuateDetents = true;
-      Clicking = true;
-      Dragging = false;
-      DragLock = false;
-      FirstClickThreshold = 1;
-      SecondClickThreshold = 1;
-      TrackpadCornerSecondaryClick = 0;
-      TrackpadFourFingerHorizSwipeGesture = 2;
-      TrackpadFourFingerPinchGesture = 2;
-      TrackpadFourFingerVertSwipeGesture = 2;
-      TrackpadMomentumScroll = true;
-      TrackpadPinch = true;
-      TrackpadRightClick = true;
-      TrackpadRotate = true;
-      TrackpadThreeFingerDrag = false;
-      TrackpadThreeFingerHorizSwipeGesture = 2;
-      TrackpadThreeFingerTapGesture = 0;
-      TrackpadThreeFingerVertSwipeGesture = 2;
-      TrackpadTwoFingerDoubleTapGesture = true;
-      TrackpadTwoFingerFromRightEdgeSwipeGesture = 3;
-    };
+    # 既定は file。手元はクリップボードへ保存。
+    screencapture.target = "clipboard";
   };
 
   home-manager.useGlobalPkgs = true;
