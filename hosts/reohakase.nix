@@ -69,14 +69,12 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Homebrew: cask / tap 専用ツール。`brew bundle --cleanup`（uninstall）は wtp の依存（brew の git 等）と衝突するため `none`。
-  # 手元の不要 formula は `brew autoremove` などで個別に整理する。
+  # Homebrew: cask のみ（formula / tap は空）。CLI は home/default.nix の nixpkgs。`wtp` / brew の `opencode` は使わない。
   homebrew = {
     enable = true;
-    onActivation.cleanup = "none";
-    # nixpkgs に無いもの・tap 公式のみ（CLI は home/default.nix の home.packages）
-    taps = [ "satococoa/tap" ];
-    brews = [ "wtp" ];
+    onActivation.cleanup = "uninstall";
+    taps = [ ];
+    brews = [ ];
     casks = [
       "affinity"
       "alt-tab"

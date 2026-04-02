@@ -40,7 +40,7 @@ in
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
-    # sessionPath で Nix を先にするが、`wtp shell-init` が PATH を書き換えるため initContent の末尾で Nix を再度先頭へ。
+    # brew shellenv / path_helper のあとでも Nix の bin を先頭に（initContent 末尾で付け直し）
     "zsh-abbr" = {
       enable = true;
       abbreviations = {
@@ -58,15 +58,11 @@ in
     initContent = ''
       export GPG_TTY=$(tty)
 
-      if command -v wtp >/dev/null 2>&1; then
-        eval "$(wtp shell-init zsh)"
-      fi
-
       if command -v uv >/dev/null 2>&1; then
         eval "$(uv generate-shell-completion zsh)"
       fi
 
-      # wtp 等のあとでも Nix の CLI を優先（which が /opt/homebrew より先に /etc/profiles を見る）
+      # Nix の CLI を Homebrew より優先
       export PATH="/etc/profiles/per-user/${user}/bin:/nix/var/nix/profiles/default/bin:$PATH"
 
       # Tethering (hotspot) TTL workaround — requires sudo
@@ -152,7 +148,7 @@ in
   home.packages =
     with pkgs;
     [
-      # CLI は nixpkgs 優先。Homebrew の `brews` は tap 専用（例: wtp）以外は空にする。
+      # CLI は nixpkgs 優先。Homebrew は cask のみ（`hosts` の `brews` / `taps` は空）。
       act
       arp-scan
       bat
