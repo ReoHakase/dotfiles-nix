@@ -106,10 +106,6 @@ in
     "karabiner/karabiner.json".source = ../config/karabiner/karabiner.json;
     "karabiner/assets".source = ../config/karabiner/assets;
     "nvim".source = ../config/nvim;
-    "opencode/opencode.json".source = ../config/opencode/opencode.json;
-    "opencode/package.json".source = ../config/opencode/package.json;
-    "opencode/bun.lock".source = ../config/opencode/bun.lock;
-    "opencode/.gitignore".source = ../config/opencode/.gitignore;
   };
 
   programs.neovim = {
