@@ -144,8 +144,13 @@ in
 
   home.packages = with pkgs;
     [
+      # CLI は nixpkgs 優先（hosts の homebrew.brews から段階的に移す）
+      act
+      arp-scan
       bat
+      cloc
       eza
+      fastfetch
       fd
       ffmpeg
       fzf
@@ -154,11 +159,13 @@ in
       gnupg
       graphviz
       hyperfine
+      libwebp # cwebp / dwebp / webpinfo など（Homebrew の formula `webp` 相当）
       mise
       nixd
       nixfmt
       nmap
       ripgrep
+      supabase-cli
       terminal-notifier
       tmux
       tree-sitter
