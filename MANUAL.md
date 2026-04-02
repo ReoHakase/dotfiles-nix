@@ -36,6 +36,63 @@
 2. 設定を反映: `./scripts/apply-system.sh`（または `darwin-rebuild switch --flake .#reohakase`。初回後は `darwin-rebuild` が PATH に乗ることが多い）。
 3. `home/default.nix` や `hosts/*.nix` を変えたら必ず上記の **switch** を実行する。
 
+## `config/` の追加・削除・編集（`~/.config` を宣言管理するとき）
+
+`home/default.nix` の `xdg.configFile` が **`../config/...` を `source` として** `~/.config` 以下にシンボリックリンクを張る。Nix は **flake の入力として Git の追跡ファイル**を読むため、リポジトリ直下で作業する場合は **未コミットの新規パスがあるとビルドが失敗**することがある（`Path 'config/...' does not exist in Git repository` など）。
+
+### ファイルを編集するとき（既に `xdg.configFile` がある）
+
+1. リポジトリの **`config/` 側**を編集する（正本はここ。`~/.config` のシmlink先を直接いじらない方が安全）。
+2. 内容に満足したら `git add` / `commit`。
+3. `./scripts/apply-system.sh` で適用（リンク先のストアパスが更新される）。
+
+### 新しい設定ファイル・ディレクトリを追加するとき
+
+1. `config/` にファイルを置く（ディレクトリごとなら `config/foo/` 以下に置く）。
+2. `home/default.nix` の `xdg.configFile` にエントリを足す。例:
+   - 単一ファイル: `"アプリ名/設定名".source = ../config/アプリ名/設定名;`
+   - ディレクトリ丸ごと: `"アプリ名".source = ../config/アプリ名;`
+3. **`git add` で新規パスを追跡したうえで** `nix flake check` または `switch`（未追跡のままだと Nix がパスを見つけられない）。
+4. `commit` してから `./scripts/apply-system.sh`。
+
+### 宣言管理をやめる・ファイルを削除するとき
+
+1. `home/default.nix` から該当の `xdg.configFile` 行を削除する。
+2. リポジトリから `config/...` のファイルを `git rm` する（不要なら）。
+3. `commit` のあと `./scripts/apply-system.sh`。  
+   以降はそのパスは Home Manager が管理しない。**手元で編集したい設定**は、`~/.config` に通常ファイルとして残す（初回は HM が退避した `.hm-backup` をリネームするなど）か、アプリ側の「デフォルトの設定場所」に任せる。
+
+### `programs.*` で生成しているもの（`git` など）
+
+`~/.config/git/config` の一部は **`programs.git` など Home Manager のモジュール**が生成する。リポジトリに平文の `config/git/config` を置かず、**`home/default.nix` の `programs.git.settings`** を編集する。`config/git/README.md` を参照。
+
+## `~/.config` とリポジトリが食い違った・衝突したとき
+
+### 事前に知っておくこと
+
+- **`home-manager.backupFileExtension = "hm-backup"`**（`hosts/reohakase.nix`）により、適用時に既存ファイルと衝突すると、既存側が **`*.hm-backup`** にリネームされ、代わりに Nix のリンクが張られる。
+- 正本を **`config/` + `home/default.nix`** に置く運用なら、**いじるのは基本リポジトリ側**で、`switch` で `~/.config` に反映するのが一番わかりやすい。
+
+### 楽な解決の流れ（迷ったらこの順）
+
+1. **何が正か決める**  
+   - 「リポジトリを正にする」→ 手元の変更を `config/` に取り込んでから `commit` → `switch`。  
+   - 「手元の `~/.config` だけ試したい」→ そのパスを **`xdg.configFile` から外す**か一時的にコメントアウトして `switch` し、通常ファイルとして編集（恒久なら後で `config/` に写して再度宣言化）。
+2. **`.hm-backup` が残っている場合**  
+   - 中身は「適用直前の旧ファイル」。**差分を見る:**  
+     `diff ~/.config/foo/foo.yml ~/.config/foo/foo.yml.hm-backup`（パスは例）  
+   - リポジトリ側に取り込みたい内容がバックアップにだけあるなら、**`config/` にマージして `commit` → `switch`**。不要ならバックアップを削除してよい。
+3. **シンボリックリンクなのにエディタで直接編集した**  
+   - リンク先は Nix ストアの読み取り専用パスになることがある。**編集は `config/` の実体**に対して行い、再度 `commit` → `switch`。
+4. **古い通常ファイルが残っていてリンクが張れない**  
+   - バックアップに退避されていない「そのまま残ったファイル」の場合は、**中身を確認したうえで**リネーム・削除してから `switch` をやり直す（消す前に `cp` や `git diff` で退避）。
+
+### コンフリクトを減らすコツ
+
+- 宣言管理するパスは **`config/` だけ編集**し、`switch` で反映する。
+- 大きいデータ（Raycast の extensions など）は **リポジトリに含めず**、ローカルや別バックアップで管理する。
+- 変更後は **`git status` がきれいな状態**で `nix flake check` / `switch` すると、Nix の「Git に無いパス」エラーを避けやすい。
+
 ## 評価だけ確認（ビルド適用なし）
 
 ```bash
@@ -128,9 +185,7 @@ GPG エージェントや `ssh-agent`、`~/.ssh/config` の中身はローカル
 
 ### Neovim
 
-`programs.neovim.initLua` で **`FileType nix` 時に `nixd` を `vim.lsp.start`** している。flake のオプション補完は `darwinConfigurations.reohakase` を指す式になっている（ホスト名を変えたら `home/default.nix` の Lua と `.vscode/settings.json` の両方を合わせる）。
-
-`~/.config/nvim` をプラグイン込みで宣言管理したくなったら、`xdg.configFile` や `programs.neovim` の `extraConfig`、別リポジトリの submodule など、好みの方式で拡張してよい。
+`config/nvim` を `xdg.configFile` で丸ごとリンクしている。Nix 用の LSP は **`config/nvim/lua/polish.lua`** で **`FileType nix` 時に `nixd` を `vim.lsp.start`** している。flake のオプション補完は `darwinConfigurations.reohakase` を指す式になっている（ホスト名を変えたら `polish.lua` と `.vscode/settings.json` の両方を合わせる）。
 
 ### Homebrew と重複している formula の整理（少しずつ）
 
