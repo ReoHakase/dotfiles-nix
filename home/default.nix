@@ -158,6 +158,7 @@ in
       noto-fonts-cjk-serif
 
       # CLI は nixpkgs 優先。Homebrew は cask のみ（`hosts` の `brews` / `taps` は空）。
+      actrun # github.com/mizchi/actrun（flake オーバーレイ。upstream nixpkgs 未収録）
       act
       arp-scan
       bat

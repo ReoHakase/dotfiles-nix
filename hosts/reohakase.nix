@@ -15,6 +15,8 @@
 
   nixpkgs.hostPlatform = "aarch64-darwin";
 
+  nixpkgs.overlays = [ inputs.actrun.overlays.default ];
+
   nixpkgs.config = {
     allowUnfree = true;
   };

@@ -51,7 +51,7 @@ macOS 向けに **Nix flakes + nix-darwin + home-manager** でシェル・CLI・
 ## ディレクトリ構成
 
 ```
-flake.nix              # inputs と darwinConfigurations.reohakase
+flake.nix              # inputs（actrun など）と darwinConfigurations.reohakase
 flake.lock             # 入力のロック（コミットする）
 hosts/reohakase.nix    # nix-darwin（Nix、defaults、users、HM の読み込み）
 home/default.nix       # home-manager（zsh / starship / neovim / packages）
