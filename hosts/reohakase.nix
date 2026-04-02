@@ -1,5 +1,5 @@
 # Host: reohakase (scutil --get LocalHostName / hostname -s)
-{ pkgs, user, ... }:
+{ pkgs, user, inputs, ... }:
 {
   nixpkgs.hostPlatform = "aarch64-darwin";
 
@@ -7,13 +7,10 @@
     allowUnfree = true;
   };
 
-  nix = {
-    settings = {
-      experimental-features = "nix-command flakes";
-      trusted-users = [ user ];
-    };
-    optimise.automatic = true;
-  };
+  # Determinate Nix は独自デーモンでインストールを管理するため、nix-darwin の Nix 管理と両立しない。
+  # `nix.enable = false` にしないと activation が中止される（「Determinate detected, aborting activation」）。
+  # flakes や trusted-users は Determinate / 手元の `/etc/nix/nix.conf` 側で調整する。
+  nix.enable = false;
 
   system.stateVersion = 5;
 
@@ -55,6 +52,9 @@
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
+  home-manager.extraSpecialArgs = { inherit inputs; };
+  # 既存の ~/.zshrc や ~/.config/gh/config.yml などと HM が衝突するとき、拡張子付きで退避してからリンクする
+  home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
   # Optional: keep Homebrew only for casks / oddballs — uncomment and list casks

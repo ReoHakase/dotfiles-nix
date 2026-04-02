@@ -1,7 +1,11 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 let
   user = "ReoHakase";
+  inherit (pkgs) lib;
+  # NixCasks: add GUI apps here (after CI is green). Example:
+  # nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [ raycast slack ];
+  nixCasks = [ ];
 in
 {
   home.username = user;
@@ -12,15 +16,87 @@ in
 
   xdg.enable = true;
 
+  # Nix / HM の bin を先に（/usr/bin や Homebrew より前に検索させる）
+  home.sessionPath = [
+    "/etc/profiles/per-user/${user}/bin"
+    "/nix/var/nix/profiles/default/bin"
+    "${config.home.homeDirectory}/.local/bin"
+    "${config.home.homeDirectory}/.cache/lm-studio/bin"
+    "${config.home.homeDirectory}/.antigravity/antigravity/bin"
+    "/Library/TeX/texbin"
+  ];
+
   programs.zsh = {
     enable = true;
     dotDir = config.home.homeDirectory;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
-    initExtra = ''
+    # PATH の先頭付けは home.sessionPath のみ（profileExtra/initContent と重複させると which -a で同じパスが二重になる）
+    # HM が plugins + user-abbreviations を配る（手動 source より確実）
+    "zsh-abbr" = {
+      enable = true;
+      abbreviations = {
+        gs = "git switch";
+        gsc = "git switch -c";
+        gpush = "git push origin HEAD";
+        gpull = "git pull origin HEAD";
+        "gc-" = "git reset --soft HEAD^";
+        gc = "git commit -S";
+        ghi = "gh issue create";
+        ghp = "gh pr create";
+        ghw = "gh repo view -w";
+      };
+    };
+    initContent = ''
       export GPG_TTY=$(tty)
-      source ${pkgs.zsh-abbr}/share/zsh-abbr/zsh-abbr.zsh
+
+      if command -v wtp >/dev/null 2>&1; then
+        eval "$(wtp shell-init zsh)"
+      fi
+
+      if command -v uv >/dev/null 2>&1; then
+        eval "$(uv generate-shell-completion zsh)"
+      fi
+
+      # Tethering (hotspot) TTL workaround — requires sudo
+      function hotspot() {
+        if [ "$#" -ne 1 ]; then
+          echo "Usage: ''${0} <on|off>"
+          return
+        fi
+        local on_or_off="''${1}"
+        if [ "''${on_or_off}" = "on" ]; then
+          sudo sysctl net.inet.ip.ttl=65
+          sudo networksetup -setv6off "Wi-Fi"
+          echo "Hotspot mode is now enabled."
+        else
+          sudo sysctl net.inet.ip.ttl=64
+          sudo networksetup -setv6automatic "Wi-Fi"
+          echo "Hotspot mode is now disabled."
+        fi
+      }
+
+      function cursor-notify() {
+        if [ "$#" -ne 1 ]; then
+          echo "Usage: ''${0} <Message>"
+          return
+        fi
+        local cursor_app_id="com.todesktop.230313mzl4w4u92"
+        local subtitle
+        if git rev-parse --is-inside-work-tree &>/dev/null; then
+          local repo_root repo_name branch_name
+          repo_root=$(git rev-parse --show-toplevel)
+          repo_name=$(basename "$repo_root")
+          branch_name=$(git branch --show-current)
+          subtitle="''${repo_name} (''${branch_name})"
+        else
+          subtitle="$(pwd)"
+        fi
+        ${lib.getExe pkgs.terminal-notifier} -group 'cursor' -title 'Cursor' -subtitle "$subtitle" -message "$1" \
+          -activate "$cursor_app_id" -sender "$cursor_app_id" -ignoreDnD -sound Funk
+        say "$1" &
+      }
     '';
     shellAliases = {
       ls = "eza";
@@ -46,6 +122,8 @@ in
   programs.git = {
     enable = true;
     lfs.enable = true;
+    # Silence HM warning: legacy default for stateVersion < 25.05
+    signing.format = "openpgp";
   };
 
   programs.gh.enable = true;
@@ -57,26 +135,26 @@ in
     enableZshIntegration = true;
   };
 
-  home.packages = with pkgs; [
-    bat
-    eza
-    fd
-    ffmpeg
-    fzf
-    gh
-    git
-    gnupg
-    graphviz
-    hyperfine
-    nmap
-    ripgrep
-    terminal-notifier
-    tmux
-    tree-sitter
-    typst
-    uv
-    wget
-    yt-dlp
-    zsh-abbr
-  ];
+  home.packages = with pkgs;
+    [
+      bat
+      eza
+      fd
+      ffmpeg
+      fzf
+      gh
+      git
+      gnupg
+      graphviz
+      hyperfine
+      nmap
+      ripgrep
+      terminal-notifier
+      tmux
+      tree-sitter
+      typst
+      uv
+      wget
+    ]
+    ++ nixCasks;
 }
