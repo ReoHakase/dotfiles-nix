@@ -19,6 +19,9 @@ in
 
   programs.home-manager.enable = true;
 
+  # フォントは nixpkgs（`home.packages`）。Darwin では HM が ~/Library/Fonts/HomeManager へ同期
+  fonts.fontconfig.enable = true;
+
   xdg.enable = true;
 
   # Nix / HM の bin を先に。続けて Homebrew（`brew` コマンド用。CLI の重複は Nix が優先）。
@@ -148,6 +151,12 @@ in
   home.packages =
     with pkgs;
     [
+      # フォント（旧 Homebrew cask: font-geist, font-geist-mono-nerd-font, font-noto-*-cjk-jp）
+      geist-font
+      nerd-fonts.geist-mono
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
+
       # CLI は nixpkgs 優先。Homebrew は cask のみ（`hosts` の `brews` / `taps` は空）。
       act
       arp-scan

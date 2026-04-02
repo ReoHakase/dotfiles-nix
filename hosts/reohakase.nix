@@ -75,7 +75,7 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Homebrew: cask のみ（formula / tap は空）。CLI は home/default.nix の nixpkgs。`wtp` / brew の `opencode` は使わない。
+  # Homebrew: cask のみ（formula / tap は空）。CLI・フォントは home/default.nix の nixpkgs。
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
@@ -101,10 +101,6 @@
       "discord"
       "dolphin"
       "figma"
-      "font-geist"
-      "font-geist-mono-nerd-font"
-      "font-noto-sans-cjk-jp"
-      "font-noto-serif-cjk-jp"
       "ghostty"
       "gstreamer-runtime"
       "imagej"
