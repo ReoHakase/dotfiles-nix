@@ -40,8 +40,7 @@ in
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
-    # PATH の先頭付けは home.sessionPath のみ（profileExtra/initContent と重複させると which -a で同じパスが二重になる）
-    # HM が plugins + user-abbreviations を配る（手動 source より確実）
+    # sessionPath で Nix を先にするが、`wtp shell-init` が PATH を書き換えるため initContent の末尾で Nix を再度先頭へ。
     "zsh-abbr" = {
       enable = true;
       abbreviations = {
@@ -66,6 +65,9 @@ in
       if command -v uv >/dev/null 2>&1; then
         eval "$(uv generate-shell-completion zsh)"
       fi
+
+      # wtp 等のあとでも Nix の CLI を優先（which が /opt/homebrew より先に /etc/profiles を見る）
+      export PATH="/etc/profiles/per-user/${user}/bin:/nix/var/nix/profiles/default/bin:$PATH"
 
       # Tethering (hotspot) TTL workaround — requires sudo
       function hotspot() {

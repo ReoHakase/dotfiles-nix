@@ -1,5 +1,10 @@
 # Host: reohakase (scutil --get LocalHostName / hostname -s)
-{ pkgs, user, inputs, ... }:
+{
+  pkgs,
+  user,
+  inputs,
+  ...
+}:
 {
   # nix-homebrew: brew を Nix 管理にし、`/run/current-system/sw/bin/brew` 系のランチャと連携（既存 /opt/homebrew は autoMigrate）
   nix-homebrew = {
@@ -64,11 +69,11 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Homebrew: 手元の `brew tap` / `brew list` を 2026-04 にスナップショット。以後はここを正とする。
-  # `zap` は使わず `uninstall` のみ（ブラウザ等のユーザデータを強掃除しない）。追加・削除はこのリストを編集してから switch。
+  # Homebrew: cask / tap 専用ツール。`brew bundle --cleanup`（uninstall）は wtp の依存（brew の git 等）と衝突するため `none`。
+  # 手元の不要 formula は `brew autoremove` などで個別に整理する。
   homebrew = {
     enable = true;
-    onActivation.cleanup = "uninstall";
+    onActivation.cleanup = "none";
     # nixpkgs に無いもの・tap 公式のみ（CLI は home/default.nix の home.packages）
     taps = [ "satococoa/tap" ];
     brews = [ "wtp" ];
