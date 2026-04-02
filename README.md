@@ -125,7 +125,7 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 - [x] `./scripts/apply-system.sh`（または `darwin-rebuild switch --flake .#reohakase`）を実行し成功させる
 - [ ] ログインシェルが Nix の `zsh` になっている（`dscl . -read ~/ UserShell` — まだなら再ログインやターミナル設定を確認）
 - [x] `starship`、`nvim`、`git` などが `/etc/profiles/per-user/<ユーザー>/bin` 経由で優先される（`which -a` で確認）
-- [ ] [nixd editor-setup](https://github.com/nix-community/nixd/blob/main/nixd/docs/editor-setup.md) に沿って Cursor / Neovim を設定する — [MANUAL.md](MANUAL.md)「次の作業」
+- [x] `nixd` / `nixfmt` を HM に含め、`.vscode/settings.json` と Neovim `initLua` で接続 — 詳細は [MANUAL.md](MANUAL.md)「nixd（エディタ連携）」
 
 ### 設定の移行
 
