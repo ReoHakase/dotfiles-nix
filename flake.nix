@@ -13,6 +13,8 @@
       url = "github:atahanyorganci/nix-casks/archive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Homebrew 本体（brew バイナリ）を Nix でピン留めし、nix-darwin の homebrew.* と併用する
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
   outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, ... }:
@@ -27,6 +29,7 @@
           inherit inputs self user;
         };
         modules = [
+          inputs.nix-homebrew.darwinModules.nix-homebrew
           ./hosts/${hostname}.nix
           home-manager.darwinModules.home-manager
         ];

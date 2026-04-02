@@ -1,6 +1,13 @@
 # Host: reohakase (scutil --get LocalHostName / hostname -s)
 { pkgs, user, inputs, ... }:
 {
+  # nix-homebrew: brew を Nix 管理にし、`/run/current-system/sw/bin/brew` 系のランチャと連携（既存 /opt/homebrew は autoMigrate）
+  nix-homebrew = {
+    enable = true;
+    user = user;
+    autoMigrate = true;
+  };
+
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   nixpkgs.config = {
@@ -57,11 +64,12 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Homebrew 本体は手元の /opt/homebrew に既にある前提。nix-darwin は `brew bundle` で宣言分を管理する。
-  # cleanup は `none` のまま（Brewfile 外の formula は触らない）。全面管理するなら `uninstall` / `zap` を検討。
+  # nix を正とする手順: まず `cleanup = "check"` で activation を試し、列挙された「余分な」brew を
+  # すべて `brews` / `casks` に追記する。宣言が手元と一致したら `cleanup = "uninstall"`（通常）か `"zap"`（cask を強掃除）へ。
+  # `uninstall` と `zap` の違いは MANUAL「Homebrew を nix で正本にする」を参照。
   homebrew = {
     enable = true;
-    onActivation.cleanup = "none";
+    onActivation.cleanup = "check";
     taps = [ "satococoa/tap" ];
     brews = [ "wtp" ];
   };
