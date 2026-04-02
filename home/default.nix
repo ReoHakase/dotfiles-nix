@@ -1,4 +1,9 @@
-{ config, pkgs, inputs, ... }:
+{
+  config,
+  pkgs,
+  inputs,
+  ...
+}:
 
 let
   user = "ReoHakase";
@@ -142,7 +147,8 @@ in
     enableZshIntegration = true;
   };
 
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       # CLI は nixpkgs 優先。Homebrew の `brews` は tap 専用（例: wtp）以外は空にする。
       act
@@ -162,7 +168,7 @@ in
       git
       gnupg
       graphviz
-      guetzli
+      # guetzli — nixpkgs は x86_64 のみで aarch64-darwin 不可。必要なら `brew install guetzli` や Rosetta
       hyperfine
       inetutils # telnet / ftp など
       jdk
