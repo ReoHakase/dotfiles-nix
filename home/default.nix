@@ -29,6 +29,7 @@ in
   programs.zsh = {
     enable = true;
     dotDir = config.home.homeDirectory;
+    # zsh-autosuggestions / zsh-syntax-highlighting は nixpkgs 由来（HM が .zshrc に source する）。brew 版は不要。
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
@@ -174,6 +175,7 @@ in
       gnupg
       graphviz
       hyperfine
+      mise
       nixd
       nixfmt
       nmap
