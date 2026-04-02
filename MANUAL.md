@@ -135,6 +135,9 @@ GPG エージェントや `ssh-agent`、`~/.ssh/config` の中身はローカル
 | 同上 | `ripgrep` ← `opencode`（`anomalyco/tap`）が依存することがある |
 | Neovim 周り | `tree-sitter` は **brew の `neovim` が依存**することがある。**先に** `brew uninstall neovim`（Nix の Neovim を使う前提）→ その後 `brew uninstall tree-sitter` が通るか確認 |
 | シェル系 | `zsh-abbr` / `zsh-autosuggestions` / `zsh-syntax-highlighting` は **Home Manager の `programs.zsh` で代替済み**なら、brew 版は外してよい（`brew uses` で空なら試しやすい） |
+| `mise` | HM の `programs.mise` と重複するなら brew 側を外してよい（`brew uses` が空なら試しやすい） |
+
+**実施例（メイン Mac）:** `fzf`, `bat`, `eza`, `fd`, `gh`, `tmux`, `wget`, `ffmpeg`, `gnupg`, `graphviz`, `hyperfine`, `nmap`, `typst`, `uv`, `terminal-notifier`, `starship`, `neovim` をアンインストールし、`neovim` 削除に伴う autoremove で `tree-sitter` も除去。続けて `mise` と zsh プラグイン 3 本を削除。**`git` と `ripgrep` は** `wtp` / `opencode` が依存するため **brew に残置**。Nix に無い `act`, `arp-scan`, `chezmoi` などはそのまま。
 
 ```bash
 # 例: 依存の確認

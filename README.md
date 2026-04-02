@@ -140,7 +140,7 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 ### Homebrew の整理（formula・cask 以外から進める）
 
 - [x] `which -a git rg fzf` で **`/etc/profiles/per-user/<ユーザー>/bin` が先**であることを確認した
-- [ ] `brew list --formula` を見て、Nix で代替済みの formula を `brew uninstall` していく（無理なものは後回しでリスト化）— 手順は [MANUAL.md](MANUAL.md)「Homebrew」
+- [x] Nix と重複していた formula を **`brew uninstall` で削減**した（`brew uses --installed` で依存なしのものから。`git` / `ripgrep` は `wtp` / `opencode` などが依存する場合は brew に残す）— 手順は [MANUAL.md](MANUAL.md)「Homebrew と重複」
 - [ ] （任意・後回しでよい）Cask / GUI の扱いを決めた（Homebrew のまま / 手動 / nix-darwin `homebrew` / NixCasks など）
 - [ ] （任意）`brew` を cask 専用として残すかどうか
 
