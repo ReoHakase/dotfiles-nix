@@ -57,10 +57,12 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Optional: keep Homebrew only for casks / oddballs — uncomment and list casks
-  # homebrew = {
-  #   enable = true;
-  #   onActivation.cleanup = "zap";
-  #   casks = [ "karabiner-elements" "orbstack" ];
-  # };
+  # Homebrew 本体は手元の /opt/homebrew に既にある前提。nix-darwin は `brew bundle` で宣言分を管理する。
+  # cleanup は `none` のまま（Brewfile 外の formula は触らない）。全面管理するなら `uninstall` / `zap` を検討。
+  homebrew = {
+    enable = true;
+    onActivation.cleanup = "none";
+    taps = [ "satococoa/tap" ];
+    brews = [ "wtp" ];
+  };
 }

@@ -16,7 +16,7 @@ in
 
   xdg.enable = true;
 
-  # Nix / HM の bin を先に（/usr/bin や Homebrew より前に検索させる）
+  # Nix / HM の bin を先に。続けて Homebrew（`brew` コマンド用。CLI の重複は Nix が優先）。
   home.sessionPath = [
     "/etc/profiles/per-user/${user}/bin"
     "/nix/var/nix/profiles/default/bin"
@@ -24,6 +24,8 @@ in
     "${config.home.homeDirectory}/.cache/lm-studio/bin"
     "${config.home.homeDirectory}/.antigravity/antigravity/bin"
     "/Library/TeX/texbin"
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
   ];
 
   programs.zsh = {
@@ -77,32 +79,9 @@ in
           echo "Hotspot mode is now disabled."
         fi
       }
-
-      function cursor-notify() {
-        if [ "$#" -ne 1 ]; then
-          echo "Usage: ''${0} <Message>"
-          return
-        fi
-        local cursor_app_id="com.todesktop.230313mzl4w4u92"
-        local subtitle
-        if git rev-parse --is-inside-work-tree &>/dev/null; then
-          local repo_root repo_name branch_name
-          repo_root=$(git rev-parse --show-toplevel)
-          repo_name=$(basename "$repo_root")
-          branch_name=$(git branch --show-current)
-          subtitle="''${repo_name} (''${branch_name})"
-        else
-          subtitle="$(pwd)"
-        fi
-        ${lib.getExe pkgs.terminal-notifier} -group 'cursor' -title 'Cursor' -subtitle "$subtitle" -message "$1" \
-          -activate "$cursor_app_id" -sender "$cursor_app_id" -ignoreDnD -sound Funk
-        say "$1" &
-      }
     '';
     shellAliases = {
       ls = "eza";
-      ll = "eza -l";
-      la = "eza -la";
     };
   };
 
