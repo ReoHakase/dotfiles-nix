@@ -58,39 +58,7 @@ in
         ghw = "gh repo view -w";
       };
     };
-    initContent = ''
-      export GPG_TTY=$(tty)
-
-      if command -v uv >/dev/null 2>&1; then
-        eval "$(uv generate-shell-completion zsh)"
-      fi
-
-      # Nix の CLI を Homebrew より優先（sessionPath と二重にならないよう path を一意化）
-      typeset -U path PATH
-      path=(
-        /etc/profiles/per-user/${user}/bin
-        /nix/var/nix/profiles/default/bin
-        $path
-      )
-
-      # Tethering (hotspot) TTL workaround — requires sudo
-      function hotspot() {
-        if [ "$#" -ne 1 ]; then
-          echo "Usage: ''${0} <on|off>"
-          return
-        fi
-        local on_or_off="''${1}"
-        if [ "''${on_or_off}" = "on" ]; then
-          sudo sysctl net.inet.ip.ttl=65
-          sudo networksetup -setv6off "Wi-Fi"
-          echo "Hotspot mode is now enabled."
-        else
-          sudo sysctl net.inet.ip.ttl=64
-          sudo networksetup -setv6automatic "Wi-Fi"
-          echo "Hotspot mode is now disabled."
-        fi
-      }
-    '';
+    initContent = builtins.readFile ../config/zsh/init-extra.zsh;
     shellAliases = {
       ls = "eza";
     };
