@@ -1,5 +1,5 @@
-# aarch64-darwin の flake を検証する（Linux ランナーでは darwinSystem を評価できない）。
-# switch はしない: root・activation・Homebrew は実機専用。ビルド可否は `nix build …system` で十分。
+# macOS: evaluate + build darwinSystem. Linux: build Home Manager activation package.
+# No switch: root / activation / Homebrew are machine-local.
 name: Nix
 
 on:
@@ -13,8 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  flake:
-    # macos-14 より新しいイメージ（macos-latest は GitHub の定義に追随）。Tahoe 専用 aarch64 ラベルが出たら差し替え可。
+  flake-darwin:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,12 +21,23 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
-      # CI 内の /nix/store 再利用（連続 run の時間短縮）。ローカル Mac とは別物。
       - uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Flake check
         run: nix flake check
 
-      # darwin-system drv を実ビルド（switch 相当の「ビルド」まで。適用はしない）。
       - name: Build darwin system (no switch)
         run: nix build '.#darwinConfigurations.reohakase.system' --no-link --print-build-logs
+
+  home-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Build Home Manager activation (x86_64-linux)
+        run: nix build '.#packages.x86_64-linux.home-reohakuta' --no-link --print-build-logs

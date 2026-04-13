@@ -77,7 +77,7 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Homebrew: cask のみ（formula / tap は空）。CLI・フォントは home/default.nix の nixpkgs。
+  # Homebrew: cask のみ（formula / tap は空）。CLI・フォントは home/darwin.nix（common）の nixpkgs。
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";

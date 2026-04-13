@@ -1,6 +1,6 @@
 # ❄️ dotfiles-nix（引き継ぎメモ）
 
-macOS 向けに **Nix flakes + nix-darwin + home-manager** でシェル・CLI・一部 UI 設定を宣言管理するリポジトリ。元々は Homebrew 中心だった構成から、**formula 相当は極力 Nix に寄せ、`brew list` を小さくする**ことを目的としている。
+**Nix flakes + home-manager** でシェル・CLI・ドットファイルを宣言管理するリポジトリ。macOS では **nix-darwin** も利用し、Ubuntu LTS などでは **Home Manager のみ**（flake の `homeConfigurations`）で `home/common.nix` を Mac と共有する。元々は Homebrew 中心だった構成から、**formula 相当は極力 Nix に寄せ、`brew list` を小さくする**ことを目的としている。
 
 > [!TIP]
 > 運用の詳細・移行・Homebrew・`config/` の手順は **[MANUAL.md](MANUAL.md)**。日常コマンドはこの README、深掘りは MANUAL を開くと読みやすいです。
@@ -14,9 +14,10 @@ macOS 向けに **Nix flakes + nix-darwin + home-manager** でシェル・CLI・
   - [ディレクトリ構成](#ディレクトリ構成)
     - [Git と flake（コミットしてから実行すべきか）](#git-と-flakeコミットしてから実行すべきか)
   - [初回・日常のコマンド](#初回日常のコマンド)
+  - [Ubuntu LTS（reohakuta）: Home Manager のみ](#ubuntu-ltsreohakuta-home-manager-のみ)
   - [何がどこで管理されているか](#何がどこで管理されているか)
     - [nix-darwin（`hosts/reohakase.nix`）](#nix-darwinhostsreohakasenix)
-    - [home-manager（`home/default.nix`）](#home-managerhomedefaultnix)
+    - [home-manager（`home/common.nix` ほか）](#home-managerhomecommonnix-ほか)
   - [Homebrew からの移行（方針メモ）](#homebrew-からの移行方針メモ)
   - [TODO リスト（引き継ぎ用）](#todo-リスト引き継ぎ用)
     - [セットアップ](#セットアップ)
@@ -32,6 +33,7 @@ macOS 向けに **Nix flakes + nix-darwin + home-manager** でシェル・CLI・
 | インストーラ | [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)（flakes 有効）      |
 | OS 統合      | [nix-darwin](https://github.com/LnL7/nix-darwin)（`system.defaults`、ユーザシェル、`/etc/nix` など） |
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
+| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.ReoHakase@reohakuta` のみ適用。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
 
 > [!NOTE] > **Cask / GUI アプリ**は厳密なハッシュ管理を前提にしない。必要なら (1) 手動インストール、(2) 残りの Homebrew 専用、(3) nix-darwin の `homebrew` モジュール、のいずれかで運用する想定。`hosts/reohakase.nix` 末尾にコメント例あり。
@@ -42,22 +44,27 @@ macOS 向けに **Nix flakes + nix-darwin + home-manager** でシェル・CLI・
 
 | 項目                        | 値                                                                   |
 | --------------------------- | -------------------------------------------------------------------- |
-| ユーザー名                  | `ReoHakase`（`flake.nix` と `home/default.nix` の両方）              |
+| ユーザー名                  | `ReoHakase`（`flake.nix` と `home/common.nix`） |
 | Darwin 構成名（flake 出力） | `reohakase`（`hostname -s` / `scutil --get LocalHostName` と揃える） |
-| アーキテクチャ              | `aarch64-darwin`（Apple Silicon）                                    |
+| Linux ホスト名（HM 出力名） | `reohakuta`（`homeConfigurations` は `ReoHakase@reohakuta`）          |
+| macOS アーキテクチャ              | `aarch64-darwin`（Apple Silicon）                                    |
+| Ubuntu（この flake の既定） | `x86_64-linux`（`flake.nix` の `linuxSystem`。ARM なら `aarch64-linux` に変更） |
 
-別 Mac や別ユーザーに載せ替えるときは、少なくとも `flake.nix` の `user` / `hostname`、`hosts/` のファイル名、`home/default.nix` の `home.username` と `home.homeDirectory` を合わせる。
+別 Mac・別ユーザー・別 Linux ユーザーに載せ替えるときは、`flake.nix` の `user` / `hostname` / `linuxSystem`、`hosts/` のファイル名、`home/darwin.nix` または `home/linux.nix` の `home.homeDirectory` を合わせる。
 
 ## ディレクトリ構成
 
 ```
-flake.nix              # inputs（actrun など）と darwinConfigurations.reohakase
+flake.nix              # darwinConfigurations.reohakase + homeConfigurations.ReoHakase@reohakuta
 flake.lock             # 入力のロック（コミットする）
-hosts/reohakase.nix    # nix-darwin（Nix、defaults、users、HM の読み込み）
-home/default.nix       # home-manager（zsh / starship / neovim / packages）
+hosts/reohakase.nix    # nix-darwin（defaults、users、HM → home/default.nix）
+home/default.nix       # macOS 向けエントリ（import ./darwin.nix）
+home/darwin.nix        # macOS（common + Karabiner / Glide / brew PATH など）
+home/linux.nix         # Ubuntu 等（common + Linux PATH / pinentry-gtk2）
+home/common.nix        # 共有（zsh・starship・nvim・packages・xdg 共通）
 config/starship.toml   # HM が xdg.configFile で配布
 scripts/apply-system.sh # darwin-rebuild を root で実行するヘルパー
-.github/workflows/nix.yml # CI（flake check + darwin system の nix build。switch はしない）
+.github/workflows/nix.yml # CI（mac: flake + darwin build / linux: home パッケージ build）
 MANUAL.md              # 運用・移行・別マシン・Homebrew / NixCasks
 ```
 
@@ -119,6 +126,49 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 > [!TIP]
 > 適用後は新しいターミナルを開くか `exec zsh` で、Nix 管理の `zsh` と HM を読み込ませる。
 
+
+## Ubuntu LTS（reohakuta）: Home Manager のみ
+
+macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew cask 宣言など）に相当するものは **Ubuntu 上には無い**。**ユーザー環境だけ**を [home/linux.nix](home/linux.nix) で宣言し、Mac との差は次のとおりです。
+
+| Mac（`home/darwin.nix`） | Ubuntu（`home/linux.nix`） |
+| ------------------------ | --------------------------- |
+| Karabiner・Glide の `xdg.configFile` | 無し（macOS用） |
+| `pinentry_mac` / `terminal-notifier` | `pinentry-gtk2`（GPG 用） |
+| `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
+| zsh 追記 [config/zsh/init-extra.zsh](config/zsh/init-extra.zsh) | [config/zsh/init-extra-linux.zsh](config/zsh/init-extra-linux.zsh) |
+
+**前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `ReoHakase` / `/home/ReoHakase` でない場合は `home/linux.nix` と `flake.nix` の `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
+
+ビルドで drv の確認のみ:
+
+```bash
+cd /path/to/dotfiles-nix
+nix flake check
+nix build '.#packages.x86_64-linux.home-reohakuta' --no-link
+```
+
+初回適用（Home Manager 未インストールでも可）:
+
+```bash
+cd /path/to/dotfiles-nix
+nix run github:nix-community/home-manager -- switch --flake .#ReoHakase@reohakuta
+```
+
+2 回目以降:
+
+```bash
+home-manager switch --flake .#ReoHakase@reohakuta
+```
+
+**ログインシェルを zsh にする**（Ubuntu は手動。`/etc/shells` に Nix の zsh を追加してから `chsh`）:
+
+```bash
+grep zsh /etc/shells || echo '/nix/var/nix/profiles/default/bin/zsh' | sudo tee -a /etc/shells
+chsh -s "$(which zsh)"
+```
+
+GUI アプリはこの flake では宣言しない。必要なら apt / flatpak / 手動で入れる。
 ## 何がどこで管理されているか
 
 ### nix-darwin（`hosts/reohakase.nix`）
@@ -128,13 +178,11 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 - `system.defaults.*`（ダークモード、Finder、Dock、トラックパッドなど）
 - 新しい nix-darwin では `system.defaults` 利用に **`system.primaryUser`** が必須（コメント参照）
 
-### home-manager（`home/default.nix`）
+### home-manager（`home/common.nix` ほか）
 
-- zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr` の読み込み）
-- starship（`config/starship.toml` を `~/.config` 相当へ）
-- neovim、git、gh、fzf、mise
-- CLI パッケージ（`bat`、`eza`、`ffmpeg`、`tmux` など。必要に応じて `home.packages` を増減）
-
+- **共通（`home/common.nix`）:** zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr`）、starship、neovim、git、gh、fzf、mise、CLI パッケージの大半、`xdg.configFile`（starship・gh・mise・nvim）
+- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath` と zsh 追記、`pinentry_mac` など
+- **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 
 ## Homebrew からの移行（方針メモ）
@@ -142,7 +190,7 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 1. この flake を `darwin-rebuild switch` まで通し、**パス上のツールが Nix 由来になることを確認**する。
 2. `brew list --formula` を見て、Nix で代替済みのものから `brew uninstall` していく（依存は `brew autoremove` などで整理）。
 3. Cask は別方針（上記）で残すか、別インストールにする。
-4. 既存の `~/.zshrc` が HM 生成物と二重にならないよう、**エイリアスやパス設定は `home/default.nix` に寄せる**と安全。
+4. 既存の `~/.zshrc` が HM 生成物と二重にならないよう、**エイリアスやパス設定は `home/common.nix` / `home/darwin.nix` に寄せる**と安全。
 
 ## TODO リスト（引き継ぎ用）
 
@@ -159,13 +207,13 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 
 ### 設定の移行
 
-- [x] 手元の `~/.zshrc` の内容を確認し、**abbr・関数・PATH・mise/uv など**を `home/default.nix` の `programs.zsh` / `initContent` / `sessionPath` に移植した（または意図的に捨てた）
+- [x] 手元の `~/.zshrc` の内容を確認し、**abbr・関数・PATH・mise/uv など**を `home/common.nix` / OS 別モジュールの `programs.zsh` / `sessionPath` に移植した（または意図的に捨てた）
 - [x] `~/.config/starship.toml` を編集する場合は **リポジトリの `config/starship.toml` を直し**、`darwin-rebuild` で反映する運用にそろえた
 - [x] Neovim は当面 `programs.neovim` のみ。`~/.config/nvim` を宣言管理する場合の選択肢は [MANUAL.md](MANUAL.md) に記載
 - [x] GPG・SSH エージェントなど、**秘密情報や機種依存**はリポジトリに含めず、[MANUAL.md](MANUAL.md) のとおりローカルのみで扱う
 - [x] nix-darwin で macOS の設定を管理する (`hosts/reohakase.nix` の `system.defaults` など)
 - [x] GitHub Actions で `nix flake check` と `nix build '.#darwinConfigurations.reohakase.system'` を実行する（`.github/workflows/nix.yml`。詳細は [MANUAL.md](MANUAL.md)「CI」）
-- [x] nix-casks を flake に取り込み、`home/default.nix` の `nixCasks` で GUI を足せる状態にした — 使い方は [MANUAL.md](MANUAL.md) と https://nix-casks.yorganci.dev/
+- [x] nix-casks を flake に取り込み、`home/darwin.nix` の `nixCasks` で GUI を足せる状態にした — 使い方は [MANUAL.md](MANUAL.md) と https://nix-casks.yorganci.dev/
 
 ### Homebrew の整理（formula・cask 以外から進める）
 

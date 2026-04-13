@@ -1,5 +1,5 @@
 {
-  description = "nix-darwin + home-manager dotfiles";
+  description = "nix-darwin + home-manager dotfiles (macOS + Home Manager on Linux)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -13,19 +13,31 @@
       url = "github:atahanyorganci/nix-casks/archive";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Homebrew 本体（brew バイナリ）を Nix でピン留めし、nix-darwin の homebrew.* と併用する
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    # GitHub Actions 互換のローカルランナー（nixpkgs 未収録のため upstream flake をオーバーレイで取り込む）
     actrun = {
       url = "github:mizchi/actrun";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ self, nix-darwin, home-manager, nixpkgs, ... }:
+  outputs =
+    inputs@{ self, nix-darwin, home-manager, nixpkgs, ... }:
     let
       user = "ReoHakase";
       hostname = "reohakase";
+      linuxSystem = "x86_64-linux";
+
+      pkgsLinux = import nixpkgs {
+        system = linuxSystem;
+        overlays = [ inputs.actrun.overlays.default ];
+        config.allowUnfree = true;
+      };
+
+      homeReohakuta = home-manager.lib.homeManagerConfiguration {
+        pkgs = pkgsLinux;
+        extraSpecialArgs = { inherit inputs; };
+        modules = [ ./home/linux.nix ];
+      };
     in
     {
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
@@ -39,5 +51,9 @@
           home-manager.darwinModules.home-manager
         ];
       };
+
+      homeConfigurations."${user}@reohakuta" = homeReohakuta;
+
+      packages.${linuxSystem}.home-reohakuta = homeReohakuta.activationPackage;
     };
 }
