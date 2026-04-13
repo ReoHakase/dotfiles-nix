@@ -104,6 +104,7 @@
       "dolphin"
       "figma"
       "ghostty"
+      "glide"
       "gstreamer-runtime"
       "imagej"
       "karabiner-elements"

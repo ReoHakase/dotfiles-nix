@@ -73,6 +73,7 @@ in
     "starship.toml".source = ../config/starship.toml;
     "gh/config.yml".source = ../config/gh/config.yml;
     "gh/hosts.yml".source = ../config/gh/hosts.yml;
+    "glide/glide.toml".source = ../config/glide/glide.toml;
     "mise/config.toml".source = ../config/mise/config.toml;
     "karabiner/karabiner.json".source = ../config/karabiner/karabiner.json;
     "karabiner/assets".source = ../config/karabiner/assets;
