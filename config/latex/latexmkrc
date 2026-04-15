@@ -1,0 +1,13 @@
+# Home Manager 管理。LuaLaTeX + 日本語向け（参考: https://trap.jp/post/2596/）
+#
+# --shell-escape は信頼できないソースのコンパイルに使わないこと（任意コード実行の余地あり）。
+
+$lualatex     = 'lualatex -shell-escape -synctex=1 -file-line-error -interaction=nonstopmode %O %S';
+$biber        = 'biber %O --bblencoding=utf8 -u -U --output_safechars %B';
+$bibtex       = 'bibtex %O %B';
+$makeindex    = 'mendex %O -o %D %S';
+$max_repeat   = 10;
+$pdf_mode     = 4;
+$out_dir      = 'out';
+$aux_dir      = 'temp';
+$ENV{"LANG"}  = "ja_JP.UTF-8";

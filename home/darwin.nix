@@ -20,7 +20,6 @@ in
     "${config.home.homeDirectory}/.local/bin"
     "${config.home.homeDirectory}/.cache/lm-studio/bin"
     "${config.home.homeDirectory}/.antigravity/antigravity/bin"
-    "/Library/TeX/texbin"
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];

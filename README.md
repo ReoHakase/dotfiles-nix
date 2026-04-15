@@ -35,6 +35,7 @@
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
 | Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
+| LaTeX（LuaLaTeX + 日本語） | [`home/common.nix`](home/common.nix) の TeX Live（`collection-langjapanese` 等）。**BasicTeX は使わない**（Nix に統一）。設定例: [traP: TeXエンジン比較](https://trap.jp/post/2596/)。`~/.latexmkrc` は [`config/latex/latexmkrc`](config/latex/latexmkrc) を HM が配布。`graphicscache` を使うなら別途 `pkgs.ghostscript` を足すなど。 |
 
 > [!NOTE] > **Cask / GUI アプリ**は厳密なハッシュ管理を前提にしない。必要なら (1) 手動インストール、(2) 残りの Homebrew 専用、(3) nix-darwin の `homebrew` モジュール、のいずれかで運用する想定。`hosts/reohakase.nix` 末尾にコメント例あり。
 
@@ -62,7 +63,8 @@ hosts/reohakase.nix    # nix-darwin（defaults、users、HM → home/default.nix
 home/default.nix       # macOS 向けエントリ（import ./darwin.nix）
 home/darwin.nix        # macOS（common + Karabiner / Glide / brew PATH など）
 home/linux.nix         # Ubuntu 等（common + Linux PATH / pinentry-gtk2）
-home/common.nix        # 共有（zsh・starship・nvim・packages・xdg 共通）
+home/common.nix        # 共有（zsh・starship・nvim・TeX Live・packages・xdg 共通）
+config/latex/latexmkrc  # LuaLaTeX 用 ~/.latexmkrc の元ファイル
 config/starship.toml   # HM が xdg.configFile で配布
 scripts/apply-system.sh # darwin-rebuild を root で実行するヘルパー
 .github/workflows/nix.yml # CI（mac: flake + darwin build / linux: home パッケージ build）
@@ -188,8 +190,8 @@ GUI アプリはこの flake では宣言しない。必要なら apt / flatpak 
 
 ### home-manager（`home/common.nix` ほか）
 
-- **共通（`home/common.nix`）:** zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr`）、starship、neovim、git、gh、fzf、mise、CLI パッケージの大半、`xdg.configFile`（starship・gh・mise・nvim）
-- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath` と zsh 追記、`pinentry_mac` など
+- **共通（`home/common.nix`）:** zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr`）、starship、neovim、git、gh、fzf、mise、CLI パッケージの大半、`xdg.configFile`（starship・gh・mise・nvim）、**LuaLaTeX 向け TeX Live**（`texliveSmall` + `collection-langjapanese` + `latexmk` + `biber`）、`~/.latexmkrc`
+- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath` と zsh 追記、`pinentry_mac` など（**`/Library/TeX/texbin` は入れない**）
 - **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 

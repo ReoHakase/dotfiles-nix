@@ -93,7 +93,6 @@
       "antigravity"
       "arc"
       "azookey"
-      "basictex"
       "betterdisplay"
       "brave-browser"
       "calibre"
