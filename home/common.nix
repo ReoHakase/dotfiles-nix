@@ -100,6 +100,7 @@
       act
       arp-scan
       bat
+      bottom
       brotli
       cloc
       dnsutils
