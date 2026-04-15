@@ -14,7 +14,7 @@
   - [ディレクトリ構成](#ディレクトリ構成)
     - [Git と flake（コミットしてから実行すべきか）](#git-と-flakeコミットしてから実行すべきか)
   - [初回・日常のコマンド](#初回日常のコマンド)
-  - [Ubuntu LTS（reohakuta）: Home Manager のみ](#ubuntu-ltsreohakuta-home-manager-のみ)
+  - [Ubuntu LTS（reohakuta-kcvl）: Home Manager のみ](#ubuntu-ltsreohakuta-kcvl-home-manager-のみ)
   - [何がどこで管理されているか](#何がどこで管理されているか)
     - [nix-darwin（`hosts/reohakase.nix`）](#nix-darwinhostsreohakasenix)
     - [home-manager（`home/common.nix` ほか）](#home-managerhomecommonnix-ほか)
@@ -33,7 +33,7 @@
 | インストーラ | [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)（flakes 有効）      |
 | OS 統合      | [nix-darwin](https://github.com/LnL7/nix-darwin)（`system.defaults`、ユーザシェル、`/etc/nix` など） |
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
-| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.ReoHakase@reohakuta` のみ適用。 |
+| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
 
 > [!NOTE] > **Cask / GUI アプリ**は厳密なハッシュ管理を前提にしない。必要なら (1) 手動インストール、(2) 残りの Homebrew 専用、(3) nix-darwin の `homebrew` モジュール、のいずれかで運用する想定。`hosts/reohakase.nix` 末尾にコメント例あり。
@@ -44,18 +44,19 @@
 
 | 項目                        | 値                                                                   |
 | --------------------------- | -------------------------------------------------------------------- |
-| ユーザー名                  | `ReoHakase`（`flake.nix` と `home/common.nix`） |
+| macOS ユーザー名            | `ReoHakase`（`flake.nix` の `user`、`home/darwin.nix`） |
 | Darwin 構成名（flake 出力） | `reohakase`（`hostname -s` / `scutil --get LocalHostName` と揃える） |
-| Linux ホスト名（HM 出力名） | `reohakuta`（`homeConfigurations` は `ReoHakase@reohakuta`）          |
+| Linux ユーザー名            | `reohakuta`（`home/linux.nix`、`flake.nix` の `linuxUser`） |
+| Linux HM 出力名           | `reohakuta@reohakuta-kcvl`（`flake.nix` の `linuxHmHostname`） |
 | macOS アーキテクチャ              | `aarch64-darwin`（Apple Silicon）                                    |
 | Ubuntu（この flake の既定） | `x86_64-linux`（`flake.nix` の `linuxSystem`。ARM なら `aarch64-linux` に変更） |
 
-別 Mac・別ユーザー・別 Linux ユーザーに載せ替えるときは、`flake.nix` の `user` / `hostname` / `linuxSystem`、`hosts/` のファイル名、`home/darwin.nix` または `home/linux.nix` の `home.homeDirectory` を合わせる。
+別 Mac・別ユーザー・別 Linux ユーザーに載せ替えるときは、`flake.nix` の `user` / `hostname` / `linuxSystem` / `linuxUser` / `linuxHmHostname`、`hosts/` のファイル名、`home/darwin.nix` または `home/linux.nix` の `home.homeDirectory` を合わせる。
 
 ## ディレクトリ構成
 
 ```
-flake.nix              # darwinConfigurations.reohakase + homeConfigurations.ReoHakase@reohakuta
+flake.nix              # darwinConfigurations.reohakase + homeConfigurations.reohakuta@reohakuta-kcvl
 flake.lock             # 入力のロック（コミットする）
 hosts/reohakase.nix    # nix-darwin（defaults、users、HM → home/default.nix）
 home/default.nix       # macOS 向けエントリ（import ./darwin.nix）
@@ -127,7 +128,7 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 > 適用後は新しいターミナルを開くか `exec zsh` で、Nix 管理の `zsh` と HM を読み込ませる。
 
 
-## Ubuntu LTS（reohakuta）: Home Manager のみ
+## Ubuntu LTS（reohakuta-kcvl）: Home Manager のみ
 
 macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew cask 宣言など）に相当するものは **Ubuntu 上には無い**。**ユーザー環境だけ**を [home/linux.nix](home/linux.nix) で宣言し、Mac との差は次のとおりです。
 
@@ -138,27 +139,27 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
 | zsh 追記 [config/zsh/init-extra.zsh](config/zsh/init-extra.zsh) | [config/zsh/init-extra-linux.zsh](config/zsh/init-extra-linux.zsh) |
 
-**前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `ReoHakase` / `/home/ReoHakase` でない場合は `home/linux.nix` と `flake.nix` の `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
+**前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `reohakuta` / `/home/reohakuta` でない場合は `home/linux.nix` と `flake.nix` の `linuxUser` / `linuxHmHostname` / `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
 
 ビルドで drv の確認のみ:
 
 ```bash
 cd /path/to/dotfiles-nix
 nix flake check
-nix build '.#packages.x86_64-linux.home-reohakuta' --no-link
+nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
 ```
 
 初回適用（Home Manager 未インストールでも可）:
 
 ```bash
 cd /path/to/dotfiles-nix
-nix run github:nix-community/home-manager -- switch --flake .#ReoHakase@reohakuta
+nix run github:nix-community/home-manager -- switch --flake .#reohakuta@reohakuta-kcvl
 ```
 
 2 回目以降:
 
 ```bash
-home-manager switch --flake .#ReoHakase@reohakuta
+home-manager switch --flake .#reohakuta@reohakuta-kcvl
 ```
 
 **ログインシェルを zsh にする**（Ubuntu は手動。`/etc/shells` に Nix の zsh を追加してから `chsh`）:

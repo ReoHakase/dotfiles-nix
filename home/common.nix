@@ -4,11 +4,7 @@
   ...
 }:
 
-let
-  user = "ReoHakase";
-in
 {
-  home.username = user;
   home.stateVersion = "24.11";
 
   programs.home-manager.enable = true;

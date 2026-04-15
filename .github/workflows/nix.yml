@@ -40,4 +40,4 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Build Home Manager activation (x86_64-linux)
-        run: nix build '.#packages.x86_64-linux.home-reohakuta' --no-link --print-build-logs
+        run: nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link --print-build-logs

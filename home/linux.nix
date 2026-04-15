@@ -5,11 +5,12 @@
 }:
 
 let
-  user = "ReoHakase";
+  user = "reohakuta";
 in
 {
   imports = [ ./common.nix ];
 
+  home.username = user;
   home.homeDirectory = "/home/${user}";
 
   home.sessionPath = [

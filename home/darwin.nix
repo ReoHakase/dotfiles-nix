@@ -11,6 +11,7 @@ in
 {
   imports = [ ./common.nix ];
 
+  home.username = user;
   home.homeDirectory = "/Users/${user}";
 
   home.sessionPath = [

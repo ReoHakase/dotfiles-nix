@@ -26,6 +26,8 @@
       user = "ReoHakase";
       hostname = "reohakase";
       linuxSystem = "x86_64-linux";
+      linuxUser = "reohakuta";
+      linuxHmHostname = "reohakuta-kcvl";
 
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
@@ -33,7 +35,7 @@
         config.allowUnfree = true;
       };
 
-      homeReohakuta = home-manager.lib.homeManagerConfiguration {
+      homeLinux = home-manager.lib.homeManagerConfiguration {
         pkgs = pkgsLinux;
         extraSpecialArgs = { inherit inputs; };
         modules = [ ./home/linux.nix ];
@@ -52,8 +54,8 @@
         ];
       };
 
-      homeConfigurations."${user}@reohakuta" = homeReohakuta;
+      homeConfigurations."${linuxUser}@${linuxHmHostname}" = homeLinux;
 
-      packages.${linuxSystem}.home-reohakuta = homeReohakuta.activationPackage;
+      packages.${linuxSystem}.home-reohakuta-kcvl = homeLinux.activationPackage;
     };
 }
