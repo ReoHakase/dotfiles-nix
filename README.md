@@ -138,6 +138,7 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | `pinentry_mac` / `terminal-notifier` | `pinentry-gtk2`（GPG 用） |
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
 | zsh 追記 [config/zsh/init-extra.zsh](config/zsh/init-extra.zsh) | [config/zsh/init-extra-linux.zsh](config/zsh/init-extra-linux.zsh) |
+| `services.tailscale`（launchd + CLI、`hosts/reohakase.nix`） | `systemd.user` の `tailscaled`（userspace）、`pkgs.tailscale`、`TS_SOCKET`（root 無し。サブネットルータ等は制限あり） |
 
 **前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `reohakuta` / `/home/reohakuta` でない場合は `home/linux.nix` と `flake.nix` の `linuxUser` / `linuxHmHostname` / `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
 
@@ -170,6 +171,11 @@ chsh -s "$(which zsh)"
 ```
 
 GUI アプリはこの flake では宣言しない。必要なら apt / flatpak / 手動で入れる。
+
+**Tailscale（Ubuntu）:** `home-manager switch` 後、ユーザーデーモンが載る（`systemctl --user status tailscaled`）。初回は `tailscale up` でログイン（ブラウザ認証）。**userspace モード**のため、exit ノードやサブネット広告など **フル TUN が要る用途では足りない**ことがある。その場合は公式の Linux インストール（system `tailscaled`）など別経路を検討する。
+
+**Tailscale（macOS）:** `hosts/reohakase.nix` の `services.tailscale`。MagicDNS で管理画面の「Override local DNS」を使う場合のみ `overrideLocalDns` を検討し、**DNS 設定を誤ると名前解決全体が壊れる**ので nix-darwin マニュアルと Tailscale 側の前提を確認する。`darwin-rebuild` がハングする事例は [nix-darwin#1688](https://github.com/nix-darwin/nix-darwin/issues/1688) を参照。
+
 ## 何がどこで管理されているか
 
 ### nix-darwin（`hosts/reohakase.nix`）
@@ -178,12 +184,13 @@ GUI アプリはこの flake では宣言しない。必要なら apt / flatpak 
 - ログインシェルを Nix の `zsh` に
 - `system.defaults.*`（ダークモード、Finder、Dock、トラックパッドなど）
 - 新しい nix-darwin では `system.defaults` 利用に **`system.primaryUser`** が必須（コメント参照）
+- **Tailscale:** `services.tailscale`（`tailscaled` / CLI）
 
 ### home-manager（`home/common.nix` ほか）
 
 - **共通（`home/common.nix`）:** zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr`）、starship、neovim、git、gh、fzf、mise、CLI パッケージの大半、`xdg.configFile`（starship・gh・mise・nvim）
 - **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath` と zsh 追記、`pinentry_mac` など
-- **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`
+- **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 
 ## Homebrew からの移行（方針メモ）

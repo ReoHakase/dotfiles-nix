@@ -41,6 +41,9 @@
 
   programs.zsh.enable = true;
 
+  # Tailscale: launchd で tailscaled、CLI は environment.systemPackages（HM の home.packages には足さない）
+  services.tailscale.enable = true;
+
   # macOS 既定と同じ値は書かない（nix-darwin マニュアル各オプションの default / 説明文を参照）。
   # 変更後は `apply-system.sh`。手元の確認: `defaults read NSGlobalDomain|com.apple.finder|com.apple.dock|com.apple.screencapture …`
   system.defaults = {
