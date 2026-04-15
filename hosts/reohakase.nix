@@ -131,6 +131,7 @@
       "vlc"
       "voiceink"
       "warp"
+      "windows-app"
       "wine-stable"
       "xquartz"
       "zoom"
