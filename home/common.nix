@@ -58,11 +58,21 @@
     vimAlias = true;
   };
 
+  # https://github.com/dandavison/delta — pager + diff filter (bat-compatible themes)
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+    };
+  };
+
   programs.git = {
     enable = true;
     lfs.enable = true;
     signing.format = "openpgp";
     settings = {
+      merge.conflictStyle = "zdiff3";
       credential."https://gist.github.com".helper = [
         ""
         "${pkgs.gh}/bin/gh auth git-credential"
@@ -118,6 +128,7 @@
       hyperfine
       inetutils
       jdk
+      lazygit
       libwebp
       lzo
       lz4
@@ -145,6 +156,7 @@
       ))
       uv
       wget
+      yazi
       xz
       zstd
     ];
