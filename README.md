@@ -33,7 +33,7 @@
 | インストーラ | [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)（flakes 有効）      |
 | OS 統合      | [nix-darwin](https://github.com/LnL7/nix-darwin)（`system.defaults`、ユーザシェル、`/etc/nix` など） |
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
-| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。 |
+| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。GUI は **Ghostty（nixpkgs）・Cursor（nixpkgs の AppImage 版）・Vicinae（公式 AppImage + 固定 hash）** を Home Manager で入れられる（`home/linux/apps/gui-apps.nix`）。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
 | LaTeX（LuaLaTeX + 日本語） | [`home/common.nix`](home/common.nix) の TeX Live（`collection-langjapanese` 等）。**BasicTeX は使わない**（Nix に統一）。設定例: [traP: TeXエンジン比較](https://trap.jp/post/2596/)。`~/.latexmkrc` は [`config/latex/latexmkrc`](config/latex/latexmkrc) を HM が配布。`graphicscache` を使うなら別途 `pkgs.ghostscript` を足すなど。 |
 
@@ -62,7 +62,10 @@ flake.lock             # 入力のロック（コミットする）
 hosts/reohakase.nix    # nix-darwin（defaults、users、HM → home/default.nix）
 home/default.nix       # macOS 向けエントリ（import ./darwin.nix）
 home/darwin.nix        # macOS（common + Karabiner / Glide / brew PATH など）
-home/linux.nix         # Ubuntu 等（common + Linux PATH / pinentry-gtk2）
+home/linux.nix         # Ubuntu 等（common + Linux PATH / pinentry-gtk2 + apps）
+home/linux/apps/gui-apps.nix  # Linux 向け GUI（Ghostty・Cursor・Vicinae）
+pkgs/gui/ghostty.nix   # Linux: nixpkgs の ghostty を薄く再エクスポート（flake の `packages` 用）
+pkgs/appimages/        # Linux: Cursor（nixpkgs の AppImage 版）・Vicinae（固定 URL + hash）
 home/common.nix        # 共有（zsh・starship・nvim・TeX Live・packages・xdg 共通）
 config/latex/latexmkrc  # LuaLaTeX 用 ~/.latexmkrc の元ファイル
 config/starship.toml   # HM が xdg.configFile で配布
@@ -140,6 +143,7 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | `pinentry_mac` / `terminal-notifier` | `pinentry-gtk2`（GPG 用） |
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
 | zsh 追記 [config/zsh/init-extra.zsh](config/zsh/init-extra.zsh) | [config/zsh/init-extra-linux.zsh](config/zsh/init-extra-linux.zsh) |
+| NixCasks 等の macOS GUI | [home/linux/apps/gui-apps.nix](home/linux/apps/gui-apps.nix)（Ghostty・Cursor・Vicinae）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,vicinae-appimage}` |
 | `services.tailscale`（launchd + CLI、`hosts/reohakase.nix`） | `systemd.user` の `tailscaled`（userspace）、`pkgs.tailscale`、`TS_SOCKET`（root 無し。サブネットルータ等は制限あり） |
 
 **前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `reohakuta` / `/home/reohakuta` でない場合は `home/linux.nix` と `flake.nix` の `linuxUser` / `linuxHmHostname` / `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
@@ -150,6 +154,10 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 cd /path/to/dotfiles-nix
 nix flake check
 nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
+# （任意）Linux GUI パッケージだけ確認する場合
+# nix build '.#packages.x86_64-linux.ghostty' --no-link
+# nix build '.#packages.x86_64-linux.cursor-appimage' --no-link
+# nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
 ```
 
 初回適用（Home Manager 未インストールでも可）:
@@ -172,7 +180,7 @@ grep zsh /etc/shells || echo '/nix/var/nix/profiles/default/bin/zsh' | sudo tee 
 chsh -s "$(which zsh)"
 ```
 
-GUI アプリはこの flake では宣言しない。必要なら apt / flatpak / 手動で入れる。
+**Linux GUI:** `home/linux/apps/gui-apps.nix` で **Ghostty**（nixpkgs）、**Cursor**（nixpkgs の `code-cursor` / AppImage ラッパー）、**Vicinae**（GitHub リリースの AppImage を `fetchurl` + SRI hash で固定）を入れている。Vicinae のバージョンを上げるときは `pkgs/appimages/vicinae.nix` の `version` / `url` / `hash` を更新し、`nix-prefetch-url '<url>' --type sha256` や `nix hash path <store-path>` で hash を取り直す。詳細は [MANUAL.md](MANUAL.md) の「Linux（Ubuntu）GUI」。
 
 **Tailscale（Ubuntu）:** `home-manager switch` 後、ユーザーデーモンが載る（`systemctl --user status tailscaled`）。初回は `tailscale up` でログイン（ブラウザ認証）。**userspace モード**のため、exit ノードやサブネット広告など **フル TUN が要る用途では足りない**ことがある。その場合は公式の Linux インストール（system `tailscaled`）など別経路を検討する。
 
@@ -192,7 +200,7 @@ GUI アプリはこの flake では宣言しない。必要なら apt / flatpak 
 
 - **共通（`home/common.nix`）:** zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr`）、starship、neovim、git、gh、fzf、mise、CLI パッケージの大半、`xdg.configFile`（starship・gh・mise・nvim）、**LuaLaTeX 向け TeX Live**（`texliveSmall` + `collection-langjapanese` + `latexmk` + `biber`）、`~/.latexmkrc`
 - **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath` と zsh 追記、`pinentry_mac` など（**`/Library/TeX/texbin` は入れない**）
-- **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`
+- **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`、**GUI**（`home/linux/apps/gui-apps.nix`）
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 
 ## Homebrew からの移行（方針メモ）

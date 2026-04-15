@@ -13,7 +13,10 @@ let
   tsSocket = "${tsSocketDir}/tailscaled.sock";
 in
 {
-  imports = [ ./common.nix ];
+  imports = [
+    ./common.nix
+    ./linux/apps/gui-apps.nix
+  ];
 
   home.username = user;
   home.homeDirectory = "/home/${user}";

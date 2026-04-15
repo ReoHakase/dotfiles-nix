@@ -18,6 +18,7 @@
 - [Homebrew](#homebrew)
 - [次の作業の目安](#次の作業の目安cask-以外)
 - [NixCasks（GUI）](#nixcasksgui)
+- [Linux（Ubuntu）GUI: Ghostty・Cursor・Vicinae](#linuxubuntu-gui-ghosttycursorvicinae)
 - [秘密情報（GPG・SSH など）](#秘密情報gpgssh-など)
 - [nixd（エディタ連携）](#nixdエディタ連携)
 - [Flake と Git](#flake-と-git)
@@ -199,6 +200,30 @@ nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [
 ```
 
 変更後は `nix flake lock`（初回追加時）と `darwin-rebuild` / `apply-system.sh` で適用する。
+
+## Linux（Ubuntu）GUI: Ghostty・Cursor・Vicinae
+
+macOS では [NixCasks](#nixcasksgui) や Homebrew cask で GUI を足すことが多いが、**この flake の Ubuntu 向け Home Manager** では次を宣言している（`home/linux/apps/gui-apps.nix`）。
+
+| パッケージ | 中身 | flake の `packages.x86_64-linux` |
+| ---------- | ---- | -------------------------------- |
+| Ghostty | nixpkgs の `ghostty` を [`pkgs/gui/ghostty.nix`](pkgs/gui/ghostty.nix) で再エクスポート | `ghostty` |
+| Cursor | nixpkgs の **`code-cursor`**（Linux では AppImage ベース）。[`pkgs/appimages/cursor.nix`](pkgs/appimages/cursor.nix) で `cursor-appimage` という名前に寄せている | `cursor-appimage` |
+| Vicinae | 公式リリースの AppImage を `fetchurl` で固定。[`pkgs/appimages/vicinae.nix`](pkgs/appimages/vicinae.nix) で `appimageTools.wrapType2` | `vicinae-appimage` |
+
+`flake.nix` の **`pkgsLinux` 用 overlay** で `cursor-appimage` / `vicinae-appimage` を定義しているため、Home Manager の `pkgs` からも同じ名前で参照できる。
+
+**ビルド確認（Linux またはリモートビルダー上）:**
+
+```bash
+nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
+# 個別
+nix build '.#packages.x86_64-linux.ghostty' --no-link
+nix build '.#packages.x86_64-linux.cursor-appimage' --no-link
+nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
+```
+
+**Vicinae のバージョン更新:** `pkgs/appimages/vicinae.nix` の `version` と `src.url` をリリースに合わせ、`hash` を更新する。手元で一度取り込んだあとなら `nix hash path /nix/store/…-Vicinae-x86_64.AppImage` で SRI にできる。未取得なら `nix-prefetch-url '<AppImage の URL>' --type sha256` で store に入れてから同様に hash を得る。
 
 ## 秘密情報（GPG・SSH など）
 

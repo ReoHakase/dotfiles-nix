@@ -31,7 +31,13 @@
 
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
-        overlays = [ inputs.actrun.overlays.default ];
+        overlays = [
+          inputs.actrun.overlays.default
+          (final: prev: {
+            cursor-appimage = import ./pkgs/appimages/cursor.nix final;
+            vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };
+          })
+        ];
         config.allowUnfree = true;
       };
 
@@ -56,6 +62,11 @@
 
       homeConfigurations."${linuxUser}@${linuxHmHostname}" = homeLinux;
 
-      packages.${linuxSystem}.home-reohakuta-kcvl = homeLinux.activationPackage;
+      packages.${linuxSystem} = {
+        home-reohakuta-kcvl = homeLinux.activationPackage;
+        ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
+        cursor-appimage = pkgsLinux.cursor-appimage;
+        vicinae-appimage = pkgsLinux.vicinae-appimage;
+      };
     };
 }
