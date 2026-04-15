@@ -49,6 +49,11 @@ in
 
   programs.zsh.initContent = builtins.readFile ../config/zsh/init-extra-linux.zsh;
 
+  # Apptainer + GPU の前提・`uv` とコンテナの役割分けは MANUAL を参照
+  programs.zsh.shellAliases = {
+    apx-nv = "apptainer exec --nv";
+  };
+
   home.packages = with pkgs; [
     pinentry-gtk2
     tailscale

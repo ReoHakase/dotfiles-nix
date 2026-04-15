@@ -19,6 +19,7 @@
 - [次の作業の目安](#次の作業の目安cask-以外)
 - [NixCasks（GUI）](#nixcasksgui)
 - [Linux（Ubuntu）GUI: Ghostty・Cursor・Vicinae](#linuxubuntu-gui-ghosttycursorvicinae)
+- [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
 - [秘密情報（GPG・SSH など）](#秘密情報gpgssh-など)
 - [nixd（エディタ連携）](#nixdエディタ連携)
 - [Flake と Git](#flake-と-git)
@@ -224,6 +225,29 @@ nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
 ```
 
 **Vicinae のバージョン更新:** `pkgs/appimages/vicinae.nix` の `version` と `src.url` をリリースに合わせ、`hash` を更新する。手元で一度取り込んだあとなら `nix hash path /nix/store/…-Vicinae-x86_64.AppImage` で SRI にできる。未取得なら `nix-prefetch-url '<AppImage の URL>' --type sha256` で store に入れてから同様に hash を得る。
+
+## Apptainer・GPU とコンテナ
+
+**このリポジトリは Apptainer 本体を Nix で入れていない**（ディストリのパッケージや手動インストールに任せる）。GPU 付きコンテナを使うときの前提だけここにまとめる。
+
+### ホスト側でそろえるもの
+
+- **NVIDIA ドライバ**はコンテナの外（Ubuntu ホスト）で入れる。まず **`nvidia-smi` がホストで成功**することを確認する。
+- コンテナ内にドライバを「二重に」入れる必要はなく、**ホストのカーネルモジュールとユーザランドドライバ**が効いていれば、`apptainer exec --nv` などで CUDA 用ライブラリをバインドして使える運用が一般的。
+
+### コンテナを起動するとき
+
+- GPU を渡す典型的な前置き: `apptainer exec --nv <image.sif> <command>`（環境やポリシーで `singularity` コマンド名の場合もある）。
+- `home/linux.nix` では略記として **`apx-nv` → `apptainer exec --nv`** の zsh エイリアスを足している（Apptainer 未インストールならコマンドはその時点で失敗する）。
+
+### ホストの `uv` / venv とコンテナ内 Python
+
+| 置き場所 | 向いている用途 |
+| -------- | -------------- |
+| **ホスト**の `uv`・venv | エディタ・シェルから速く試す、ホストのファイルを直接触る CLI 作業、Nix / HM で PATH を揃えたいツール群。 |
+| **コンテナ**内の Python・依存 | 実験・本番に近い固定イメージ、CUDA や古い glibc 前提のスタック、チームで同じ SIF を回す再現性。 |
+
+**両方を混ぜない方が安全:** ホストの venv をマウントしたコンテナで `pip install` すると、アーキテクチャやライブラリの不一致で壊れやすい。GPU 実験なら **コンテナ内で専用 venv かイメージに焼いた依存**に寄せ、ホストの `uv` は別プロジェクト・軽い CLI 用、と切り分けるとトラブルが減る。
 
 ## 秘密情報（GPG・SSH など）
 

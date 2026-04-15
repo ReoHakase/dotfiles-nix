@@ -182,6 +182,8 @@ chsh -s "$(which zsh)"
 
 **Linux GUI:** `home/linux/apps/gui-apps.nix` で **Ghostty**（nixpkgs）、**Cursor**（nixpkgs の `code-cursor` / AppImage ラッパー）、**Vicinae**（GitHub リリースの AppImage を `fetchurl` + SRI hash で固定）を入れている。Vicinae のバージョンを上げるときは `pkgs/appimages/vicinae.nix` の `version` / `url` / `hash` を更新し、`nix-prefetch-url '<url>' --type sha256` や `nix hash path <store-path>` で hash を取り直す。詳細は [MANUAL.md](MANUAL.md) の「Linux（Ubuntu）GUI」。
 
+**Apptainer / GPU:** ドライバはホストに入れ、`nvidia-smi` がホストで通ることを先に確認する。コンテナでは `apptainer exec --nv`（`home/linux.nix` の zsh 略記 `apx-nv`）を参照。ホストの `uv` / venv とコンテナ内 Python の切り分けは [MANUAL.md](MANUAL.md) の「Apptainer・GPU とコンテナ」。
+
 **Tailscale（Ubuntu）:** `home-manager switch` 後、ユーザーデーモンが載る（`systemctl --user status tailscaled`）。初回は `tailscale up` でログイン（ブラウザ認証）。**userspace モード**のため、exit ノードやサブネット広告など **フル TUN が要る用途では足りない**ことがある。その場合は公式の Linux インストール（system `tailscaled`）など別経路を検討する。
 
 **Tailscale（macOS）:** `hosts/reohakase.nix` の `services.tailscale`。MagicDNS で管理画面の「Override local DNS」を使う場合のみ `overrideLocalDns` を検討し、**DNS 設定を誤ると名前解決全体が壊れる**ので nix-darwin マニュアルと Tailscale 側の前提を確認する。`darwin-rebuild` がハングする事例は [nix-darwin#1688](https://github.com/nix-darwin/nix-darwin/issues/1688) を参照。
