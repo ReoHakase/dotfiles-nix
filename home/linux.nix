@@ -49,5 +49,9 @@ in
   home.packages = with pkgs; [
     pinentry-gtk2
     tailscale
+    # Neovim / nvim-treesitter / Lazy プラグインのビルド（make / CMake）
+    gnumake
+    cmake
+    ninja
   ];
 }
