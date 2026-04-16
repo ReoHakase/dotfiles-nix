@@ -113,6 +113,8 @@
       bottom
       brotli
       cloc
+      claude-code-bin
+      codex
       dnsutils
       eza
       fastfetch
