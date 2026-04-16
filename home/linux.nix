@@ -24,8 +24,10 @@ in
   # tailscale / tailscaled CLI がユーザーデーモンと同じソケットを使う（userspace モード）
   home.sessionVariables.TS_SOCKET = tsSocket;
 
-  # Electron（Cursor / VS Code 系の nixpkgs ラッパー）は NixOS 以外だと未設定になりがち。
-  # WAYLAND_DISPLAY があるときだけ --ozone-platform-hint=auto 等が付与される（nixpkgs vscode generic.nix）。
+  # Electron（Cursor / VS Code 系の nixpkgs ラッパー）: NIXOS_OZONE_WL と WAYLAND_DISPLAY の両方があるときだけ
+  # Ozone/Wayland 向けフラグが付く（nixpkgs vscode generic.nix）。
+  # GNOME + Mutter on X11 では通常 WAYLAND_DISPLAY が無いのでこの分岐は効かず、普段は X11 経路。Wayland セッションに
+  # 切り替えたとき用に NIXOS_OZONE_WL だけ先に立てておく（X11 のみでも害はない）。
   home.sessionVariables.NIXOS_OZONE_WL = "1";
 
   systemd.user.services.tailscaled = {
