@@ -24,6 +24,10 @@ in
   # tailscale / tailscaled CLI がユーザーデーモンと同じソケットを使う（userspace モード）
   home.sessionVariables.TS_SOCKET = tsSocket;
 
+  # Electron（Cursor / VS Code 系の nixpkgs ラッパー）は NixOS 以外だと未設定になりがち。
+  # WAYLAND_DISPLAY があるときだけ --ozone-platform-hint=auto 等が付与される（nixpkgs vscode generic.nix）。
+  home.sessionVariables.NIXOS_OZONE_WL = "1";
+
   systemd.user.services.tailscaled = {
     Unit = {
       Description = "Tailscale node agent (userspace networking)";
