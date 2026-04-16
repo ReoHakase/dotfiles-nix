@@ -56,8 +56,6 @@ in
 
   home.packages = with pkgs; [
     pinentry-gtk2
-    # Sylabs Singularity CE（CLI: singularity）。Apptainer（Linux Foundation フォーク）とは別パッケージ
-    singularity
     tailscale
     # Neovim / nvim-treesitter / Lazy プラグインのビルド（make / CMake）
     gnumake
