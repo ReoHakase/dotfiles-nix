@@ -164,10 +164,10 @@
       zstd
     ];
 
-  # [microsoft/apm](https://github.com/microsoft/apm) — PyPI 名 apm-cli。Nix の uv で `uv tool` 導入（~/.local/bin に apm）。
-  # バージョンを上げるときはここを更新して `home-manager switch`（初回・更新時はネットワークが要る）。
+  # [microsoft/apm](https://github.com/microsoft/apm) — PyPI `apm-cli`。Nix の `uv` で常に最新系を `uv tool` 導入（~/.local/bin の `apm`）。
+  # `home-manager switch` のたびに PyPI を見に行く（オフラインだと失敗しうる）。外すときは `uv tool uninstall apm-cli`。
   home.activation.apm-cli-via-uv = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     export PATH="${lib.makeBinPath [ pkgs.uv ]}:$PATH"
-    ${lib.getExe pkgs.uv} tool install apm-cli==0.8.11
+    run ${lib.getExe pkgs.uv} tool install apm-cli
   '';
 }
