@@ -30,10 +30,12 @@ in
   # 切り替えたとき用に NIXOS_OZONE_WL だけ先に立てておく（X11 のみでも害はない）。
   home.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  # 注意: systemd --user からはシステムの network-online.target を After にできない（無視・失敗の原因になる）。
+  # ログイン前から常時起動したい場合は: sudo loginctl enable-linger ${user}
   systemd.user.services.tailscaled = {
     Unit = {
       Description = "Tailscale node agent (userspace networking)";
-      After = [ "network-online.target" ];
+      After = [ "basic.target" ];
     };
     Service = {
       ExecStartPre = "${lib.getExe' pkgs.coreutils "mkdir"} -p ${tsStateDir} ${tsSocketDir}";
