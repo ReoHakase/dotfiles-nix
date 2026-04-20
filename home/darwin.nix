@@ -18,6 +18,8 @@ in
     "/etc/profiles/per-user/${user}/bin"
     "/nix/var/nix/profiles/default/bin"
     "${config.home.homeDirectory}/.local/bin"
+    # bun install -g（例: kanna-code）— mise 利用時は ~/.cache/.bun/bin になることがある
+    "${config.home.homeDirectory}/.cache/.bun/bin"
     "${config.home.homeDirectory}/.cache/lm-studio/bin"
     "${config.home.homeDirectory}/.antigravity/antigravity/bin"
     "/opt/homebrew/bin"
