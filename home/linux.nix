@@ -21,6 +21,12 @@ in
   home.username = user;
   home.homeDirectory = "/home/${user}";
 
+  # gpg-agent.conf は Nix が入れた pinentry(gtk2) の絶対パスを指す。
+  # home-manager が書き換えるので手編集しない。反映には `gpgconf --kill gpg-agent` が必要。
+  home.file.".gnupg/gpg-agent.conf".text = ''
+    pinentry-program ${lib.getExe pkgs.pinentry-gtk2}
+  '';
+
   # tailscale / tailscaled CLI がユーザーデーモンと同じソケットを使う（userspace モード）
   home.sessionVariables.TS_SOCKET = tsSocket;
 

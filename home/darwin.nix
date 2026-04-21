@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -13,6 +14,12 @@ in
 
   home.username = user;
   home.homeDirectory = "/Users/${user}";
+
+  # gpg-agent.conf は Nix が入れた pinentry-mac の絶対パスを指す。
+  # home-manager が書き換えるので手編集しない。反映には `gpgconf --kill gpg-agent` が必要。
+  home.file.".gnupg/gpg-agent.conf".text = ''
+    pinentry-program ${lib.getExe pkgs.pinentry_mac}
+  '';
 
   home.sessionPath = [
     "/etc/profiles/per-user/${user}/bin"
