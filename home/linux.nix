@@ -38,6 +38,8 @@ in
 
   # 注意: systemd --user からはシステムの network-online.target を After にできない（無視・失敗の原因になる）。
   # ログイン前から常時起動したい場合は: sudo loginctl enable-linger ${user}
+  # これは user unit なので `sudo systemctl ...` では見つからない。操作は `systemctl --user ...` を使う。
+  # 初回のみ `tailscale up` でブラウザ認証が必要。完了するまで状態は NeedsLogin のままで tailnet に参加しない。
   systemd.user.services.tailscaled = {
     Unit = {
       Description = "Tailscale node agent (userspace networking)";

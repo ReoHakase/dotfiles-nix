@@ -184,7 +184,7 @@ chsh -s "$(which zsh)"
 
 **Apptainer / GPU:** ドライバはホストに入れ、`nvidia-smi` がホストで通ることを先に確認する。コンテナでは `apptainer exec --nv`（`home/linux.nix` の zsh 略記 `apx-nv`）を参照。ホストの `uv` / venv とコンテナ内 Python の切り分けは [MANUAL.md](MANUAL.md) の「Apptainer・GPU とコンテナ」。
 
-**Tailscale（Ubuntu）:** `home-manager switch` 後、`systemctl --user enable --now tailscaled`（HM がユニットを入れるので初回だけでも可）。`systemctl --user status tailscaled` で確認。ユーザーユニットは **システムの `network-online.target` に依存できない**ため、`After` はユーザ側の `basic.target` のみにしている。**ログイン前から** `tailscaled` を載せたい場合は `sudo loginctl enable-linger <ユーザー名>`。初回は `tailscale up` でログイン（ブラウザ認証）。**userspace モード**のため、exit ノードやサブネット広告など **フル TUN が要る用途では足りない**ことがある。その場合は公式の Linux インストール（system `tailscaled`）など別経路を検討する。
+**Tailscale（Ubuntu）:** `home-manager switch` 後、`systemctl --user enable --now tailscaled`（HM がユニットを入れるので初回だけでも可）。`systemctl --user status tailscaled` で確認。**user unit なので `sudo systemctl start tailscaled` では「Unit not found」になる**。操作は必ず `systemctl --user ...` を使う。ユーザーユニットは **システムの `network-online.target` に依存できない**ため、`After` はユーザ側の `basic.target` のみにしている。**ログイン前から** `tailscaled` を載せたい場合は `sudo loginctl enable-linger <ユーザー名>`。**初回は `tailscale up` でブラウザ認証が必須**。完了するまで `tailscale status` は `NeedsLogin` のままで tailnet に参加しない。**userspace モード**のため、exit ノードやサブネット広告など **フル TUN が要る用途では足りない**ことがある。その場合は公式の Linux インストール（system `tailscaled`）など別経路を検討する。
 
 **Tailscale（macOS）:** `hosts/reohakase.nix` の `services.tailscale`。MagicDNS で管理画面の「Override local DNS」を使う場合のみ `overrideLocalDns` を検討し、**DNS 設定を誤ると名前解決全体が壊れる**ので nix-darwin マニュアルと Tailscale 側の前提を確認する。`darwin-rebuild` がハングする事例は [nix-darwin#1688](https://github.com/nix-darwin/nix-darwin/issues/1688) を参照。
 
