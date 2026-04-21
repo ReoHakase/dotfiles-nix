@@ -1,14 +1,21 @@
--- aerial.nvim の treesitter バックエンドは Markdown で落ちる（線 115 の
--- extensions.lua で `level_node:type()` が nil メソッドになる）。
--- 原因: Neovim 0.11+ の `query:iter_matches` は `{ all = false }` を渡しても
--- キャプチャごとに「ノードのリスト」を返すことがあり、aerial 側は単一の
--- TSNode を想定して `.node` をそのまま使うため、`match.level.node` が
--- テーブルになって `:type()` 呼び出しが失敗する。upstream master も
--- 同じコードのままなので修正版を待てない。
+-- aerial.nvim の treesitter backend は Markdown を開くと落ちる。
+-- 原因は Neovim 0.12 の破壊的変更で `Query:iter_matches` から `all = false`
+-- オプションが削除されたこと（neovim/neovim#33070, 2026-03-23 マージ）。
+-- aerial 側はまだ `{ all = false }` を渡して単一ノードを前提としているため、
+-- キャプチャごとに返るノードのリストを TSNode とみなして `:type()` を呼び、
+-- extensions.lua:115 で nil メソッド呼び出しになる。aerial master も同じ
+-- コードのままなので upstream 修正を待てない。
 --
--- Markdown 専用の非 treesitter バックエンド（"markdown"）は見出しを自前で
--- パースするので影響を受けない。Markdown では lsp → markdown の順だけに
--- 切り詰めて treesitter を経由させない。
+-- 本命の対策は plugins/astrolsp.lua で markdown-oxide LSP を登録すること。
+-- LSP が attach すれば aerial は先に LSP backend を採用し、壊れた
+-- treesitter 経路を踏まない。
+--
+-- ただし root_markers (.git / .obsidian / .moxide.toml) が無い孤立 md
+-- ファイルでは LSP が attach しない。その場合 aerial の既定順は
+-- lsp → treesitter → markdown なので、treesitter にフォールバックして
+-- 再び落ちる。保険として markdown の backend 順序から treesitter を
+-- 除外し、lsp が落ちたら非 treesitter の "markdown" backend に直接
+-- フォールバックさせる。
 ---@type LazySpec
 return {
   "stevearc/aerial.nvim",

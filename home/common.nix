@@ -136,6 +136,11 @@
     libwebp
     lzo
     lz4
+    # Markdown LSP (PKM). aerial.nvim の treesitter backend は nvim 0.12 の
+    # Query:iter_matches API 変更（`all = false` 削除）で Markdown を開くと
+    # クラッシュする。LSP が attach すれば aerial は LSP backend を使うので
+    # その経路を経由しなくなる。ついでに wikilink / backlink / todo 補完が効く。
+    markdown-oxide
     mise
     nixd
     nixfmt
