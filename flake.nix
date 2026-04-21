@@ -68,6 +68,10 @@
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         cursor-appimage = pkgsLinux.cursor-appimage;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
+        # `nix-update --flake <attr>` から更新できるように overlay の npm CLI を公開する。
+        # 既定 system (=x86_64-linux) で十分なので aarch64-darwin 側は用意しない。
+        claude-code = pkgsLinux.claude-code;
+        codex = pkgsLinux.codex;
       };
     };
 }

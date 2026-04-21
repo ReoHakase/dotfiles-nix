@@ -51,6 +51,41 @@ nixpkgs 本家が追従しきれない npm 系 CLI を自前で pin するオー
 3. 出力された SRI を `platforms` attrset の該当 triple の `hash` に貼る。
 4. `nix build .#darwinConfigurations.reohakase.system` で確認。
 
+## Renovate による自動 bump
+
+`.github/workflows/renovate.yml` が毎日 03:00 JST に self-hosted Renovate を起動し、下記 3 つを PR として開く。
+
+- `flake.lock` の週次 `lockFileMaintenance` (月曜のみ)
+- `pkgs/npm/claude-code/package.nix` の `version` を npm registry と突き合わせ、
+  更新があれば `scripts/renovate/update-claude-code.sh` が post-upgrade task として走り、
+  `package-lock.json` を再生成 → `nix-update` が `src.hash` / `npmDepsHash` を置換する。
+- `pkgs/npm/codex/package.nix` の `version` を `openai/codex` の `rust-v*` Release と突き合わせ、
+  `scripts/renovate/update-codex.sh` が各 triple の SRI hash を prefetch して差し込む。
+
+設定は [.github/renovate.json5](../../.github/renovate.json5)。手動 bump したいときも同じスクリプトを呼ぶのが最短:
+
+```sh
+bash scripts/renovate/update-claude-code.sh 2.1.113
+bash scripts/renovate/update-codex.sh 0.123.0
+```
+
+### トークン
+
+デフォルトの `GITHUB_TOKEN` で作った PR は他の workflow (= 既存 `nix.yml` CI) を**起動しない**という GitHub の仕様があるので、Renovate PR が自動的に CI を通るようにするには Fine-grained PAT を発行して Secret に登録する必要がある。
+
+- Secret 名: `RENOVATE_TOKEN` (未設定時は `GITHUB_TOKEN` にフォールバックして動くが CI は走らない)
+- 権限: 本リポジトリに対して
+  - Repository permissions: `Contents: Read & Write`, `Pull requests: Read & Write`, `Workflows: Read & Write`
+  - 発行元アカウントは自分自身 (bot 化したい場合のみ GitHub App に切り替え)
+- 将来 GitHub App 化する場合は `actions/create-github-app-token` に差し替え、`app-id` / `private-key` を Secret に置く。
+
+### 運用メモ
+
+- 初回は `gh workflow run Renovate` で手動キック、または Actions タブから `workflow_dispatch`。`dryRun: extract` でまず extract 段階まで走らせると副作用なしで設定確認ができる。
+- Renovate の `allowedPostUpgradeCommands` allowlist はこのリポジトリの `.github/renovate.json5` にベタ書きしてあり、self-hosted global config として読まれる (= `configurationFile` に指定しているため)。
+- `post-upgrade` が失敗 (例: 上流 tarball の URL スキーマ変更) したときは PR が出ない代わりに Actions ログにスタックが残る。週次で run 履歴を覗くこと。
+- 対応 triple を増やしたいときは `pkgs/npm/codex/package.nix` の `platforms` attrset と `scripts/renovate/update-codex.sh` の `TRIPLES=(...)` を同時に広げる。
+
 ## 動作確認
 
 ビルド後:

@@ -1,0 +1,77 @@
+# Self-hosted Renovate. Cron で flake.lock / pkgs/npm/* を PR として bump する。
+# 設定本体は .github/renovate.json5。post-upgrade で nix-update / nix-prefetch-url を
+# 叩くので Nix と Node.js を事前にセットアップしておく。
+name: Renovate
+
+on:
+  schedule:
+    # 03:00 JST = 18:00 UTC。毎日回して flake.lock / claude-code / codex を追従。
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Renovate log level"
+        required: false
+        default: "info"
+        type: choice
+        options:
+          - debug
+          - info
+          - warn
+          - error
+      dryRun:
+        description: "Renovate dry-run mode (empty=off, full, lookup, extract)"
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: renovate-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      # post-upgrade tasks で nix-update / nix-prefetch-url を使うため Nix を入れる。
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      # update-claude-code.sh が `npm install --package-lock-only` を叩くので Node.js を置く。
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # post-upgrade から呼ぶツール一式を PATH に入れる。
+      # nix-update: version + src.hash + npmDepsHash を一括書き換え
+      # nix-prefetch / jq: codex の triple 別 hash 計算
+      - name: Install helper tools via Nix
+        run: |
+          nix profile install \
+            nixpkgs#nix-update \
+            nixpkgs#nix-prefetch \
+            nixpkgs#jq \
+            nixpkgs#gnused \
+            nixpkgs#curl
+
+      - name: Run Renovate
+        uses: renovatebot/github-action@v40.3.1
+        env:
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
+          RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
+          # repository 情報を明示。self-hosted でも必須。
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          # Self-hosted 固有: post-upgrade コマンドの allowlist を config 側で解釈させる。
+          RENOVATE_ALLOW_POST_UPGRADE_COMMAND_TEMPLATING: "true"
+        with:
+          configurationFile: .github/renovate.json5
+          token: ${{ secrets.GITHUB_TOKEN }}
