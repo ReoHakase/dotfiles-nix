@@ -11,6 +11,23 @@ let
   tsState = "${tsStateDir}/tailscaled.state";
   tsSocketDir = "${config.home.homeDirectory}/.tailscale";
   tsSocket = "${tsSocketDir}/tailscaled.sock";
+
+  # tailscale CLI は既定で /var/run/tailscale/tailscaled.sock を見に行き、
+  # TS_SOCKET 等の環境変数は読まない。user service で動かしている
+  # tailscaled のソケットを指すよう、symlinkJoin + makeWrapper で
+  # bin/tailscale に --socket=<user socket> を前置する。
+  # tailscaled 本体は同梱の symlink 経由でそのまま利用できる。
+  tailscaleCli = pkgs.symlinkJoin {
+    name = "tailscale-usersock-${pkgs.tailscale.version}";
+    paths = [ pkgs.tailscale ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      rm -f $out/bin/tailscale
+      makeWrapper ${pkgs.tailscale}/bin/tailscale $out/bin/tailscale \
+        --add-flags "--socket=${tsSocket}"
+    '';
+    inherit (pkgs.tailscale) meta;
+  };
 in
 {
   imports = [
@@ -27,7 +44,9 @@ in
     pinentry-program ${lib.getExe pkgs.pinentry-gtk2}
   '';
 
-  # tailscale / tailscaled CLI がユーザーデーモンと同じソケットを使う（userspace モード）
+  # tailscale CLI 自身はこの env var を読まないが、ユーザのスクリプトや
+  # 手打ち (`tailscale --socket="$TS_SOCKET" ...`) 用に残す。
+  # 標準の `tailscale` 実行パスは上の tailscaleCli ラッパー経由で user socket を向く。
   home.sessionVariables.TS_SOCKET = tsSocket;
 
   # Electron（Cursor / VS Code 系の nixpkgs ラッパー）: NIXOS_OZONE_WL と WAYLAND_DISPLAY の両方があるときだけ
@@ -72,7 +91,7 @@ in
 
   home.packages = with pkgs; [
     pinentry-gtk2
-    tailscale
+    tailscaleCli
     # Neovim / nvim-treesitter / Lazy プラグインのビルド（make / CMake）
     gnumake
     cmake
