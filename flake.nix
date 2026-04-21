@@ -33,6 +33,7 @@
         system = linuxSystem;
         overlays = [
           inputs.actrun.overlays.default
+          (import ./pkgs/npm)
           (final: prev: {
             cursor-appimage = import ./pkgs/appimages/cursor.nix final;
             vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };

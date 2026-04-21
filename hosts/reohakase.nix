@@ -15,7 +15,12 @@
 
   nixpkgs.hostPlatform = "aarch64-darwin";
 
-  nixpkgs.overlays = [ inputs.actrun.overlays.default ];
+  nixpkgs.overlays = [
+    inputs.actrun.overlays.default
+    # npm 由来 CLI(claude-code / codex)を上流追従させる in-tree オーバーレイ。
+    # nixpkgs のバージョン遅延を回避する目的。bump 手順は pkgs/npm/README.md。
+    (import ../pkgs/npm)
+  ];
 
   nixpkgs.config = {
     allowUnfree = true;

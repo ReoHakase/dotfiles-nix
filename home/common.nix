@@ -113,7 +113,9 @@
     bottom
     brotli
     cloc
-    claude-code-bin
+    # claude-code / codex は in-tree オーバーレイ(`pkgs/npm/`)で最新に pin。
+    # nixpkgs の claude-code-bin は毎日のように出る新バージョンに追従しきれないため採用しない。
+    claude-code
     codex
     dnsutils
     eza
