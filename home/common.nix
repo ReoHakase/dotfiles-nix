@@ -32,6 +32,7 @@
         ghi = "gh issue create";
         ghp = "gh pr create";
         ghw = "gh repo view -w";
+        lg = "lazygit";
       };
     };
     shellAliases = {
@@ -99,70 +100,68 @@
   # LuaLaTeX + 日本語（luatexja / ltjsbook）。macOS の BasicTeX は使わず Nix に統一。
   home.file.".latexmkrc".source = ../config/latex/latexmkrc;
 
-  home.packages =
-    with pkgs;
-    [
-      geist-font
-      nerd-fonts.geist-mono
-      noto-fonts-cjk-sans
-      noto-fonts-cjk-serif
+  home.packages = with pkgs; [
+    geist-font
+    nerd-fonts.geist-mono
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
 
-      actrun
-      act
-      arp-scan
-      bat
-      bottom
-      brotli
-      cloc
-      claude-code-bin
-      codex
-      dnsutils
-      eza
-      fastfetch
-      fd
-      ffmpeg
-      fzf
-      gcc
-      gettext
-      gh
-      git
-      gnupg
-      graphviz
-      hyperfine
-      inetutils
-      jdk
-      lazygit
-      libwebp
-      lzo
-      lz4
-      mise
-      nixd
-      nixfmt
-      nmap
-      opencode
-      openssl
-      pkgconf
-      rWrapper
-      ripgrep
-      supabase-cli
-      tcl
-      tk
-      tmux
-      tree-sitter
-      typst
-      (texliveSmall.withPackages (
-        ps: with ps; [
-          collection-langjapanese
-          latexmk
-          biber
-        ]
-      ))
-      uv
-      wget
-      yazi
-      xz
-      zstd
-    ];
+    actrun
+    act
+    arp-scan
+    bat
+    bottom
+    brotli
+    cloc
+    claude-code-bin
+    codex
+    dnsutils
+    eza
+    fastfetch
+    fd
+    ffmpeg
+    fzf
+    gcc
+    gettext
+    gh
+    git
+    gnupg
+    graphviz
+    hyperfine
+    inetutils
+    jdk
+    lazygit
+    libwebp
+    lzo
+    lz4
+    mise
+    nixd
+    nixfmt
+    nmap
+    opencode
+    openssl
+    pkgconf
+    rWrapper
+    ripgrep
+    supabase-cli
+    tcl
+    tk
+    tmux
+    tree-sitter
+    typst
+    (texliveSmall.withPackages (
+      ps: with ps; [
+        collection-langjapanese
+        latexmk
+        biber
+      ]
+    ))
+    uv
+    wget
+    yazi
+    xz
+    zstd
+  ];
 
   # [microsoft/apm](https://github.com/microsoft/apm) — PyPI `apm-cli`。Nix の `uv` で常に最新系を `uv tool` 導入（~/.local/bin の `apm`）。
   # `home-manager switch` のたびに PyPI を見に行く（オフラインだと失敗しうる）。外すときは `uv tool uninstall apm-cli`。
