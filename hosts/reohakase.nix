@@ -33,6 +33,11 @@
 
   system.stateVersion = 5;
 
+  # nix-darwin's local manual/options docs generation currently emits an
+  # upstream string-context warning during evaluation. Disable only that
+  # documentation bundle; `programs.man` / `programs.info` remain available.
+  documentation.enable = false;
+
   # Required for system.defaults.* (activation runs as root)
   system.primaryUser = user;
 

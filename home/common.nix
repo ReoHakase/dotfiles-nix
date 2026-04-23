@@ -10,6 +10,11 @@
 
   programs.home-manager.enable = true;
 
+  # Home Manager manual generation pulls in options.json and currently emits
+  # a string-context warning during evaluation. We don't need the local
+  # `home-configuration.nix` manpage in this setup.
+  manual.manpages.enable = false;
+
   fonts.fontconfig.enable = true;
 
   xdg.enable = true;
@@ -64,6 +69,8 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+    withPython3 = false;
+    withRuby = false;
   };
 
   # https://github.com/dandavison/delta — pager + diff filter (bat-compatible themes)
