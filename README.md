@@ -41,6 +41,14 @@
 
 > [!IMPORTANT] > **Determinate Nix を使う場合:** [Determinate](https://github.com/DeterminateSystems/nix-installer) は Nix のインストールを独自に管理するため、nix-darwin の `nix.*`（`/etc/nix` など）と競合し、`Determinate detected, aborting activation` で止まる。このリポジトリでは `hosts/reohakase.nix` で **`nix.enable = false`** とし、Nix 本体の設定は Determinate / 手元の `nix.conf` に任せる。詳細は [MANUAL.md](MANUAL.md) の「Determinate Nix と nix-darwin」。
 
+> [!NOTE]
+> `apm` / `claude-code` / `codex` は [`numtide/llm-agents.nix`](https://github.com/numtide/llm-agents.nix) から入れる。`flake.nix` には Numtide cache の `nixConfig` を置いているが、Determinate Nix では非 trusted user からの `extra-substituters` / `trusted-public-keys` は無視されることがある。その場合でも `nix flake check --all-systems` は通るが、cache を使うには trusted な Nix 設定（例: `/etc/nix/nix.conf` や Determinate 側の管理設定）に次を入れる。
+>
+> ```conf
+> extra-substituters = https://cache.numtide.com
+> extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+> ```
+
 ## 前提（このマシン向けの固定値）
 
 | 項目                        | 値                                                                   |
@@ -255,6 +263,7 @@ chsh -s "$(which zsh)"
 | `abbr: command not found`                   | `programs.zsh.zsh-abbr`（home-manager）で読み込む。**`./scripts/apply-system.sh` で再適用**してから `exec zsh`。[MANUAL.md](MANUAL.md) のトラブルも参照。                        |
 | `Existing file '…' would be clobbered`      | 手元の `~/.zshrc` や `~/.config/gh/config.yml` などが HM と重なる。このリポジトリでは `hosts/reohakase.nix` の **`home-manager.backupFileExtension`** で退避してからリンクする。 |
 | `Determinate detected, aborting activation` | Determinate と nix-darwin の Nix 管理がぶつかっている。`hosts/<hostname>.nix` で `nix.enable = false` にする（このリポジトリでは既に設定済み）。                                 |
+| `ignoring untrusted substituter 'https://cache.numtide.com'` | flake 側の Numtide cache 設定が trusted user ではないため無視されている。check 自体が通るなら問題なし。cache を使うなら上記の trusted な Nix 設定に追記する。 |
 | `No space left on device`                   | ディスク空きを増やし、`nix-collect-garbage -d` などでストアを整理する。詳細は [MANUAL.md](MANUAL.md) の「ディスク不足」。                                                        |
 | `darwin-rebuild` がホスト名で失敗           | `flake.nix` の `hostname` と `scutil --get LocalHostName` を一致させる。                                                                                                         |
 | Flake が古いファイルしか見ない              | 変更を `git add` / `commit` するか、警告に従う。                                                                                                                                 |

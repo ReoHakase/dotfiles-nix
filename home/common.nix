@@ -1,10 +1,13 @@
 {
   config,
   pkgs,
-  lib,
+  inputs,
   ...
 }:
 
+let
+  llmAgentsPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+in
 {
   home.stateVersion = "24.11";
 
@@ -126,10 +129,9 @@
     bottom
     brotli
     cloc
-    # claude-code / codex は in-tree オーバーレイ(`pkgs/npm/`)で最新に pin。
-    # nixpkgs の claude-code-bin は毎日のように出る新バージョンに追従しきれないため採用しない。
-    claude-code
-    codex
+    llmAgentsPkgs.apm
+    llmAgentsPkgs.claude-code
+    llmAgentsPkgs.codex
     dnsutils
     eza
     fastfetch
@@ -182,11 +184,4 @@
     xz
     zstd
   ];
-
-  # [microsoft/apm](https://github.com/microsoft/apm) — PyPI `apm-cli`。Nix の `uv` で常に最新系を `uv tool` 導入（~/.local/bin の `apm`）。
-  # `home-manager switch` のたびに PyPI を見に行く（オフラインだと失敗しうる）。外すときは `uv tool uninstall apm-cli`。
-  home.activation.apm-cli-via-uv = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    export PATH="${lib.makeBinPath [ pkgs.uv ]}:$PATH"
-    run ${lib.getExe pkgs.uv} tool install apm-cli
-  '';
 }

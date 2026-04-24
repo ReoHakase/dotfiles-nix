@@ -1,6 +1,13 @@
 {
   description = "nix-darwin + home-manager dotfiles (macOS + Home Manager on Linux)";
 
+  nixConfig = {
+    extra-substituters = [ "https://cache.numtide.com" ];
+    extra-trusted-public-keys = [
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
@@ -18,10 +25,17 @@
       url = "github:mizchi/actrun";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   outputs =
-    inputs@{ self, nix-darwin, home-manager, nixpkgs, ... }:
+    inputs@{
+      self,
+      nix-darwin,
+      home-manager,
+      nixpkgs,
+      ...
+    }:
     let
       user = "ReoHakase";
       hostname = "reohakase";
@@ -33,7 +47,6 @@
         system = linuxSystem;
         overlays = [
           inputs.actrun.overlays.default
-          (import ./pkgs/npm)
           (final: prev: {
             cursor-appimage = import ./pkgs/appimages/cursor.nix final;
             vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };
@@ -68,10 +81,6 @@
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         cursor-appimage = pkgsLinux.cursor-appimage;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
-        # `nix-update --flake <attr>` から更新できるように overlay の npm CLI を公開する。
-        # 既定 system (=x86_64-linux) で十分なので aarch64-darwin 側は用意しない。
-        claude-code = pkgsLinux.claude-code;
-        codex = pkgsLinux.codex;
       };
     };
 }
