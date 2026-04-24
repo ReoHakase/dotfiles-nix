@@ -147,6 +147,7 @@ in
     hyperfine
     inetutils
     jdk
+    just
     lazygit
     libwebp
     lzo
