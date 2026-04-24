@@ -7,9 +7,16 @@
 
 let
   llmAgentsPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  apm = pkgs.callPackage ../pkgs/apm-codex-user-scope.nix {
+    inherit (llmAgentsPkgs) apm;
+  };
 in
 {
+  imports = [ ../modules/apm.nix ];
+
   home.stateVersion = "24.11";
+
+  reohakase.apmGlobal.enable = true;
 
   programs.home-manager.enable = true;
 
@@ -129,7 +136,7 @@ in
     bottom
     brotli
     cloc
-    llmAgentsPkgs.apm
+    apm
     llmAgentsPkgs.claude-code
     llmAgentsPkgs.codex
     dnsutils

@@ -42,6 +42,17 @@
       linuxSystem = "x86_64-linux";
       linuxUser = "reohakuta";
       linuxHmHostname = "reohakuta-kcvl";
+      patchedApmFor =
+        system:
+        let
+          pkgsForSystem = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        pkgsForSystem.callPackage ./pkgs/apm-codex-user-scope.nix {
+          apm = inputs.llm-agents.packages.${system}.apm;
+        };
 
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
@@ -77,10 +88,15 @@
       homeConfigurations."${linuxUser}@${linuxHmHostname}" = homeLinux;
 
       packages.${linuxSystem} = {
+        apm = patchedApmFor linuxSystem;
         home-reohakuta-kcvl = homeLinux.activationPackage;
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         cursor-appimage = pkgsLinux.cursor-appimage;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
+      };
+
+      packages.aarch64-darwin = {
+        apm = patchedApmFor "aarch64-darwin";
       };
     };
 }

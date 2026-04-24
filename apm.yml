@@ -1,0 +1,20 @@
+name: reohakase-global-agents
+version: 0.0.0
+description: Personal user-scope APM dependencies and MCP configuration
+
+target:
+  - claude
+  - cursor
+  - codex
+
+dependencies:
+  apm:
+    - mizchi/skills/empirical-prompt-tuning
+    - mizchi/skills/tech-article-reproducibility
+    - mizchi/skills/apm-usage
+    - mizchi/skills/nix-setup
+    - mizchi/skills/justfile
+    - ast-grep/agent-skill
+    - mizchi/skills/conventional-changelog
+    - mizchi/skills/dotenvx
+  mcp: []

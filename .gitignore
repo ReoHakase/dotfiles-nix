@@ -3,3 +3,17 @@ result-*
 .direnv
 *.swp
 .DS_Store
+
+
+# APM dependencies
+apm_modules/
+
+# APM generated target outputs
+.agents/
+.claude/
+.codex/
+.cursor/
+.github/agents/
+.github/instructions/
+.github/prompts/
+.github/skills/
