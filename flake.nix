@@ -54,6 +54,23 @@
           apm = inputs.llm-agents.packages.${system}.apm;
         };
 
+      devShellFor =
+        system:
+        let
+          pkgsForSystem = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        pkgsForSystem.mkShell {
+          packages = [
+            pkgsForSystem.commitlint-rs
+            pkgsForSystem.dotenvx
+            pkgsForSystem.git
+            pkgsForSystem.lefthook
+          ];
+        };
+
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
         overlays = [
@@ -98,5 +115,8 @@
       packages.aarch64-darwin = {
         apm = patchedApmFor "aarch64-darwin";
       };
+
+      devShells.aarch64-darwin.default = devShellFor "aarch64-darwin";
+      devShells.${linuxSystem}.default = devShellFor linuxSystem;
     };
 }

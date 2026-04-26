@@ -6,7 +6,8 @@
 }:
 
 let
-  llmAgentsPkgs = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  system = pkgs.stdenv.hostPlatform.system;
+  llmAgentsPkgs = inputs.llm-agents.packages.${system};
   apm = pkgs.callPackage ../pkgs/apm-codex-user-scope.nix {
     inherit (llmAgentsPkgs) apm;
   };
@@ -136,7 +137,10 @@ in
     bottom
     brotli
     cloc
+    commitlint-rs
     apm
+    dotenvx
+    lefthook
     llmAgentsPkgs.claude-code
     llmAgentsPkgs.codex
     dnsutils
