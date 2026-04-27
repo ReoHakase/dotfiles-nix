@@ -1,9 +1,5 @@
 export GPG_TTY=$(tty)
 
-if [[ -n ${SSH_CONNECTION:-} || -n ${SSH_TTY:-} ]]; then
-  export ZSH_AUTOSUGGEST_DISABLED=1
-fi
-
 # ユーザ site-packages（~/.local/lib/python*）を読ませない（venv / システム Python の混線防止）
 export PYTHONNOUSERSITE=1
 
