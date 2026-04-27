@@ -115,7 +115,16 @@ in
 
   programs.ssh = {
     enable = true;
-    matchBlocks."*".setEnv.TERM = "xterm-256color";
+    matchBlocks = {
+      "*" = {
+        setEnv.TERM = "xterm-256color";
+      };
+      kcvl = {
+        hostname = "192.168.100.149";
+        user = "reohakuta";
+        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
+    };
   };
 
   programs.gh.enable = false;
