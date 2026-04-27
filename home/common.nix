@@ -71,6 +71,7 @@ in
     "starship.toml".source = ../config/starship.toml;
     "gh/config.yml".source = ../config/gh/config.yml;
     "gh/hosts.yml".source = ../config/gh/hosts.yml;
+    "lazygit/config.yml".source = ../config/lazygit/config.yml;
     "mise/config.toml".source = ../config/mise/config.toml;
     "nvim".source = ../config/nvim;
   };
@@ -144,6 +145,7 @@ in
     llmAgentsPkgs.claude-code
     llmAgentsPkgs.codex
     dnsutils
+    eternal-terminal
     eza
     fastfetch
     fd
