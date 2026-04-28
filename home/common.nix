@@ -11,6 +11,26 @@ let
   apm = pkgs.callPackage ../pkgs/apm-codex-user-scope.nix {
     inherit (llmAgentsPkgs) apm;
   };
+  tmuxAutoreload = pkgs.tmuxPlugins.mkTmuxPlugin {
+    pluginName = "tmux-autoreload";
+    version = "0.0.1";
+    src = pkgs.fetchFromGitHub {
+      owner = "b0o";
+      repo = "tmux-autoreload";
+      rev = "v0.0.1";
+      hash = "sha256-SYzn18gMYFwrsBKIu1HSStSq96MFJQc36QSGfI7bTZo=";
+    };
+    rtpFilePath = "tmux-autoreload.tmux";
+  };
+  tmuxPowerkit = pkgs.callPackage (
+    pkgs.fetchFromGitHub {
+      owner = "fabioluciano";
+      repo = "tmux-powerkit";
+      rev = "372b891e6c1884dd3b959f101336c92fa89056ec";
+      hash = "sha256-rYDxaELzJNmn2+ndLBjhUSNZjwg8tf7lT4iwCAU4nfQ=";
+    }
+    + "/default.nix"
+  ) { };
 in
 {
   imports = [ ../modules/apm.nix ];
@@ -142,10 +162,62 @@ in
 
   programs.fzf.enable = true;
 
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   programs.mise = {
     enable = true;
     enableZshIntegration = true;
   };
+
+  programs.tmux =
+    let
+      clipboardCommand =
+        if pkgs.stdenv.isDarwin then
+          "/usr/bin/pbcopy"
+        else
+          "${pkgs.xclip}/bin/xclip -selection clipboard -in";
+    in
+    {
+      enable = true;
+      aggressiveResize = true;
+      escapeTime = 0;
+      historyLimit = 50000;
+      mouse = true;
+      shell = "${pkgs.zsh}/bin/zsh";
+      terminal = "tmux-256color";
+      plugins = with pkgs.tmuxPlugins; [
+        sensible
+        tmux-fzf
+        session-wizard
+        resurrect
+        continuum
+        tmuxAutoreload
+        {
+          plugin = tmuxPowerkit;
+          extraConfig = ''
+            set -g @powerkit_plugins "datetime,battery,cpu,memory,git,hostname"
+            set -g @powerkit_theme "onedark"
+            set -g @powerkit_theme_variant "dark"
+            set -g @powerkit_separator_style "rounded"
+            set -g @powerkit_elements_spacing "both"
+            set -g @powerkit_status_interval "5"
+            set -g @powerkit_transparent "true"
+          '';
+        }
+      ];
+      extraConfig = ''
+        set -g status-interval 5
+        set -g renumber-windows on
+        set -g default-command "exec ${pkgs.zsh}/bin/zsh"
+        set -g set-clipboard on
+        set -g copy-command "${clipboardCommand}"
+
+        source-file ${pkgs.tmuxPlugins.tmux-which-key}/share/tmux-plugins/tmux-which-key/plugin/init.example.tmux
+      '';
+    };
 
   # LuaLaTeX + 日本語（luatexja / ltjsbook）。macOS の BasicTeX は使わず Nix に統一。
   home.file.".latexmkrc".source = ../config/latex/latexmkrc;
@@ -166,6 +238,7 @@ in
     commitlint-rs
     apm
     dotenvx
+    entr
     lefthook
     llmAgentsPkgs.claude-code
     llmAgentsPkgs.codex
@@ -204,10 +277,10 @@ in
     pkgconf
     rWrapper
     ripgrep
+    sesh
     supabase-cli
     tcl
     tk
-    tmux
     tree-sitter
     typst
     (texliveSmall.withPackages (
