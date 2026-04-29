@@ -32,6 +32,17 @@ let
     }
     + "/default.nix"
   ) { };
+
+  tmuxCowboy = pkgs.tmuxPlugins.mkTmuxPlugin {
+    pluginName = "cowboy";
+    version = "2021-05-11";
+    src = pkgs.fetchFromGitHub {
+      owner = "tmux-plugins";
+      repo = "tmux-cowboy";
+      rev = "75702b6d0a866769dd14f3896e9d19f7e0acd4f2";
+      hash = "sha256-KJNsdDLqT2Uzc25U4GLSB2O1SA/PThmDj9Aej5XjmJs=";
+    };
+  };
   tmuxPowerkitOneDarkProNightFlat = pkgs.writeText "tmux-powerkit-onedark-pro-night-flat.sh" ''
     declare -gA THEME_COLORS=(
       [background]="default"
@@ -237,6 +248,7 @@ in
       terminal = "tmux-256color";
       plugins = with pkgs.tmuxPlugins; [
         sensible
+        tmuxCowboy
         tmux-fzf
         session-wizard
         resurrect
@@ -245,7 +257,12 @@ in
         {
           plugin = tmuxPowerkit;
           extraConfig = ''
-            set -g @powerkit_plugins "datetime,battery,cpu,memory,git,hostname"
+            set -g @powerkit_plugins "datetime,battery,cpu,memory,gpu,netspeed,git,hostname"
+            set -g @powerkit_plugin_datetime_format "%b %d %H:%M"
+            # usage + VRAM (Linux: nvidia-smi; macOS: bundled powerkit-gpu)
+            set -g @powerkit_plugin_gpu_metric "usage,memory"
+            set -g @powerkit_plugin_netspeed_interface "auto"
+            set -g @powerkit_plugin_netspeed_format "both"
             set -g @powerkit_theme "custom"
             set -g @powerkit_theme_variant "night-flat"
             set -g @powerkit_custom_theme_path "${tmuxPowerkitOneDarkProNightFlat}"
@@ -308,6 +325,9 @@ in
           "Previous session" p "switch-client -p" \
           "Rename session" r "command-prompt -I '#S' 'rename-session -- \"%%\"'" \
           "New session" s "new-session"
+
+        # Same as prefix+Space → Panes → Choose (interactive pane picker).
+        bind-key -T prefix P displayp -d 0
       '';
     };
 
