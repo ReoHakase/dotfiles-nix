@@ -34,8 +34,10 @@ in
       ".apm/apm.yml".source = ../config/apm/apm.yml;
     };
 
+    # After linkGeneration: ~/.apm/apm.yml is a home.file symlink; it does not
+    # exist during writeBoundary (HM activation order).
     home.activation.installGlobalApm =
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      lib.hm.dag.entryAfter [ "linkGeneration" ] ''
         set -euo pipefail
 
         echo "APM: installing global agent dependencies from ~/.apm/apm.yml"

@@ -49,6 +49,11 @@ in
   # 標準の `tailscale` 実行パスは上の tailscaleCli ラッパー経由で user socket を向く。
   home.sessionVariables.TS_SOCKET = tsSocket;
 
+  # Standalone Home Manager でも nix-darwin 側の backupFileExtension と同じ退避名にする。
+  home.activation.setHomeManagerBackupExtension = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+    export HOME_MANAGER_BACKUP_EXT=hm-backup
+  '';
+
   # Electron（Cursor / VS Code 系の nixpkgs ラッパー）: NIXOS_OZONE_WL と WAYLAND_DISPLAY の両方があるときだけ
   # Ozone/Wayland 向けフラグが付く（nixpkgs vscode generic.nix）。
   # GNOME + Mutter on X11 では通常 WAYLAND_DISPLAY が無いのでこの分岐は効かず、普段は X11 経路。Wayland セッションに

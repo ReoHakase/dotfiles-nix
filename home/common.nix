@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   inputs,
   ...
@@ -309,6 +310,12 @@ in
           "New session" s "new-session"
       '';
     };
+
+  home.activation.reloadTmuxConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    if command -v tmux >/dev/null 2>&1 && tmux info >/dev/null 2>&1; then
+      run tmux source-file "$HOME/.config/tmux/tmux.conf"
+    fi
+  '';
 
   # LuaLaTeX + 日本語（luatexja / ltjsbook）。macOS の BasicTeX は使わず Nix に統一。
   home.file.".latexmkrc".source = ../config/latex/latexmkrc;
