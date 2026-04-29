@@ -31,6 +31,51 @@ let
     }
     + "/default.nix"
   ) { };
+  tmuxPowerkitOneDarkProNightFlat = pkgs.writeText "tmux-powerkit-onedark-pro-night-flat.sh" ''
+    declare -gA THEME_COLORS=(
+      [background]="default"
+
+      [statusbar-bg]="default"
+      [statusbar-fg]="#9da5b4"
+
+      [session-bg]="#4aa5f0"
+      [session-fg]="#16191d"
+      [session-prefix-bg]="#d18f52"
+      [session-copy-bg]="#42b3c2"
+      [session-search-bg]="#d18f52"
+      [session-command-bg]="#c162de"
+
+      [window-active-base]="#23272e"
+      [window-active-style]="bold"
+      [window-inactive-base]="#1e2227"
+      [window-inactive-style]="none"
+      [window-activity-style]="italics"
+      [window-bell-style]="bold"
+      [window-zoomed-bg]="#42b3c2"
+
+      [pane-border-active]="#4aa5f0"
+      [pane-border-inactive]="#3e4452"
+
+      [ok-base]="#23272e"
+      [good-base]="#8cc265"
+      [info-base]="#42b3c2"
+      [warning-base]="#d18f52"
+      [error-base]="#e05561"
+      [disabled-base]="#667187"
+
+      [message-bg]="default"
+      [message-fg]="#abb2bf"
+
+      [popup-bg]="#1e2227"
+      [popup-fg]="#abb2bf"
+      [popup-border]="#3e4452"
+      [menu-bg]="#1e2227"
+      [menu-fg]="#abb2bf"
+      [menu-selected-bg]="#2c313a"
+      [menu-selected-fg]="#d7dae0"
+      [menu-border]="#3e4452"
+    )
+  '';
 in
 {
   imports = [ ../modules/apm.nix ];
@@ -89,6 +134,7 @@ in
 
   xdg.configFile = {
     "starship.toml".source = ../config/starship.toml;
+    "ghostty/config".source = ../config/ghostty/config;
     "gh/config.yml".source = ../config/gh/config.yml;
     "gh/hosts.yml".source = ../config/gh/hosts.yml;
     "lazygit/config.yml".source = ../config/lazygit/config.yml;
@@ -199,10 +245,13 @@ in
           plugin = tmuxPowerkit;
           extraConfig = ''
             set -g @powerkit_plugins "datetime,battery,cpu,memory,git,hostname"
-            set -g @powerkit_theme "onedark"
-            set -g @powerkit_theme_variant "dark"
-            set -g @powerkit_separator_style "rounded"
-            set -g @powerkit_elements_spacing "both"
+            set -g @powerkit_theme "custom"
+            set -g @powerkit_theme_variant "night-flat"
+            set -g @powerkit_custom_theme_path "${tmuxPowerkitOneDarkProNightFlat}"
+            set -g @powerkit_separator_style "none"
+            set -g @powerkit_edge_separator_style "none"
+            set -g @powerkit_initial_separator_style "none"
+            set -g @powerkit_elements_spacing "false"
             set -g @powerkit_status_interval "5"
             set -g @powerkit_transparent "true"
           '';
@@ -216,6 +265,48 @@ in
         set -g copy-command "${clipboardCommand}"
 
         source-file ${pkgs.tmuxPlugins.tmux-which-key}/share/tmux-plugins/tmux-which-key/plugin/init.example.tmux
+        set -g @wk_menu_root \
+          'Detach "d" detach-client \
+          "Kill pane" "x" "confirm-before -p \"Kill pane #P? (y/n)\" kill-pane" \
+          "" \
+          Run "space" command-prompt \
+          "Last window" "tab" last-window \
+          "Last pane" "`" last-pane \
+          Copy "c" "show-wk-menu #{@wk_menu_copy}" \
+          "" \
+          "+Windows" "w" "show-wk-menu #{@wk_menu_windows}" \
+          "+Panes" "p" "show-wk-menu #{@wk_menu_panes}" \
+          "+Buffers" "b" "show-wk-menu #{@wk_menu_buffers}" \
+          "+Sessions" "s" "show-wk-menu #{@wk_menu_sessions}" \
+          "+Client" "C" "show-wk-menu #{@wk_menu_client}" \
+          "" \
+          Time "T" clock-mode \
+          "Show messages" "\~" show-messages \
+          "+Keys" "?" "list-keys -N"'
+
+        bind-key -T copy-mode MouseDragEnd1Pane send-keys -X copy-pipe-no-clear
+        bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-no-clear
+
+        unbind-key -q -T root MouseDown3Pane
+        unbind-key -q -T root MouseDown3Status
+        unbind-key -q -T root MouseDown3StatusLeft
+        bind-key -T root MouseUp3Pane display-menu -T "#[align=centre]#{pane_index} (#{pane_id})" -t = -x M -y M \
+          "Copy word" c "copy-mode -q ; set-buffer '#{q:mouse_word}'" \
+          "Copy line" l "copy-mode -q ; set-buffer '#{q:mouse_line}'" \
+          "" \
+          "Horizontal split" h "split-window -h" \
+          "Vertical split" v "split-window -v" \
+          "Zoom" z "resize-pane -Z" \
+          "Kill pane" X "kill-pane"
+        bind-key -T root MouseUp3Status display-menu -T "#[align=centre]#{window_index}:#{window_name}" -t = -x W -y W \
+          "New window" w "new-window" \
+          "Rename window" n "command-prompt -F -I '#W' 'rename-window -t \"#{window_id}\" -- \"%%\"'" \
+          "Kill window" X "kill-window"
+        bind-key -T root MouseUp3StatusLeft display-menu -T "#[align=centre]#{session_name}" -t = -x M -y W \
+          "Next session" n "switch-client -n" \
+          "Previous session" p "switch-client -p" \
+          "Rename session" r "command-prompt -I '#S' 'rename-session -- \"%%\"'" \
+          "New session" s "new-session"
       '';
     };
 
