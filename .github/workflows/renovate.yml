@@ -30,7 +30,11 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
+  issues: write
+  pull-requests: write
+  # renovate updates .github/workflows (github-actions manager) and needs workflow scope
+  workflows: write
 
 jobs:
   renovate:

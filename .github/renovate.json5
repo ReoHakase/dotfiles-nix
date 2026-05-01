@@ -1,6 +1,12 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  extends: ["config:recommended", ":dependencyDashboard"],
+  extends: [
+    "config:recommended",
+    ":dependencyDashboard",
+    // Immutable action refs + tag comment — see helpers:pinGitHubActionDigests preset.
+    // https://docs.renovatebot.com/modules/manager/github-actions/
+    "helpers:pinGitHubActionDigests",
+  ],
   timezone: "Asia/Tokyo",
   schedule: ["before 6am every weekday"],
   labels: ["dependencies"],
@@ -17,14 +23,17 @@
 
   customManagers: [
     {
+      description: "@anthropic-ai/claude-code semver in pkgs/npm/claude-code/package.nix",
       // pkgs/npm/claude-code/package.nix の `version = "X.Y.Z";` を npm registry と突き合わせる。
       customType: "regex",
       managerFilePatterns: ["^pkgs/npm/claude-code/package\\.nix$"],
       matchStrings: ['version\\s*=\\s*"(?<currentValue>[^"]+)";'],
       datasourceTemplate: "npm",
       depNameTemplate: "@anthropic-ai/claude-code",
+      versioningTemplate: "semver",
     },
     {
+      description: "openai/codex release tag rust-vX.Y.Z in pkgs/npm/codex/package.nix",
       // pkgs/npm/codex/package.nix の `version = "X.Y.Z";` を GitHub Releases (tag: rust-vX.Y.Z) と突き合わせる。
       customType: "regex",
       managerFilePatterns: ["^pkgs/npm/codex/package\\.nix$"],
@@ -32,10 +41,18 @@
       datasourceTemplate: "github-releases",
       depNameTemplate: "openai/codex",
       extractVersionTemplate: "^rust-v(?<version>.+)$",
+      versioningTemplate: "semver",
     },
   ],
 
   packageRules: [
+    {
+      description: "Pin actions/setup-node node-version inputs (uses-with deps).",
+      matchManagers: ["github-actions"],
+      matchDepTypes: ["uses-with"],
+      matchDepNames: ["node"],
+      rangeStrategy: "pin",
+    },
     {
       matchManagers: ["nix"],
       groupName: "flake inputs",
