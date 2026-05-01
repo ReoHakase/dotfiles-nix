@@ -48,6 +48,11 @@
 
   programs.zsh.enable = true;
 
+  # sudo に Touch ID（および設定済みなら Apple Watch）。`/etc/pam.d/sudo_local` を nix-darwin が管理。
+  # reattach: tmux / screen 内でも pam_tid が効くようにする（pam-reattach）。
+  security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.reattach = true;
+
   # Tailscale: launchd で tailscaled、CLI は environment.systemPackages（HM の home.packages には足さない）
   services.tailscale.enable = true;
 
