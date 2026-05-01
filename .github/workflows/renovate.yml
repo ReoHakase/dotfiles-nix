@@ -32,8 +32,9 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
-  # renovate updates .github/workflows (github-actions manager) and needs workflow scope
-  workflows: write
+  # PAT の「workflow」スコープとは別物。ワークフロー YAML の更新は GITHUB_TOKEN で
+  # contents:write + リポ設定（Actions の読み書き権限）に依存。permissions に workflows キーは無い。
+  # https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions#permissions
 
 jobs:
   renovate:
