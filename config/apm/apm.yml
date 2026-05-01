@@ -9,12 +9,12 @@ target:
 
 dependencies:
   apm:
-    - mizchi/skills/empirical-prompt-tuning
-    - mizchi/skills/tech-article-reproducibility
-    - mizchi/skills/apm-usage
-    - mizchi/skills/nix-setup
-    - mizchi/skills/justfile
-    - ast-grep/agent-skill
-    - mizchi/skills/conventional-changelog
-    - mizchi/skills/dotenvx
+    - mizchi/skills/empirical-prompt-tuning#a2b5a796a5f22fc05fb515cef106993b84cf08cc
+    - mizchi/skills/tech-article-reproducibility#a2b5a796a5f22fc05fb515cef106993b84cf08cc
+    - mizchi/skills/apm-usage#a2b5a796a5f22fc05fb515cef106993b84cf08cc
+    - mizchi/skills/nix-setup#a2b5a796a5f22fc05fb515cef106993b84cf08cc
+    - mizchi/skills/justfile#a2b5a796a5f22fc05fb515cef106993b84cf08cc
+    - ast-grep/agent-skill#577f4d4507678f2c8cee150fae25e6ce309f70b1
+    - mizchi/skills/conventional-changelog#a2b5a796a5f22fc05fb515cef106993b84cf08cc
+    - mizchi/skills/dotenvx#a2b5a796a5f22fc05fb515cef106993b84cf08cc
   mcp: []
