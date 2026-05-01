@@ -10,11 +10,11 @@
   timezone: "Asia/Tokyo",
   schedule: ["before 6am every weekday"],
   labels: ["dependencies"],
-  // claude-code は毎日のように patch が出るので同時 PR を抑える。
   prConcurrentLimit: 4,
   prHourlyLimit: 4,
 
-  // nix マネージャで flake.lock を週次 bump する。
+  // flake.lock は nix manager が rev / narHash を更新。個別 *.nix の fetchurl hash 等は
+  // packageRules の postUpgradeTasks（curl + nix hash / nix-update）で追随させる。
   nix: { enabled: true },
   lockFileMaintenance: {
     enabled: true,
@@ -23,24 +23,13 @@
 
   customManagers: [
     {
-      description: "@anthropic-ai/claude-code semver in pkgs/npm/claude-code/package.nix",
-      // pkgs/npm/claude-code/package.nix の `version = "X.Y.Z";` を npm registry と突き合わせる。
+      description: "Vicinae AppImage (fixed-output fetchurl)",
       customType: "regex",
-      managerFilePatterns: ["^pkgs/npm/claude-code/package\\.nix$"],
-      matchStrings: ['version\\s*=\\s*"(?<currentValue>[^"]+)";'],
-      datasourceTemplate: "npm",
-      depNameTemplate: "@anthropic-ai/claude-code",
-      versioningTemplate: "semver",
-    },
-    {
-      description: "openai/codex release tag rust-vX.Y.Z in pkgs/npm/codex/package.nix",
-      // pkgs/npm/codex/package.nix の `version = "X.Y.Z";` を GitHub Releases (tag: rust-vX.Y.Z) と突き合わせる。
-      customType: "regex",
-      managerFilePatterns: ["^pkgs/npm/codex/package\\.nix$"],
+      managerFilePatterns: ["^pkgs/appimages/vicinae\\.nix$"],
       matchStrings: ['version\\s*=\\s*"(?<currentValue>[^"]+)";'],
       datasourceTemplate: "github-releases",
-      depNameTemplate: "openai/codex",
-      extractVersionTemplate: "^rust-v(?<version>.+)$",
+      depNameTemplate: "vicinaehq/vicinae",
+      extractVersionTemplate: "^v(?<version>.+)$",
       versioningTemplate: "semver",
     },
   ],
@@ -60,34 +49,21 @@
       semanticCommitScope: "flake",
     },
     {
-      matchPackageNames: ["@anthropic-ai/claude-code"],
+      description: "Recompute Vicinae fetchurl SRI hash after semver bump.",
+      matchManagers: ["regex"],
+      matchDatasources: ["github-releases"],
+      matchPackageNames: ["vicinaehq/vicinae"],
       semanticCommitType: "chore",
-      semanticCommitScope: "claude-code",
-      // claude-code 更新時のみ update-claude-code.sh を走らせて
-      // package-lock.json 再生成 + src.hash / npmDepsHash 更新をする。
+      semanticCommitScope: "vicinae",
       postUpgradeTasks: {
-        commands: ["bash scripts/renovate/update-claude-code.sh {{{newVersion}}}"],
-        fileFilters: ["pkgs/npm/claude-code/**"],
-        executionMode: "update",
-      },
-    },
-    {
-      matchPackageNames: ["openai/codex"],
-      semanticCommitType: "chore",
-      semanticCommitScope: "codex",
-      // codex 更新時は prebuilt tarball の SRI hash を各 triple 分書き換える。
-      postUpgradeTasks: {
-        commands: ["bash scripts/renovate/update-codex.sh {{{newVersion}}}"],
-        fileFilters: ["pkgs/npm/codex/**"],
+        commands: ["bash scripts/renovate/bump-vicinae-appimage.sh {{{newVersion}}}"],
+        fileFilters: ["pkgs/appimages/vicinae.nix"],
         executionMode: "update",
       },
     },
   ],
 
-  // セルフホスト側で実行を許可するコマンドの allowlist (正規表現、完全一致)。
-  // Renovate config 上では repo config に書くことで、self-hosted の global config からも merge される。
   allowedPostUpgradeCommands: [
-    "^bash scripts/renovate/update-claude-code\\.sh [0-9]+\\.[0-9]+\\.[0-9]+$",
-    "^bash scripts/renovate/update-codex\\.sh [0-9]+\\.[0-9]+\\.[0-9]+$",
+    "^bash scripts/renovate/bump-vicinae-appimage\\.sh [-\\.0-9A-Za-z+]+$",
   ],
 }

@@ -1,11 +1,10 @@
-# Self-hosted Renovate. Cron で flake.lock / pkgs/npm/* を PR として bump する。
-# 設定本体は .github/renovate.json5。post-upgrade で nix-update / nix-prefetch-url を
-# 叩くので Nix と Node.js を事前にセットアップしておく。
+# Self-hosted Renovate。flake.lock とカスタム Nix（固定出力 fetchurl の hash など）を PR で追従。
+# post-upgrade で scripts/renovate/*（curl + nix hash、bundled の nix-update）を叩くので Nix を入れる。
 name: Renovate
 
 on:
   schedule:
-    # 03:00 JST = 18:00 UTC。毎日回して flake.lock / claude-code / codex を追従。
+    # 03:00 JST = 18:00 UTC。flake 入力ロックと Vicinae AppImage（fetchurl の hash を含む）などを PR。
     - cron: "0 18 * * *"
   workflow_dispatch:
     inputs:
@@ -49,15 +48,13 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      # update-claude-code.sh が `npm install --package-lock-only` を叩くので Node.js を置く。
+      # 将来 npm ベースの post-upgrade を足すとき用（Renovate 本体は Action 側の Node を使用）。
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      # post-upgrade から呼ぶツール一式を PATH に入れる。
-      # nix-update: version + src.hash + npmDepsHash を一括書き換え
-      # nix-prefetch / jq: codex の triple 別 hash 計算
+      # post-upgrade で使うもの: nix-update（nix-update-flake-package.sh）、nix-prefetch、curl など。
       - name: Install helper tools via Nix
         run: |
           nix profile install \
