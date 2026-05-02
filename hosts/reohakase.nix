@@ -81,6 +81,10 @@
       show-recents = false;
     };
 
+    trackpad = {
+      Clicking = false;
+    };
+
     # 既定は file。手元はクリップボードへ保存。
     screencapture.target = "clipboard";
   };
