@@ -284,12 +284,16 @@ in
       ];
       extraConfig = ''
         set -g status-interval 5
+        set -g base-index 1
+        set -g pane-base-index 1
         set -g renumber-windows on
         set -g default-command "exec ${pkgs.zsh}/bin/zsh"
         set -g set-clipboard on
         set -g copy-command "${clipboardCommand}"
 
         source-file ${pkgs.tmuxPlugins.tmux-which-key}/share/tmux-plugins/tmux-which-key/plugin/init.example.tmux
+        unbind-key -q -T prefix Space
+        bind-key -T root C-Space show-wk-menu-root
         set -g @wk_menu_root \
           'Detach "d" detach-client \
           "Kill pane" "x" "confirm-before -p \"Kill pane #P? (y/n)\" kill-pane" \
@@ -333,8 +337,9 @@ in
           "Rename session" r "command-prompt -I '#S' 'rename-session -- \"%%\"'" \
           "New session" s "new-session"
 
-        # Same as prefix+Space → Panes → Choose (interactive pane picker).
+        # Interactive pane picker.
         bind-key -T prefix P displayp -d 0
+        bind-key -T root C-Tab displayp -d 0
       '';
     };
 
