@@ -263,11 +263,21 @@ in
         tmuxAutoreload
         {
           plugin = tmuxPowerkit;
-          extraConfig = ''
-            set -g @powerkit_plugins "datetime,battery,cpu,memory,gpu,netspeed,git,hostname"
+          extraConfig =
+            let
+              powerkitPlugins =
+                if pkgs.stdenv.isDarwin then
+                  "datetime,battery,cpu,memory,netspeed,git,hostname"
+                else
+                  "datetime,battery,cpu,memory,gpu,netspeed,git,hostname";
+              powerkitGpuConfig = lib.optionalString (!pkgs.stdenv.isDarwin) ''
+                set -g @powerkit_plugin_gpu_metric "usage,memory"
+              '';
+            in
+            ''
+              set -g @powerkit_plugins "${powerkitPlugins}"
             set -g @powerkit_plugin_datetime_format "%b %d %H:%M"
-            # usage + VRAM (Linux: nvidia-smi; macOS: bundled powerkit-gpu)
-            set -g @powerkit_plugin_gpu_metric "usage,memory"
+            ${powerkitGpuConfig}
             set -g @powerkit_plugin_netspeed_interface "auto"
             set -g @powerkit_plugin_netspeed_format "both"
             set -g @powerkit_theme "custom"
