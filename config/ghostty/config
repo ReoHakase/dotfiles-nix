@@ -33,6 +33,9 @@ macos-option-as-alt = true
 mouse-hide-while-typing = true
 shell-integration = zsh
 
+custom-shader = shaders/cursor_sweep.glsl
+custom-shader-animation = always
+
 window-colorspace = display-p3
 window-padding-x = 12
 window-padding-y = 12
