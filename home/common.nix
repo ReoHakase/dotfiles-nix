@@ -43,6 +43,12 @@ let
       hash = "sha256-KJNsdDLqT2Uzc25U4GLSB2O1SA/PThmDj9Aej5XjmJs=";
     };
   };
+  ghosttyCursorShaders = pkgs.fetchFromGitHub {
+    owner = "sahaj-b";
+    repo = "ghostty-cursor-shaders";
+    rev = "4faa83e4b9306750fc8de64b38c6f53c57862db8";
+    hash = "sha256-ruhEqXnWRCYdX5mRczpY3rj1DTdxyY3BoN9pdlDOKrE=";
+  };
   tmuxPowerkitOneDarkProNightFlat = pkgs.writeText "tmux-powerkit-onedark-pro-night-flat.sh" ''
     declare -gA THEME_COLORS=(
       [background]="default"
@@ -147,6 +153,7 @@ in
   xdg.configFile = {
     "starship.toml".source = ../config/starship.toml;
     "ghostty/config".source = ../config/ghostty/config;
+    "ghostty/shaders".source = ghosttyCursorShaders;
     "gh/config.yml".source = ../config/gh/config.yml;
     "gh/hosts.yml".source = ../config/gh/hosts.yml;
     "lazygit/config.yml".source = ../config/lazygit/config.yml;
