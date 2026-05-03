@@ -402,7 +402,6 @@ in
     just
     lazygit
     libwebp
-    nodejs
     lzo
     lz4
     # Markdown LSP (PKM). aerial.nvim の treesitter backend は nvim 0.12 の
