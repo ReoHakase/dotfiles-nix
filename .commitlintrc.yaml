@@ -19,7 +19,7 @@ rules:
     level: error
   description-format:
     level: error
-    format: ^[a-z0-9].*[^.]$
+    format: '^([a-z0-9]|[^\x00-\x7F]+ [a-z0-9]).*[^.]$'
   description-max-length:
     level: error
     length: 72
