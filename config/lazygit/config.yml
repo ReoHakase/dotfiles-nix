@@ -1,4 +1,10 @@
+gui:
+  nerdFontsVersion: "3"
+
 git:
+  allBranchesLogCmds:
+    - "git log --graph --color=always --date=format:'%Y-%m-%d %H:%M' --pretty=format:'%C(240 reverse)%h%Creset %C(14)%ad%Creset %C(202)%an <%ae>%Creset %C(11 reverse)%d%Creset %n%C(15 bold)%s%Creset%n' --all --"
+  branchLogCmd: "git log --graph --color=always --date=format:'%Y-%m-%d %H:%M' --pretty=format:'%C(240 reverse)%h%Creset %C(14)%ad%Creset %C(202)%an <%ae>%Creset %C(11 reverse)%d%Creset %n%C(15 bold)%s%Creset%n' {{branchName}} --"
   pagers:
     - pager: delta --dark --paging=never
       colorArg: always
