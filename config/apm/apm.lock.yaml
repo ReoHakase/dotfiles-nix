@@ -13,6 +13,17 @@ dependencies:
   - .claude/skills/conventional-commit
   - .cursor/skills/conventional-commit
   content_hash: sha256:1085e14b467b64808576176a8a13e41468bd25459de7e666655be60e73f8cc3e
+- repo_url: ReoHakase/skills
+  host: github.com
+  resolved_commit: 1feaf27beb3586a88fcc24cb32210ca2b242088b
+  virtual_path: agentskills-authoring
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .agents/skills/agentskills-authoring
+  - .claude/skills/agentskills-authoring
+  - .cursor/skills/agentskills-authoring
+  content_hash: sha256:482a96a6365bf50c9599bf60e8c35940591bb70d18a57de48d7f9391e4caf299
 - repo_url: ast-grep/agent-skill
   host: github.com
   resolved_commit: 577f4d4507678f2c8cee150fae25e6ce309f70b1
