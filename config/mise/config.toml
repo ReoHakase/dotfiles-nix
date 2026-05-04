@@ -2,4 +2,6 @@
 idiomatic_version_file_enable_tools = ["python"]
 
 [tools]
-node = "24"
+node = "latest"
+bun = "latest"
+pnpm = "latest"
