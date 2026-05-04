@@ -41,19 +41,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       # post-upgrade tasks で nix-update / nix-prefetch-url を使うため Nix を入れる。
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v22
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
+      - uses: DeterminateSystems/magic-nix-cache-action@87b14cf437d03d37989d87f0fa5ce4f5dc1a330b # v8
 
       # 将来 npm ベースの post-upgrade を足すとき用（Renovate 本体は Action 側の Node を使用）。
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "22"
+          node-version: "22.22.2"
 
       # post-upgrade で使うもの: nix-update（nix-update-flake-package.sh）、nix-prefetch、curl など。
       - name: Install helper tools via Nix
@@ -66,7 +66,7 @@ jobs:
             nixpkgs#curl
 
       - name: Run Renovate
-        uses: renovatebot/github-action@v40.3.1
+        uses: renovatebot/github-action@a1ed1d0adddfdf138192d1fbe3150a80094dee6a # v40.3.1
         env:
           LOG_LEVEL: ${{ inputs.logLevel || 'info' }}
           RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
