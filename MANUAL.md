@@ -255,6 +255,28 @@ nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
 
 GPG エージェントや `ssh-agent`、`~/.ssh/config` の中身はローカルで管理し、このリポジトリには手順メモのみを書く（本ファイルの「ローカルのみ」扱い）。
 
+### Git commit 用 GPG 鍵をローカルに作る
+
+Git の名前・メールアドレスは Home Manager が `home/common.nix` の `programs.git.settings.user` から生成する。署名鍵 ID はホストごとに変わるため、リポジトリには入れず `~/.config/git/local` にだけ書く。
+
+`gh` にログイン済みなら、次のスクリプトで ed25519 の GPG 鍵作成、`~/.config/git/local` への署名鍵 ID 登録、GitHub への公開鍵アップロードまで行う。
+
+```sh
+./scripts/register-gpg-key.sh
+```
+
+スクリプトは `git config --get user.name` / `git config --get user.email` の実効値を使う。メールアドレスに一致する ed25519 秘密鍵がすでにあれば再利用し、なければ `gpg --quick-generate-key` で作る。GitHub CLI が未ログインなら先に認証する。
+
+確認:
+
+```sh
+git config --get user.signingKey
+git config --get commit.gpgSign
+printf test | gpg --clearsign
+```
+
+署名確認用の空コミットまで試すなら `git commit --allow-empty -m "chore: verify gpg signing"` を実行する。確認用コミットが不要なら、直後に `git reset --soft HEAD~1` で取り消す。
+
 ## nixd（エディタ連携）
 
 `nixd` と `nixfmt` は **`home/default.nix` の `home.packages`** に含めている。適用後はターミナルで `command -v nixd` が Nix のパスを指すことを確認する。概要は [editor-setup](https://github.com/nix-community/nixd/blob/main/nixd/docs/editor-setup.md)。
