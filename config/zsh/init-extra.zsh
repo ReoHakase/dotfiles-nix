@@ -4,6 +4,10 @@ if command -v uv >/dev/null 2>&1; then
   eval "$(uv generate-shell-completion zsh)"
 fi
 
+if (( $+functions[compdef] )); then
+  compdef _cd z
+fi
+
 # Nix の CLI を Homebrew より優先（sessionPath と二重にならないよう path を一意化）
 typeset -U path PATH
 path=(
