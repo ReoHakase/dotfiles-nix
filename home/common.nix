@@ -49,6 +49,38 @@ let
     rev = "4faa83e4b9306750fc8de64b38c6f53c57862db8";
     hash = "sha256-ruhEqXnWRCYdX5mRczpY3rj1DTdxyY3BoN9pdlDOKrE=";
   };
+  lazysshMetadata = {
+    paras.tags = [
+      "96gb"
+      "6000-ada-x2"
+      "lab"
+      "gpu"
+    ];
+    snorlax.tags = [
+      "96gb"
+      "6000-pro-blackwell-max-q"
+      "lab"
+      "gpu"
+    ];
+    squirtle.tags = [
+      "48gb"
+      "3090ti-x2"
+      "lab"
+      "gpu"
+      "retiring-soon"
+    ];
+    nidoking.tags = [
+      "128gb"
+      "preparing"
+      "lab"
+    ];
+    nidoqueen.tags = [
+      "128gb"
+      "preparing"
+      "lab"
+    ];
+  };
+  lazysshMetadataFile = pkgs.writeText "lazyssh-metadata.json" (builtins.toJSON lazysshMetadata);
   tmuxPowerkitOneDarkProNightFlat = pkgs.writeText "tmux-powerkit-onedark-pro-night-flat.sh" ''
     declare -gA THEME_COLORS=(
       [background]="default"
@@ -405,6 +437,34 @@ in
   home.activation.reloadTmuxConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     if command -v tmux >/dev/null 2>&1 && tmux info >/dev/null 2>&1; then
       run tmux source-file "$HOME/.config/tmux/tmux.conf"
+    fi
+  '';
+
+  home.activation.configureLazysshMetadata = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    set -euo pipefail
+
+    metadata_path="$HOME/.lazyssh/metadata.json"
+    metadata_dir="$(dirname "$metadata_path")"
+    desired_metadata=${lib.escapeShellArg lazysshMetadataFile}
+
+    run mkdir -p "$metadata_dir"
+    run chmod 750 "$metadata_dir"
+
+    if [ -L "$metadata_path" ]; then
+      run rm -f "$metadata_path"
+    fi
+
+    if [ -s "$metadata_path" ]; then
+      tmp_file="$(mktemp)"
+      if ${lib.getExe pkgs.jq} -s '.[0] * .[1]' "$metadata_path" "$desired_metadata" > "$tmp_file"; then
+        run install -m 600 "$tmp_file" "$metadata_path"
+      else
+        echo "LazySSH: replacing invalid metadata at $metadata_path"
+        run install -m 600 "$desired_metadata" "$metadata_path"
+      fi
+      run rm -f "$tmp_file"
+    else
+      run install -m 600 "$desired_metadata" "$metadata_path"
     fi
   '';
 
