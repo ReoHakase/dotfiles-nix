@@ -530,6 +530,7 @@ in
     ripgrep
     sesh
     supabase-cli
+    turso-cli
     tcl
     tk
     tree-sitter

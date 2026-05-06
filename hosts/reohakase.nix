@@ -17,6 +17,9 @@
 
   nixpkgs.overlays = [
     inputs.actrun.overlays.default
+    (final: prev: {
+      turso-cli = final.callPackage ../pkgs/turso-cli.nix { };
+    })
   ];
 
   nixpkgs.config = {

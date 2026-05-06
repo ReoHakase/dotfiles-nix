@@ -71,10 +71,15 @@
           ];
         };
 
+      localOverlay = final: prev: {
+        turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
+      };
+
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
         overlays = [
           inputs.actrun.overlays.default
+          localOverlay
           (final: prev: {
             cursor-appimage = import ./pkgs/appimages/cursor.nix final;
             vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };
@@ -109,11 +114,18 @@
         home-reohakuta-kcvl = homeLinux.activationPackage;
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         cursor-appimage = pkgsLinux.cursor-appimage;
+        turso-cli = pkgsLinux.turso-cli;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
       };
 
       packages.aarch64-darwin = {
         apm = patchedApmFor "aarch64-darwin";
+        turso-cli =
+          (import nixpkgs {
+            system = "aarch64-darwin";
+            overlays = [ localOverlay ];
+            config.allowUnfree = true;
+          }).turso-cli;
       };
 
       devShells.aarch64-darwin.default = devShellFor "aarch64-darwin";
