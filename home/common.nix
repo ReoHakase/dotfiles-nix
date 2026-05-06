@@ -239,6 +239,36 @@ in
         user = "reohakuta";
         proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
+      # 96GB; RTX 6000 Ada x2
+      "paras paras02 paras02.lan" = {
+        hostname = "paras02.lan";
+        user = "student";
+        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
+      # 96GB; RTX 6000 Pro Blackwell Max-Q
+      "snorlax snorlax06 snorlax06.lan" = {
+        hostname = "snorlax06.lan";
+        user = "student";
+        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
+      # 48GB; RTX 3090 Ti x2; retiring soon
+      "squirtle squirtle05 squirtle05.lan" = {
+        hostname = "squirtle05.lan";
+        user = "student";
+        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
+      # 128GB; preparing
+      "nidoking nidoking07 nidoking07.lan" = {
+        hostname = "nidoking07.lan";
+        user = "student";
+        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
+      # 128GB; preparing
+      "nidoqueen nidoqueen08 nidoqueen08.lan" = {
+        hostname = "nidoqueen08.lan";
+        user = "student";
+        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
     };
   };
 
