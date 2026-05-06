@@ -31,8 +31,6 @@ buildGoModule (finalAttrs: {
 
   postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
     installShellCompletion --cmd turso \
-      --bash <($out/bin/turso completion bash) \
-      --fish <($out/bin/turso completion fish) \
       --zsh <($out/bin/turso completion zsh)
   '';
 
