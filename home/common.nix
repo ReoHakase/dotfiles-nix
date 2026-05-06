@@ -450,6 +450,7 @@ in
     jdk
     just
     lazygit
+    lazyssh
     libwebp
     lzo
     lz4
