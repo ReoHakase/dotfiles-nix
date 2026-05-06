@@ -19,6 +19,7 @@
     inputs.actrun.overlays.default
     (final: prev: {
       turso-cli = final.callPackage ../pkgs/turso-cli.nix { };
+      similarity = final.callPackage ../pkgs/similarity.nix { };
     })
   ];
 

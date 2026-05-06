@@ -530,6 +530,7 @@ in
     ripgrep
     sesh
     supabase-cli
+    similarity
     turso-cli
     tcl
     tk

@@ -73,6 +73,7 @@
 
       localOverlay = final: prev: {
         turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
+        similarity = final.callPackage ./pkgs/similarity.nix { };
       };
 
       pkgsLinux = import nixpkgs {
@@ -115,6 +116,7 @@
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         cursor-appimage = pkgsLinux.cursor-appimage;
         turso-cli = pkgsLinux.turso-cli;
+        similarity = pkgsLinux.similarity;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
       };
 
@@ -126,6 +128,12 @@
             overlays = [ localOverlay ];
             config.allowUnfree = true;
           }).turso-cli;
+        similarity =
+          (import nixpkgs {
+            system = "aarch64-darwin";
+            overlays = [ localOverlay ];
+            config.allowUnfree = true;
+          }).similarity;
       };
 
       devShells.aarch64-darwin.default = devShellFor "aarch64-darwin";
