@@ -1,6 +1,6 @@
 lockfile_version: '1'
 generated_at: '2026-05-06T14:10:24.747176+00:00'
-apm_version: 0.12.2
+apm_version: 0.12.4
 dependencies:
 - repo_url: ReoHakase/skills
   host: github.com
