@@ -7,11 +7,3 @@ fi
 if (( $+functions[compdef] )); then
   compdef _cd z
 fi
-
-# Nix の CLI を Homebrew より優先（sessionPath と二重にならないよう path を一意化）
-typeset -U path PATH
-path=(
-  /etc/profiles/per-user/$USER/bin
-  /nix/var/nix/profiles/default/bin
-  $path
-)

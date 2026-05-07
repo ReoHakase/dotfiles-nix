@@ -148,6 +148,24 @@ in
   programs.zsh = {
     enable = true;
     dotDir = config.home.homeDirectory;
+    # Goes into generated ~/.zshenv (before .zshrc). GUI / IDE 統合ターミナルはログインシェルでなくても
+    # Nix と direnv を先に PATH へ載せ、.envrc の `use flake`（nix-direnv）が効くようにする。
+    envExtra =
+      if pkgs.stdenv.isDarwin then ''
+        typeset -U path PATH
+        path=(
+          /etc/profiles/per-user/$USER/bin
+          /nix/var/nix/profiles/default/bin
+          $path
+        )
+      '' else ''
+        typeset -U path PATH
+        path=(
+          "$HOME/.nix-profile/bin"
+          /nix/var/nix/profiles/default/bin
+          $path
+        )
+      '';
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
