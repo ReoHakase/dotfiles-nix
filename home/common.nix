@@ -189,6 +189,7 @@ in
     "gh/config.yml".source = ../config/gh/config.yml;
     "gh/hosts.yml".source = ../config/gh/hosts.yml;
     "lazygit/config.yml".source = ../config/lazygit/config.yml;
+    "direnv/direnv.toml".source = ../config/direnv/direnv.toml;
     "mise/config.toml".source = ../config/mise/config.toml;
     "nvim".source = ../config/nvim;
   };
