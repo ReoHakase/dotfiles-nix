@@ -72,6 +72,7 @@
         };
 
       localOverlay = final: prev: {
+        mole = final.callPackage ./pkgs/mole.nix { };
         turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
         similarity = final.callPackage ./pkgs/similarity.nix { };
       };
@@ -122,6 +123,12 @@
 
       packages.aarch64-darwin = {
         apm = patchedApmFor "aarch64-darwin";
+        mole =
+          (import nixpkgs {
+            system = "aarch64-darwin";
+            overlays = [ localOverlay ];
+            config.allowUnfree = true;
+          }).mole;
         turso-cli =
           (import nixpkgs {
             system = "aarch64-darwin";

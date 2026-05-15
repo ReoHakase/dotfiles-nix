@@ -44,6 +44,7 @@ in
   home.packages =
     with pkgs;
     [
+      mole
       pinentry_mac
       terminal-notifier
     ]

@@ -18,6 +18,7 @@
   nixpkgs.overlays = [
     inputs.actrun.overlays.default
     (final: prev: {
+      mole = final.callPackage ../pkgs/mole.nix { };
       turso-cli = final.callPackage ../pkgs/turso-cli.nix { };
       similarity = final.callPackage ../pkgs/similarity.nix { };
     })
