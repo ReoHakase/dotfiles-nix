@@ -116,6 +116,7 @@
       "canva"
       "chatgpt"
       "codex-app"
+      "steipete/tap/codexbar"
       "creality-print"
       "cursor"
       "discord"
