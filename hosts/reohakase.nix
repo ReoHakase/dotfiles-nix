@@ -11,6 +11,17 @@
     enable = true;
     user = user;
     autoMigrate = true;
+    # Homebrew 5.1.1 can hit `nil.to_sym` while loading casks from the JSON API.
+    # Keep API installs enabled, but skip empty macOS dependency objects.
+    package = pkgs.runCommandLocal "brew-5.1.1-cask-api-nil-dep" { version = "5.1.1"; } ''
+      cp -R ${inputs.nix-homebrew.inputs.brew-src} "$out"
+      chmod u+w "$out/Library/Homebrew/api/cask"
+      chmod u+w "$out/Library/Homebrew/api/cask/cask_struct_generator.rb"
+      ${pkgs.perl}/bin/perl -0pi -e 's/            if dep_type\.to_sym == :==/            next [key, nil] if dep_type.nil?\n\n            if dep_type.to_sym == :==/' \
+        "$out/Library/Homebrew/api/cask/cask_struct_generator.rb"
+      grep -q 'next \[key, nil\] if dep_type.nil?' \
+        "$out/Library/Homebrew/api/cask/cask_struct_generator.rb"
+    '';
   };
 
   nixpkgs.hostPlatform = "aarch64-darwin";
