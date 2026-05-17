@@ -75,6 +75,7 @@
         mole = final.callPackage ./pkgs/mole.nix { };
         turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
         similarity = final.callPackage ./pkgs/similarity.nix { };
+        harano-aji-fonts = final.callPackage ./pkgs/harano-aji-fonts.nix { };
       };
 
       pkgsLinux = import nixpkgs {
@@ -116,6 +117,7 @@
         home-reohakuta-kcvl = homeLinux.activationPackage;
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         cursor-appimage = pkgsLinux.cursor-appimage;
+        harano-aji-fonts = pkgsLinux.harano-aji-fonts;
         turso-cli = pkgsLinux.turso-cli;
         similarity = pkgsLinux.similarity;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
@@ -135,6 +137,12 @@
             overlays = [ localOverlay ];
             config.allowUnfree = true;
           }).turso-cli;
+        harano-aji-fonts =
+          (import nixpkgs {
+            system = "aarch64-darwin";
+            overlays = [ localOverlay ];
+            config.allowUnfree = true;
+          }).harano-aji-fonts;
         similarity =
           (import nixpkgs {
             system = "aarch64-darwin";

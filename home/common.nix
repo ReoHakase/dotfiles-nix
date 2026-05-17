@@ -492,6 +492,7 @@ in
 
   home.packages = with pkgs; [
     geist-font
+    harano-aji-fonts
     nerd-fonts.geist-mono
     noto-fonts-cjk-sans
     noto-fonts-cjk-serif
