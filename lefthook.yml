@@ -2,3 +2,18 @@ commit-msg:
   commands:
     commitlint:
       run: commitlint --edit {1}
+
+pre-commit:
+  commands:
+    nix-format:
+      glob: "*.nix"
+      run: nix --option warn-dirty false develop -c nixfmt --check {staged_files}
+    nix-lint:
+      glob: "*.nix"
+      run: nix --option warn-dirty false develop -c statix check {staged_files}
+    nix-dead-code:
+      glob: "*.nix"
+      run: nix --option warn-dirty false develop -c deadnix --fail {staged_files}
+    nix-lockfile:
+      glob: "{flake.nix,flake.lock}"
+      run: nix --option warn-dirty false flake lock --no-update-lock-file

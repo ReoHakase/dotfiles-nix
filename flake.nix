@@ -42,36 +42,39 @@
       linuxSystem = "x86_64-linux";
       linuxUser = "reohakuta";
       linuxHmHostname = "reohakuta-kcvl";
+      pkgsFor =
+        system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
       patchedApmFor =
         system:
         let
-          pkgsForSystem = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          pkgsForSystem = pkgsFor system;
         in
         pkgsForSystem.callPackage ./pkgs/apm-codex-user-scope.nix {
-          apm = inputs.llm-agents.packages.${system}.apm;
+          inherit (inputs.llm-agents.packages.${system}) apm;
         };
 
       devShellFor =
         system:
         let
-          pkgsForSystem = import nixpkgs {
-            inherit system;
-            config.allowUnfree = true;
-          };
+          pkgsForSystem = pkgsFor system;
         in
         pkgsForSystem.mkShell {
           packages = [
             pkgsForSystem.commitlint-rs
+            pkgsForSystem.deadnix
             pkgsForSystem.dotenvx
             pkgsForSystem.git
             pkgsForSystem.lefthook
+            pkgsForSystem.nixfmt
+            pkgsForSystem.statix
           ];
         };
 
-      localOverlay = final: prev: {
+      localOverlay = final: _prev: {
         mole = final.callPackage ./pkgs/mole.nix { };
         turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
         similarity = final.callPackage ./pkgs/similarity.nix { };
@@ -83,11 +86,16 @@
         overlays = [
           inputs.actrun.overlays.default
           localOverlay
-          (final: prev: {
+          (final: _prev: {
             cursor-appimage = import ./pkgs/appimages/cursor.nix final;
             vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };
           })
         ];
+        config.allowUnfree = true;
+      };
+      pkgsDarwin = import nixpkgs {
+        system = "aarch64-darwin";
+        overlays = [ localOverlay ];
         config.allowUnfree = true;
       };
 
@@ -116,41 +124,25 @@
         apm = patchedApmFor linuxSystem;
         home-reohakuta-kcvl = homeLinux.activationPackage;
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
-        cursor-appimage = pkgsLinux.cursor-appimage;
-        harano-aji-fonts = pkgsLinux.harano-aji-fonts;
-        turso-cli = pkgsLinux.turso-cli;
-        similarity = pkgsLinux.similarity;
-        proton-vpn = pkgsLinux.proton-vpn;
-        veracrypt = pkgsLinux.veracrypt;
-        vicinae-appimage = pkgsLinux.vicinae-appimage;
+        inherit (pkgsLinux)
+          cursor-appimage
+          harano-aji-fonts
+          proton-vpn
+          similarity
+          turso-cli
+          veracrypt
+          vicinae-appimage
+          ;
       };
 
       packages.aarch64-darwin = {
         apm = patchedApmFor "aarch64-darwin";
-        mole =
-          (import nixpkgs {
-            system = "aarch64-darwin";
-            overlays = [ localOverlay ];
-            config.allowUnfree = true;
-          }).mole;
-        turso-cli =
-          (import nixpkgs {
-            system = "aarch64-darwin";
-            overlays = [ localOverlay ];
-            config.allowUnfree = true;
-          }).turso-cli;
-        harano-aji-fonts =
-          (import nixpkgs {
-            system = "aarch64-darwin";
-            overlays = [ localOverlay ];
-            config.allowUnfree = true;
-          }).harano-aji-fonts;
-        similarity =
-          (import nixpkgs {
-            system = "aarch64-darwin";
-            overlays = [ localOverlay ];
-            config.allowUnfree = true;
-          }).similarity;
+        inherit (pkgsDarwin)
+          harano-aji-fonts
+          mole
+          similarity
+          turso-cli
+          ;
       };
 
       devShells.aarch64-darwin.default = devShellFor "aarch64-darwin";

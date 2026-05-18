@@ -116,6 +116,15 @@ nix flake check
 nix flake lock
 ```
 
+Git hook を入れる:
+
+```bash
+nix develop -c lefthook install
+nix develop -c lefthook run pre-commit --all-files
+```
+
+`pre-commit` は staged の Nix ファイルに `nixfmt --check` / `statix check` / `deadnix --fail` をかけ、`flake.nix` / `flake.lock` 変更時は `nix flake lock --no-update-lock-file` で lockfile の同期漏れを止める。
+
 > [!IMPORTANT] > **設定を本番適用するには管理者権限が必要**です。
 
 ```bash
