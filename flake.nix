@@ -120,6 +120,8 @@
         harano-aji-fonts = pkgsLinux.harano-aji-fonts;
         turso-cli = pkgsLinux.turso-cli;
         similarity = pkgsLinux.similarity;
+        proton-vpn = pkgsLinux.proton-vpn;
+        veracrypt = pkgsLinux.veracrypt;
         vicinae-appimage = pkgsLinux.vicinae-appimage;
       };
 
