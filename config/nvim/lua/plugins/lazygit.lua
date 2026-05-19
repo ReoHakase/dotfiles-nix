@@ -1,5 +1,5 @@
 -- kdheepak/lazygit.nvim — Neovim から lazygit を floating window で起動する。
--- lazygit 本体は home/common.nix の home.packages で入れている。
+-- lazygit 本体は home/modules/packages.nix の home.packages で入れている。
 --
 -- コマンド/キーで lazy-load するので起動コストはかからない。plenary.nvim は
 -- AstroNvim が既に依存として入れているが、単独運用でも成り立つよう明示する。

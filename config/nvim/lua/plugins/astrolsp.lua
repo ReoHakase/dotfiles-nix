@@ -1,5 +1,5 @@
 -- markdown-oxide を AstroLSP に登録する。
--- バイナリ自体は home.packages に入れている（home/common.nix）。
+-- バイナリ自体は home.packages に入れている（home/modules/packages.nix）。
 --
 -- nvim-lspconfig 同梱の `lsp/markdown_oxide.lua` に既定の
 -- cmd = { "markdown-oxide" } / filetypes = { "markdown" } /

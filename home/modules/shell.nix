@@ -1,0 +1,211 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  programs.zsh = {
+    enable = true;
+    dotDir = config.home.homeDirectory;
+    # Goes into generated ~/.zshenv (before .zshrc). GUI / IDE 統合ターミナルはログインシェルでなくても
+    # Nix と direnv を先に PATH へ載せ、.envrc の `use flake`（nix-direnv）が効くようにする。
+    envExtra =
+      if pkgs.stdenv.isDarwin then
+        ''
+          typeset -U path PATH
+          path=(
+            /etc/profiles/per-user/$USER/bin
+            /nix/var/nix/profiles/default/bin
+            $path
+          )
+        ''
+      else
+        ''
+          typeset -U path PATH
+          path=(
+            "$HOME/.nix-profile/bin"
+            /nix/var/nix/profiles/default/bin
+            $path
+          )
+        '';
+    initContent = lib.mkMerge [
+      ''
+        export GPG_TTY=$(tty)
+
+        if command -v uv >/dev/null 2>&1; then
+          eval "$(uv generate-shell-completion zsh)"
+        fi
+      ''
+      (lib.mkAfter ''
+        if (( $+functions[compdef] )); then
+          compdef _cd z
+        fi
+      '')
+    ];
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    defaultKeymap = "emacs";
+    "zsh-abbr" = {
+      enable = true;
+      abbreviations = {
+        gs = "git switch";
+        gsc = "git switch -c";
+        gpush = "git push origin HEAD";
+        gpull = "git pull origin HEAD";
+        "gc-" = "git reset --soft HEAD^";
+        gc = "git commit -S";
+        ghi = "gh issue create";
+        ghp = "gh pr create";
+        ghw = "gh repo view -w";
+        lg = "lazygit";
+      };
+    };
+    shellAliases = {
+      ls = "eza";
+    };
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+    config.global.hide_env_diff = true;
+  };
+
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = builtins.fromTOML ''
+      # Get editor completions based on the config schema
+      "$schema" = 'https://starship.rs/config-schema.json'
+
+      add_newline = true
+
+      format = """
+      $username\
+      $hostname\
+      $directory\
+      $git_branch\
+      $git_commit\
+      $custom\
+      $git_status\
+      $git_metrics\
+      $line_break\
+      $character\
+      """
+
+      right_format = """
+      [\
+      \uea7c \
+      $mise\
+      $nodejs\
+      $python\
+      $docker_context\
+      $container\
+      ](bright-black)
+      """
+
+      # Custom command for git worktree detection
+      [custom.git_worktree]
+      command = """git rev-parse --git-dir | sed -E 's#/\\.git(/.*)?$##; s#.*/##'"""
+      when = """git rev-parse --git-dir 2>/dev/null | grep -q 'worktrees'"""
+      require_repo = true
+      style = "green"
+      format = "[🌳 of \uf401 $output]($style)"
+
+      [git_branch]
+      symbol = "\ue0a0 "
+      format = "on  [$symbol$branch](bold bright-black) "
+      truncation_length = 24
+
+      [git_commit]
+      commit_hash_length = 7
+      only_detached = true
+      tag_disabled = false
+      tag_symbol = '🔖 '
+      style = "italic bright-black"
+      format = "[\uf172 $hash$tag]($style) "
+
+      [git_status]
+      format = "([$ahead_behind$all_status]($style))"
+      conflicted = "[ ⚔️ conflicted ](red) "
+      ahead = "[ 💨ahead ](bright-black)"
+      behind = "[ 😰behind ](bright-black)"
+      diverged = "[ 😵diverged ](bright-black)"
+      up_to_date = "[ ✓ ](bright-black)"
+      untracked = "[ 🤷$count ](bright-black)"
+      stashed = "[ 📦$count ](bright-black)"
+      modified = "[ 📝$count ](yellow)"
+      staged = '[ ++$count ](green)'
+      renamed = "[ 🏷️$count ](cyan)"
+      deleted = "[ 🗑️ $count ](red)"
+
+      [git_metrics]
+      disabled = true
+
+      [mise]
+      symbol = "mise"
+      style = "bright-black"
+      format = "[$symbol:$health]($style) "
+      healthy_symbol = "✔︎"
+      unhealthy_symbol = "✗"
+      disabled = false
+
+      [nodejs]
+      style = "bright-black"
+      format = "[ $version]($style) "
+
+      [python]
+      # Display the version of python from inside a local venv.
+      #
+      # Note this will only work when the venv is inside the project and it will only
+      # work in the directory that contains the venv dir but maybe this is ok?
+      # format = "via [\ue606 $venv $version](bold yellow) "
+      symbol = "\ue73c "
+      style = "bright-black"
+      format = '[''${symbol}''${pyenv_prefix}(''${version} )(\(''${virtualenv}\) )]($style)'
+      python_binary = ['./venv/bin/python', 'python', 'python3', 'python2']
+      detect_files = [ "requirements.txt", ".python-version", "pyproject.toml", "Pipfile", "tox.ini", "setup.py", "__init__.py" ]
+
+      [container]
+      format = '[🐳 $name](blue bold) '
+
+      [directory]
+      format = "in [ $path](cyan italic) "
+
+      [username]
+      show_always = true
+      style_user = "purple"
+      style_root = "red"
+      format = "[\uf2c0 $user]($style) "
+      aliases = { root = "👑", ReoHakase = "ReoH" }
+
+      [hostname]
+      ssh_only = true
+      format = "at [$hostname](green) "
+    '';
+  };
+
+  programs.fzf.enable = true;
+
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  programs.mise = {
+    enable = true;
+    enableZshIntegration = true;
+    globalConfig = {
+      settings = {
+        idiomatic_version_file_enable_tools = [ "python" ];
+      };
+      tools = {
+        node = "latest";
+        bun = "latest";
+        pnpm = "latest";
+      };
+    };
+  };
+}

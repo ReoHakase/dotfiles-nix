@@ -8,9 +8,9 @@
 
 let
   cfg = config.reohakase.apmGlobal;
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
-  apm = pkgs.callPackage ../pkgs/apm-codex-user-scope.nix {
+  apm = pkgs.callPackage ../../pkgs/apm-codex-user-scope.nix {
     inherit (llmAgentsPkgs) apm;
   };
 in
@@ -31,17 +31,16 @@ in
     ];
 
     home.file = {
-      ".apm/apm.yml".source = ../config/apm/apm.yml;
+      ".apm/apm.yml".source = ../../config/apm/apm.yml;
     };
 
     # After linkGeneration: ~/.apm/apm.yml is a home.file symlink; it does not
     # exist during writeBoundary (HM activation order).
-    home.activation.installGlobalApm =
-      lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-        set -euo pipefail
+    home.activation.installGlobalApm = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      set -euo pipefail
 
-        echo "APM: installing global agent dependencies from ~/.apm/apm.yml"
-        ${lib.getExe apm} install -g --target ${lib.escapeShellArg cfg.targets}
-      '';
+      echo "APM: installing global agent dependencies from ~/.apm/apm.yml"
+      ${lib.getExe apm} install -g --target ${lib.escapeShellArg cfg.targets}
+    '';
   };
 }

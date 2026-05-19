@@ -1,6 +1,6 @@
 # ❄️ dotfiles-nix（引き継ぎメモ）
 
-**Nix flakes + home-manager** でシェル・CLI・ドットファイルを宣言管理するリポジトリ。macOS では **nix-darwin** も利用し、Ubuntu LTS などでは **Home Manager のみ**（flake の `homeConfigurations`）で `home/common.nix` を Mac と共有する。元々は Homebrew 中心だった構成から、**formula 相当は極力 Nix に寄せ、`brew list` を小さくする**ことを目的としている。
+**Nix flakes + home-manager** でシェル・CLI・ドットファイルを宣言管理するリポジトリ。macOS では **nix-darwin** も利用し、Ubuntu LTS などでは **Home Manager のみ**（flake の `homeConfigurations`）で `home/common.nix` と `home/modules/` を Mac と共有する。元々は Homebrew 中心だった構成から、**formula 相当は極力 Nix に寄せ、`brew list` を小さくする**ことを目的としている。
 
 > [!TIP]
 > 運用の詳細・移行・Homebrew・`config/` の手順は **[MANUAL.md](MANUAL.md)**。日常コマンドはこの README、深掘りは MANUAL を開くと読みやすいです。
@@ -17,7 +17,7 @@
   - [Ubuntu LTS（reohakuta-kcvl）: Home Manager のみ](#ubuntu-ltsreohakuta-kcvl-home-manager-のみ)
   - [何がどこで管理されているか](#何がどこで管理されているか)
     - [nix-darwin（`hosts/reohakase.nix`）](#nix-darwinhostsreohakasenix)
-    - [home-manager（`home/common.nix` ほか）](#home-managerhomecommonnix-ほか)
+    - [home-manager（`home/modules/` ほか）](#home-managerhomemodules-ほか)
   - [Homebrew からの移行（方針メモ）](#homebrew-からの移行方針メモ)
   - [TODO リスト（引き継ぎ用）](#todo-リスト引き継ぎ用)
     - [セットアップ](#セットアップ)
@@ -33,9 +33,9 @@
 | インストーラ | [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)（flakes 有効）      |
 | OS 統合      | [nix-darwin](https://github.com/LnL7/nix-darwin)（`system.defaults`、ユーザシェル、`/etc/nix` など） |
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
-| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。GUI は **Ghostty（nixpkgs）・Cursor（nixpkgs の AppImage 版）・Proton VPN（nixpkgs）・VeraCrypt（nixpkgs）・Vicinae（公式 AppImage + 固定 hash）** を Home Manager で入れられる（`home/linux/apps/gui-apps.nix`）。 |
+| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。GUI は **Ghostty（nixpkgs）・Cursor（nixpkgs の AppImage 版）・Proton VPN（nixpkgs）・VeraCrypt（nixpkgs）・Vicinae（公式 AppImage + 固定 hash）** を Home Manager で入れられる（`home/modules/linux/gui-apps.nix`）。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
-| LaTeX（LuaLaTeX + 日本語） | [`home/common.nix`](home/common.nix) の TeX Live（`collection-langjapanese` 等）。**BasicTeX は使わない**（Nix に統一）。設定例: [traP: TeXエンジン比較](https://trap.jp/post/2596/)。`~/.latexmkrc` は [`config/latex/latexmkrc`](config/latex/latexmkrc) を HM が配布。`graphicscache` を使うなら別途 `pkgs.ghostscript` を足すなど。 |
+| LaTeX（LuaLaTeX + 日本語） | [`home/modules/tex.nix`](home/modules/tex.nix) の TeX Live（`collection-langjapanese` 等）。**BasicTeX は使わない**（Nix に統一）。設定例: [traP: TeXエンジン比較](https://trap.jp/post/2596/)。`~/.latexmkrc` は [`config/latex/latexmkrc`](config/latex/latexmkrc) を HM が配布。`graphicscache` を使うなら別途 `pkgs.ghostscript` を足すなど。 |
 
 > [!NOTE] > **Cask / GUI アプリ**は厳密なハッシュ管理を前提にしない。必要なら (1) 手動インストール、(2) 残りの Homebrew 専用、(3) nix-darwin の `homebrew` モジュール、のいずれかで運用する想定。`hosts/reohakase.nix` 末尾にコメント例あり。
 
@@ -70,15 +70,15 @@ flake.lock             # 入力のロック（コミットする）
 hosts/reohakase.nix    # nix-darwin（defaults、users、HM → home/default.nix）
 home/default.nix       # macOS 向けエントリ（import ./darwin.nix）
 home/darwin.nix        # macOS（common + Karabiner / Glide / brew PATH など）
-home/linux.nix         # Ubuntu 等（common + Linux PATH / pinentry-gtk2 + apps）
-home/linux/apps/gui-apps.nix  # Linux 向け GUI（Ghostty・Cursor・Vicinae）
+home/linux.nix         # Ubuntu 等（common + Linux PATH / Linux 固有 aliases）
+home/common.nix        # 共有 Home Manager entry（home/modules/* を import）
+home/modules/          # shell/git/ssh/terminal/editor/packages/tex/gpg-agent など
+home/modules/linux/    # Linux 向け GUI と user-space Tailscale
 pkgs/gui/ghostty.nix   # Linux: nixpkgs の ghostty を薄く再エクスポート（flake の `packages` 用）
 pkgs/appimages/        # Linux: Cursor（nixpkgs の AppImage 版）・Vicinae（固定 URL + hash）
-home/common.nix        # 共有（zsh・starship・nvim・TeX Live・packages・xdg 共通）
 config/latex/latexmkrc  # LuaLaTeX 用 ~/.latexmkrc の元ファイル
-config/starship.toml   # HM が xdg.configFile で配布
 scripts/apply-system.sh # darwin-rebuild を root で実行するヘルパー
-.github/workflows/nix.yml # CI（mac: flake + darwin build / linux: home パッケージ build）
+.github/workflows/renovate.yml # Renovate（Nix 検証 CI は現在ローカルコマンドで実行）
 MANUAL.md              # 運用・移行・別マシン・Homebrew / NixCasks
 ```
 
@@ -159,8 +159,8 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | Karabiner・Glide の `xdg.configFile` | 無し（macOS用） |
 | `pinentry_mac` / `terminal-notifier` | `pinentry-gtk2`（GPG 用） |
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
-| zsh 追記 [config/zsh/init-extra.zsh](config/zsh/init-extra.zsh) | [config/zsh/init-extra-linux.zsh](config/zsh/init-extra-linux.zsh) |
-| NixCasks 等の macOS GUI | [home/linux/apps/gui-apps.nix](home/linux/apps/gui-apps.nix)（Ghostty・Cursor・Proton VPN・VeraCrypt・Vicinae）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,proton-vpn,veracrypt,vicinae-appimage}` |
+| zsh 追記 | [`home/modules/shell.nix`](home/modules/shell.nix) で共通生成。Linux だけ `PYTHONNOUSERSITE=1` を `home/linux.nix` で追加 |
+| NixCasks 等の macOS GUI | [home/modules/linux/gui-apps.nix](home/modules/linux/gui-apps.nix)（Ghostty・Cursor・Proton VPN・VeraCrypt・Vicinae）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,proton-vpn,veracrypt,vicinae-appimage}` |
 | `services.tailscale`（launchd + CLI、`hosts/reohakase.nix`） | `systemd.user` の `tailscaled`（userspace）、`pkgs.tailscale`、`TS_SOCKET`（root 無し。サブネットルータ等は制限あり） |
 
 **前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `reohakuta` / `/home/reohakuta` でない場合は `home/linux.nix` と `flake.nix` の `linuxUser` / `linuxHmHostname` / `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
@@ -197,7 +197,7 @@ grep zsh /etc/shells || echo '/nix/var/nix/profiles/default/bin/zsh' | sudo tee 
 chsh -s "$(which zsh)"
 ```
 
-**Linux GUI:** `home/linux/apps/gui-apps.nix` で **Ghostty**（nixpkgs）、**Cursor**（nixpkgs の `code-cursor` / AppImage ラッパー）、**Proton VPN**（nixpkgs の `proton-vpn`）、**VeraCrypt**（nixpkgs）、**Vicinae**（GitHub リリースの AppImage を `fetchurl` + SRI hash で固定）を入れている。Vicinae のバージョンを上げるときは `pkgs/appimages/vicinae.nix` の `version` / `url` / `hash` を更新し、`nix-prefetch-url '<url>' --type sha256` や `nix hash path <store-path>` で hash を取り直す。詳細は [MANUAL.md](MANUAL.md) の「Linux（Ubuntu）GUI」。
+**Linux GUI:** `home/modules/linux/gui-apps.nix` で **Ghostty**（nixpkgs）、**Cursor**（nixpkgs の `code-cursor` / AppImage ラッパー）、**Proton VPN**（nixpkgs の `proton-vpn`）、**VeraCrypt**（nixpkgs）、**Vicinae**（GitHub リリースの AppImage を `fetchurl` + SRI hash で固定）を入れている。Vicinae のバージョンを上げるときは `pkgs/appimages/vicinae.nix` の `version` / `url` / `hash` を更新し、`nix-prefetch-url '<url>' --type sha256` や `nix hash path <store-path>` で hash を取り直す。詳細は [MANUAL.md](MANUAL.md) の「Linux（Ubuntu）GUI」。
 
 **Apptainer / GPU:** ドライバはホストに入れ、`nvidia-smi` がホストで通ることを先に確認する。コンテナでは `apptainer exec --nv`（`home/linux.nix` の zsh 略記 `apx-nv`）を参照。ホストの `uv` / venv とコンテナ内 Python の切り分けは [MANUAL.md](MANUAL.md) の「Apptainer・GPU とコンテナ」。
 
@@ -215,11 +215,12 @@ chsh -s "$(which zsh)"
 - 新しい nix-darwin では `system.defaults` 利用に **`system.primaryUser`** が必須（コメント参照）
 - **Tailscale:** `services.tailscale`（`tailscaled` / CLI）
 
-### home-manager（`home/common.nix` ほか）
+### home-manager（`home/modules/` ほか）
 
-- **共通（`home/common.nix`）:** zsh（補完・autosuggestion・syntax-highlighting、`zsh-abbr`）、starship、neovim、git、gh、fzf、mise、CLI パッケージの大半、`xdg.configFile`（starship・gh・mise・nvim）、**LuaLaTeX 向け TeX Live**（`texliveSmall` + `collection-langjapanese` + `latexmk` + `biber`）、`~/.latexmkrc`
-- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath` と zsh 追記、`pinentry_mac` など（**`/Library/TeX/texbin` は入れない**）
-- **Linux（`home/linux.nix`）:** Linux 向け `sessionPath` と zsh 追記、`pinentry-gtk2`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`、**GUI**（`home/linux/apps/gui-apps.nix`）
+- **共通（`home/common.nix`）:** `home/modules/*` の import と HM 共通の土台（stateVersion、APM、manual、fontconfig、xdg）
+- **共有モジュール（`home/modules/`）:** zsh、starship、direnv、mise、neovim、git、gh、ssh、tmux、lazygit、Ghostty shader、CLI パッケージ、TeX Live、GPG pinentry
+- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath`、`terminal-notifier`、`mole` など（**`/Library/TeX/texbin` は入れない**）
+- **Linux（`home/linux.nix` + `home/modules/linux/`）:** Linux 向け `sessionPath`、`PYTHONNOUSERSITE`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`、**GUI**
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 
 ## Homebrew からの移行（方針メモ）
@@ -227,7 +228,7 @@ chsh -s "$(which zsh)"
 1. この flake を `darwin-rebuild switch` まで通し、**パス上のツールが Nix 由来になることを確認**する。
 2. `brew list --formula` を見て、Nix で代替済みのものから `brew uninstall` していく（依存は `brew autoremove` などで整理）。
 3. Cask は別方針（上記）で残すか、別インストールにする。
-4. 既存の `~/.zshrc` が HM 生成物と二重にならないよう、**エイリアスやパス設定は `home/common.nix` / `home/darwin.nix` に寄せる**と安全。
+4. 既存の `~/.zshrc` が HM 生成物と二重にならないよう、**エイリアスやパス設定は `home/modules/shell.nix` / OS 別モジュールに寄せる**と安全。
 
 ## TODO リスト（引き継ぎ用）
 
@@ -244,12 +245,12 @@ chsh -s "$(which zsh)"
 
 ### 設定の移行
 
-- [x] 手元の `~/.zshrc` の内容を確認し、**abbr・関数・PATH・mise/uv など**を `home/common.nix` / OS 別モジュールの `programs.zsh` / `sessionPath` に移植した（または意図的に捨てた）
-- [x] `~/.config/starship.toml` を編集する場合は **リポジトリの `config/starship.toml` を直し**、`darwin-rebuild` で反映する運用にそろえた
+- [x] 手元の `~/.zshrc` の内容を確認し、**abbr・関数・PATH・mise/uv など**を `home/modules/shell.nix` / OS 別モジュールの `programs.zsh` / `sessionPath` に移植した（または意図的に捨てた）
+- [x] `starship` / `direnv` / `mise` / `lazygit` / `gh` の小さい設定は、個別ファイルではなく Home Manager の `programs.*.settings` に寄せた
 - [x] Neovim は当面 `programs.neovim` のみ。`~/.config/nvim` を宣言管理する場合の選択肢は [MANUAL.md](MANUAL.md) に記載
 - [x] GPG・SSH エージェントなど、**秘密情報や機種依存**はリポジトリに含めず、[MANUAL.md](MANUAL.md) のとおりローカルのみで扱う
 - [x] nix-darwin で macOS の設定を管理する (`hosts/reohakase.nix` の `system.defaults` など)
-- [x] GitHub Actions で `nix flake check` と `nix build '.#darwinConfigurations.reohakase.system'` を実行する（`.github/workflows/nix.yml`。詳細は [MANUAL.md](MANUAL.md)「CI」）
+- [ ] Nix 検証用 GitHub Actions を必要に応じて戻す（現在の `.github/workflows/` は Renovate のみ。検証コマンドは [MANUAL.md](MANUAL.md)「評価だけ確認」を参照）
 - [x] nix-casks を flake に取り込み、`home/darwin.nix` の `nixCasks` で GUI を足せる状態にした — 使い方は [MANUAL.md](MANUAL.md) と https://nix-casks.yorganci.dev/
 
 ### Homebrew の整理（formula・cask 以外から進める）
