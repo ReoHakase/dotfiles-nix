@@ -96,6 +96,7 @@ in
 
   home.packages = with pkgs; [
     pinentry-gtk2
+    sshfs
     tailscaleCli
     # Neovim / nvim-treesitter / Lazy プラグインのビルド（make / CMake）
     gnumake

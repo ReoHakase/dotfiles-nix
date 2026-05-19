@@ -7,7 +7,7 @@
 }:
 
 let
-  system = pkgs.stdenv.hostPlatform.system;
+  inherit (pkgs.stdenv.hostPlatform) system;
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
   apm = pkgs.callPackage ../pkgs/apm-codex-user-scope.nix {
     inherit (llmAgentsPkgs) apm;
@@ -151,21 +151,24 @@ in
     # Goes into generated ~/.zshenv (before .zshrc). GUI / IDE 統合ターミナルはログインシェルでなくても
     # Nix と direnv を先に PATH へ載せ、.envrc の `use flake`（nix-direnv）が効くようにする。
     envExtra =
-      if pkgs.stdenv.isDarwin then ''
-        typeset -U path PATH
-        path=(
-          /etc/profiles/per-user/$USER/bin
-          /nix/var/nix/profiles/default/bin
-          $path
-        )
-      '' else ''
-        typeset -U path PATH
-        path=(
-          "$HOME/.nix-profile/bin"
-          /nix/var/nix/profiles/default/bin
-          $path
-        )
-      '';
+      if pkgs.stdenv.isDarwin then
+        ''
+          typeset -U path PATH
+          path=(
+            /etc/profiles/per-user/$USER/bin
+            /nix/var/nix/profiles/default/bin
+            $path
+          )
+        ''
+      else
+        ''
+          typeset -U path PATH
+          path=(
+            "$HOME/.nix-profile/bin"
+            /nix/var/nix/profiles/default/bin
+            $path
+          )
+        '';
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     defaultKeymap = "emacs";
@@ -375,21 +378,21 @@ in
               '';
             in
             ''
-              set -g @powerkit_plugins "${powerkitPlugins}"
-            set -g @powerkit_plugin_datetime_format "%b %d %H:%M"
-            ${powerkitGpuConfig}
-            set -g @powerkit_plugin_netspeed_interface "auto"
-            set -g @powerkit_plugin_netspeed_format "both"
-            set -g @powerkit_theme "custom"
-            set -g @powerkit_theme_variant "night-flat"
-            set -g @powerkit_custom_theme_path "${tmuxPowerkitOneDarkProNightFlat}"
-            set -g @powerkit_separator_style "none"
-            set -g @powerkit_edge_separator_style "none"
-            set -g @powerkit_initial_separator_style "none"
-            set -g @powerkit_elements_spacing "false"
-            set -g @powerkit_status_interval "5"
-            set -g @powerkit_transparent "true"
-          '';
+                set -g @powerkit_plugins "${powerkitPlugins}"
+              set -g @powerkit_plugin_datetime_format "%b %d %H:%M"
+              ${powerkitGpuConfig}
+              set -g @powerkit_plugin_netspeed_interface "auto"
+              set -g @powerkit_plugin_netspeed_format "both"
+              set -g @powerkit_theme "custom"
+              set -g @powerkit_theme_variant "night-flat"
+              set -g @powerkit_custom_theme_path "${tmuxPowerkitOneDarkProNightFlat}"
+              set -g @powerkit_separator_style "none"
+              set -g @powerkit_edge_separator_style "none"
+              set -g @powerkit_initial_separator_style "none"
+              set -g @powerkit_elements_spacing "false"
+              set -g @powerkit_status_interval "5"
+              set -g @powerkit_transparent "true"
+            '';
         }
       ];
       extraConfig = ''
@@ -555,7 +558,6 @@ in
     # Official https://get.tur.so/install.sh also drops libsql's sqld next to turso (~/.turso).
     # Our turso-cli derivation is CLI-only; nixpkgs sqld supplies the local server binary.
     sqld
-    sshfs
     tcl
     tk
     tree-sitter

@@ -9,7 +9,7 @@
   # nix-homebrew: brew を Nix 管理にし、`/run/current-system/sw/bin/brew` 系のランチャと連携（既存 /opt/homebrew は autoMigrate）
   nix-homebrew = {
     enable = true;
-    user = user;
+    inherit user;
     autoMigrate = true;
   };
 
@@ -17,7 +17,7 @@
 
   nixpkgs.overlays = [
     inputs.actrun.overlays.default
-    (final: prev: {
+    (final: _prev: {
       mole = final.callPackage ../pkgs/mole.nix { };
       turso-cli = final.callPackage ../pkgs/turso-cli.nix { };
       similarity = final.callPackage ../pkgs/similarity.nix { };
@@ -102,12 +102,16 @@
   home-manager.backupFileExtension = "hm-backup";
   home-manager.users.${user} = import ../home;
 
-  # Homebrew: cask のみ（formula / tap は空）。CLI・フォントは home/darwin.nix（common）の nixpkgs。
+  # Homebrew: GUI cask と macOS 統合が必要な formula。CLI・フォントは原則 home/darwin.nix（common）の nixpkgs。
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
-    taps = [ ];
-    brews = [ ];
+    taps = [
+      "macos-fuse-t/cask"
+    ];
+    brews = [
+      "macos-fuse-t/cask/sshfs-fuse-t"
+    ];
     casks = [
       "affinity"
       "alt-tab"
@@ -127,7 +131,7 @@
       "karabiner-elements"
       "keka"
       "lm-studio"
-      "macfuse"
+      "homebrew/cask/fuse-t"
       "microsoft-excel"
       "microsoft-powerpoint"
       "microsoft-word"
@@ -141,7 +145,7 @@
       "stats"
       "tor-browser"
       "unity-hub"
-      "veracrypt"
+      "homebrew/cask/veracrypt-fuse-t"
       "visual-studio-code"
       "vlc"
       "warp"
