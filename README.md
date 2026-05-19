@@ -33,6 +33,7 @@
 | インストーラ | [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)（flakes 有効）      |
 | OS 統合      | [nix-darwin](https://github.com/LnL7/nix-darwin)（`system.defaults`、ユーザシェル、`/etc/nix` など） |
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
+| Agent Skills | [agent-skills-nix](https://github.com/Kyure-A/agent-skills-nix)（`.agents` / `.claude` / `.cursor` 向け skill 配布） |
 | Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。GUI は **Ghostty（nixpkgs）・Cursor（nixpkgs の AppImage 版）・Proton VPN（nixpkgs）・VeraCrypt（nixpkgs）・Vicinae（公式 AppImage + 固定 hash）** を Home Manager で入れられる（`home/modules/linux/gui-apps.nix`）。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
 | LaTeX（LuaLaTeX + 日本語） | [`home/modules/tex.nix`](home/modules/tex.nix) の TeX Live（`collection-langjapanese` 等）。**BasicTeX は使わない**（Nix に統一）。設定例: [traP: TeXエンジン比較](https://trap.jp/post/2596/)。`~/.latexmkrc` は [`config/latex/latexmkrc`](config/latex/latexmkrc) を HM が配布。`graphicscache` を使うなら別途 `pkgs.ghostscript` を足すなど。 |
@@ -42,7 +43,7 @@
 > [!IMPORTANT] > **Determinate Nix を使う場合:** [Determinate](https://github.com/DeterminateSystems/nix-installer) は Nix のインストールを独自に管理するため、nix-darwin の `nix.*`（`/etc/nix` など）と競合し、`Determinate detected, aborting activation` で止まる。このリポジトリでは `hosts/reohakase.nix` で **`nix.enable = false`** とし、Nix 本体の設定は Determinate / 手元の `nix.conf` に任せる。詳細は [MANUAL.md](MANUAL.md) の「Determinate Nix と nix-darwin」。
 
 > [!NOTE]
-> `apm` / `claude-code` / `codex` は [`numtide/llm-agents.nix`](https://github.com/numtide/llm-agents.nix) から入れる。`flake.nix` には Numtide cache の `nixConfig` を置いているが、Determinate Nix では非 trusted user からの `extra-substituters` / `trusted-public-keys` は無視されることがある。その場合でも `nix flake check --all-systems` は通るが、cache を使うには trusted な Nix 設定（例: `/etc/nix/nix.conf` や Determinate 側の管理設定）に次を入れる。
+> `claude-code` / `codex` は [`numtide/llm-agents.nix`](https://github.com/numtide/llm-agents.nix) から入れる。Agent Skills は [`agent-skills-nix`](https://github.com/Kyure-A/agent-skills-nix) で Home Manager から配布する。`flake.nix` には Numtide cache の `nixConfig` を置いているが、Determinate Nix では非 trusted user からの `extra-substituters` / `trusted-public-keys` は無視されることがある。その場合でも `nix flake check --all-systems` は通るが、cache を使うには trusted な Nix 設定（例: `/etc/nix/nix.conf` や Determinate 側の管理設定）に次を入れる。
 >
 > ```conf
 > extra-substituters = https://cache.numtide.com
@@ -72,7 +73,7 @@ home/default.nix       # macOS 向けエントリ（import ./darwin.nix）
 home/darwin.nix        # macOS（common + Karabiner / Glide / brew PATH など）
 home/linux.nix         # Ubuntu 等（common + Linux PATH / Linux 固有 aliases）
 home/common.nix        # 共有 Home Manager entry（home/modules/* を import）
-home/modules/          # shell/git/ssh/terminal/editor/packages/tex/gpg-agent など
+home/modules/          # shell/git/ssh/terminal/editor/packages/tex/gpg-agent/skills など
 home/modules/linux/    # Linux 向け GUI と user-space Tailscale
 pkgs/gui/ghostty.nix   # Linux: nixpkgs の ghostty を薄く再エクスポート（flake の `packages` 用）
 pkgs/appimages/        # Linux: Cursor（nixpkgs の AppImage 版）・Vicinae（固定 URL + hash）
@@ -217,8 +218,8 @@ chsh -s "$(which zsh)"
 
 ### home-manager（`home/modules/` ほか）
 
-- **共通（`home/common.nix`）:** `home/modules/*` の import と HM 共通の土台（stateVersion、APM、manual、fontconfig、xdg）
-- **共有モジュール（`home/modules/`）:** zsh、starship、direnv、mise、neovim、git、gh、ssh、tmux、lazygit、Ghostty shader、CLI パッケージ、TeX Live、GPG pinentry
+- **共通（`home/common.nix`）:** `home/modules/*` と `agent-skills-nix` の import、HM 共通の土台（stateVersion、manual、fontconfig、xdg）
+- **共有モジュール（`home/modules/`）:** zsh、starship、direnv、mise、neovim、git、gh、ssh、tmux、lazygit、Ghostty shader、CLI パッケージ、TeX Live、GPG pinentry、Agent Skills
 - **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath`、`terminal-notifier`、`mole` など（**`/Library/TeX/texbin` は入れない**）
 - **Linux（`home/linux.nix` + `home/modules/linux/`）:** Linux 向け `sessionPath`、`PYTHONNOUSERSITE`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`、**GUI**
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
@@ -273,7 +274,7 @@ chsh -s "$(which zsh)"
 | `abbr: command not found`                   | `programs.zsh.zsh-abbr`（home-manager）で読み込む。**`./scripts/apply-system.sh` で再適用**してから `exec zsh`。[MANUAL.md](MANUAL.md) のトラブルも参照。                        |
 | `Existing file '…' would be clobbered`      | 手元の `~/.zshrc` や `~/.config/gh/config.yml` などが HM と重なる。このリポジトリでは `hosts/reohakase.nix` の **`home-manager.backupFileExtension`** で退避してからリンクする。 |
 | `Determinate detected, aborting activation` | Determinate と nix-darwin の Nix 管理がぶつかっている。`hosts/<hostname>.nix` で `nix.enable = false` にする（このリポジトリでは既に設定済み）。                                 |
-| `ignoring untrusted substituter 'https://cache.numtide.com'` | flake 側の Numtide cache 設定が trusted user ではないため無視されている。check 自体が通るなら問題なし。cache を使うなら上記の trusted な Nix 設定に追記する。 |
+| `ignoring untrusted substituter 'https://cache.numtide.com'` | `claude-code` / `codex` 用の Numtide cache 設定が trusted user ではないため無視されている。check 自体が通るなら問題なし。cache を使うなら上記の trusted な Nix 設定に追記する。 |
 | `No space left on device`                   | ディスク空きを増やし、`nix-collect-garbage -d` などでストアを整理する。詳細は [MANUAL.md](MANUAL.md) の「ディスク不足」。                                                        |
 | `darwin-rebuild` がホスト名で失敗           | `flake.nix` の `hostname` と `scutil --get LocalHostName` を一致させる。                                                                                                         |
 | Flake が古いファイルしか見ない              | 変更を `git add` / `commit` するか、警告に従う。                                                                                                                                 |

@@ -22,6 +22,46 @@
         "type": "github"
       }
     },
+    "agent-skills": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778976376,
+        "narHash": "sha256-BoLtbQ1OnYDL6yEK99409ZXmIhyhcStoUv9FQgA4pPc=",
+        "owner": "Kyure-A",
+        "repo": "agent-skills-nix",
+        "rev": "e1c086fcb4bc3b5805b87d32d86e9c189eb1f200",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Kyure-A",
+        "repo": "agent-skills-nix",
+        "type": "github"
+      }
+    },
+    "ast-grep-agent-skill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769044697,
+        "narHash": "sha256-LgGFtPieyKtoru22AhHW8hvkJ8kCHO2Cr8rBOWGuxvY=",
+        "owner": "ast-grep",
+        "repo": "agent-skill",
+        "rev": "577f4d4507678f2c8cee150fae25e6ce309f70b1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ast-grep",
+        "repo": "agent-skill",
+        "rev": "577f4d4507678f2c8cee150fae25e6ce309f70b1",
+        "type": "github"
+      }
+    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -177,6 +217,23 @@
       "original": {
         "owner": "numtide",
         "repo": "llm-agents.nix",
+        "type": "github"
+      }
+    },
+    "mizchi-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777045904,
+        "narHash": "sha256-RybJvW2FYiHR/Aalg33/0C5XKGVJ6Jj9kOCS5z4Nkh8=",
+        "owner": "mizchi",
+        "repo": "skills",
+        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mizchi",
+        "repo": "skills",
+        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
         "type": "github"
       }
     },
@@ -340,15 +397,36 @@
         "type": "github"
       }
     },
+    "reohakase-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778073579,
+        "narHash": "sha256-QF907DFKDmWiMFOYCY+70PG8TuWGHvwpfkT4vTS8yb8=",
+        "owner": "ReoHakase",
+        "repo": "skills",
+        "rev": "bdc317003cc64835552a5df26ba1ed7159f9964d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ReoHakase",
+        "repo": "skills",
+        "rev": "bdc317003cc64835552a5df26ba1ed7159f9964d",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "actrun": "actrun",
+        "agent-skills": "agent-skills",
+        "ast-grep-agent-skill": "ast-grep-agent-skill",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
+        "mizchi-skills": "mizchi-skills",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_3",
+        "reohakase-skills": "reohakase-skills"
       }
     },
     "systems": {

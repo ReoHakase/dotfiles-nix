@@ -25,6 +25,23 @@
       url = "github:mizchi/actrun";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agent-skills = {
+      url = "github:Kyure-A/agent-skills-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+    mizchi-skills = {
+      url = "github:mizchi/skills/a2b5a796a5f22fc05fb515cef106993b84cf08cc";
+      flake = false;
+    };
+    ast-grep-agent-skill = {
+      url = "github:ast-grep/agent-skill/577f4d4507678f2c8cee150fae25e6ce309f70b1";
+      flake = false;
+    };
+    reohakase-skills = {
+      url = "github:ReoHakase/skills/bdc317003cc64835552a5df26ba1ed7159f9964d";
+      flake = false;
+    };
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
@@ -48,15 +65,6 @@
           inherit system;
           config.allowUnfree = true;
         };
-      patchedApmFor =
-        system:
-        let
-          pkgsForSystem = pkgsFor system;
-        in
-        pkgsForSystem.callPackage ./pkgs/apm-codex-user-scope.nix {
-          inherit (inputs.llm-agents.packages.${system}) apm;
-        };
-
       devShellFor =
         system:
         let
@@ -121,7 +129,6 @@
       homeConfigurations."${linuxUser}@${linuxHmHostname}" = homeLinux;
 
       packages.${linuxSystem} = {
-        apm = patchedApmFor linuxSystem;
         home-reohakuta-kcvl = homeLinux.activationPackage;
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         inherit (pkgsLinux)
@@ -136,7 +143,6 @@
       };
 
       packages.aarch64-darwin = {
-        apm = patchedApmFor "aarch64-darwin";
         inherit (pkgsDarwin)
           harano-aji-fonts
           mole

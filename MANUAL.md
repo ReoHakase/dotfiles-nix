@@ -18,6 +18,7 @@
 - [Homebrew](#homebrew)
 - [次の作業の目安](#次の作業の目安cask-以外)
 - [NixCasks（GUI）](#nixcasksgui)
+- [Agent Skills](#agent-skills)
 - [Linux（Ubuntu）GUI: Ghostty・Cursor・Vicinae](#linuxubuntu-gui-ghosttycursorvicinae)
 - [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
 - [秘密情報（GPG・SSH など）](#秘密情報gpgssh-など)
@@ -201,6 +202,12 @@ nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [
 ```
 
 変更後は `nix flake lock`（初回追加時）と `darwin-rebuild` / `apply-system.sh` で適用する。
+
+## Agent Skills
+
+Agent Skills は [`home/modules/skills.nix`](home/modules/skills.nix) で [`agent-skills-nix`](https://github.com/Kyure-A/agent-skills-nix) に渡している。skill の取得元は `flake.nix` の input と `flake.lock` で固定し、Home Manager が `~/.agents/skills` / `~/.claude/skills` / `~/.cursor/skills` に symlink tree を配布する。
+
+skill を増減するときは `home/modules/skills.nix` の source / `skills.enable` と、必要なら `flake.nix` の input を編集してから `nix flake lock` → `nix flake check` → `switch`。旧 APM の `~/.apm/apm.yml` / lockfile と activation-time install は使わない。
 
 ## Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt・Vicinae
 

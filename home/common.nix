@@ -1,20 +1,19 @@
-{ ... }:
+{ inputs, ... }:
 {
   imports = [
-    ./modules/apm.nix
+    inputs.agent-skills.homeManagerModules.default
     ./modules/editor.nix
     ./modules/git.nix
     ./modules/gpg-agent.nix
     ./modules/packages.nix
     ./modules/shell.nix
+    ./modules/skills.nix
     ./modules/ssh.nix
     ./modules/terminal.nix
     ./modules/tex.nix
   ];
 
   home.stateVersion = "24.11";
-
-  reohakase.apmGlobal.enable = true;
 
   programs.home-manager.enable = true;
 
