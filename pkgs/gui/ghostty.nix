@@ -1,2 +1,1 @@
-{ ghostty }:
-ghostty
+{ ghostty }: ghostty

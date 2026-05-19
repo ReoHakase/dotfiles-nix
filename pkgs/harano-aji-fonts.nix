@@ -6,7 +6,7 @@
 
 stdenvNoCC.mkDerivation {
   pname = "harano-aji-fonts";
-  version = texlivePackages.haranoaji.version;
+  inherit (texlivePackages.haranoaji) version;
 
   dontUnpack = true;
 

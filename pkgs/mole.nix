@@ -38,11 +38,8 @@ buildGoModule (finalAttrs: {
     cp -R . $out/libexec/mole/
 
     for command in mole mo; do
-      cat > $out/bin/$command <<EOF
-#!${stdenv.shell}
-exec "$out/libexec/mole/mole" "\$@"
-EOF
-      chmod +x $out/bin/$command
+      printf '%s\n' '#!${stdenv.shell}' "exec \"$out/libexec/mole/mole\" \"\$@\"" > "$out/bin/$command"
+      chmod +x "$out/bin/$command"
     done
 
     runHook postInstall

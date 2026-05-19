@@ -1,0 +1,71 @@
+name: Nix
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: nix-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check Nix formatting and lint
+        run: |
+          mapfile -t nix_files < <(git ls-files "*.nix")
+          nix --option warn-dirty false develop -c nixfmt --check "${nix_files[@]}"
+          nix --option warn-dirty false develop -c sh -c "for file do statix check \"\$file\"; done" sh "${nix_files[@]}"
+          nix --option warn-dirty false develop -c deadnix --fail "${nix_files[@]}"
+
+      - name: Check flake lock
+        run: nix --option warn-dirty false flake lock --no-update-lock-file
+
+  linux-home:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check Linux flake outputs
+        run: nix flake check
+
+      - name: Build Linux Home Manager generation
+        run: nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
+
+  darwin-system:
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check Darwin flake outputs
+        run: nix flake check
+
+      - name: Build Darwin system
+        run: nix build '.#darwinConfigurations.reohakase.system' --no-link
