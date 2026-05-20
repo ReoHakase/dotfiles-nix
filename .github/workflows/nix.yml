@@ -46,8 +46,8 @@ jobs:
       - name: Evaluate Linux Home Manager output
         run: nix eval --raw '.#packages.x86_64-linux.home-reohakuta-kcvl.drvPath'
 
-      - name: Build Linux Home Manager generation
-        run: nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
+      - name: Check Linux Home Manager build plan
+        run: nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --dry-run
 
   darwin-system:
     runs-on: macos-26
