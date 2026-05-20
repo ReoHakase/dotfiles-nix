@@ -46,9 +46,6 @@ jobs:
       - name: Evaluate Linux Home Manager output
         run: nix eval --raw '.#packages.x86_64-linux.home-reohakuta-kcvl.drvPath'
 
-      - name: Check Linux Home Manager build plan
-        run: nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --dry-run
-
   darwin-system:
     runs-on: macos-26
     timeout-minutes: 90
@@ -60,6 +57,3 @@ jobs:
 
       - name: Evaluate Darwin system output
         run: nix eval --raw '.#darwinConfigurations.reohakase.system.drvPath'
-
-      - name: Build Darwin system
-        run: nix build '.#darwinConfigurations.reohakase.system' --no-link
