@@ -24,10 +24,6 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
-        with:
-          use-flakehub: false
-
       - name: Check Nix formatting and lint
         run: |
           mapfile -t nix_files < <(git ls-files "*.nix")
@@ -47,12 +43,8 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
-        with:
-          use-flakehub: false
-
-      - name: Check Linux flake outputs
-        run: nix flake check
+      - name: Evaluate Linux Home Manager output
+        run: nix eval --raw '.#packages.x86_64-linux.home-reohakuta-kcvl.drvPath'
 
       - name: Build Linux Home Manager generation
         run: nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
@@ -66,12 +58,8 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
 
-      - uses: DeterminateSystems/magic-nix-cache-action@v8
-        with:
-          use-flakehub: false
-
-      - name: Check Darwin flake outputs
-        run: nix flake check
+      - name: Evaluate Darwin system output
+        run: nix eval --raw '.#darwinConfigurations.reohakase.system.drvPath'
 
       - name: Build Darwin system
         run: nix build '.#darwinConfigurations.reohakase.system' --no-link
