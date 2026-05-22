@@ -59,6 +59,7 @@ in
     nmap
     opencode
     openssl
+    p7zip
     pkgconf
     rWrapper
     ripgrep
