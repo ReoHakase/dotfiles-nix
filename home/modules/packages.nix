@@ -28,6 +28,7 @@ in
     llmAgentsPkgs.codex
     dnsutils
     eternal-terminal
+    exiftool
     eza
     fastfetch
     fd
@@ -45,7 +46,9 @@ in
     just
     lazygit
     lazyssh
+    imagemagick
     libwebp
+    libtiff
     lzo
     lz4
     # Markdown LSP (PKM). aerial.nvim の treesitter backend は nvim 0.12 の
@@ -75,6 +78,7 @@ in
     tree-sitter
     typst
     uv
+    vips
     wget
     yazi
     xz
