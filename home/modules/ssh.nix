@@ -42,54 +42,54 @@ in
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    matchBlocks = {
+    settings = {
       "*" = {
-        forwardAgent = false;
-        addKeysToAgent = "no";
-        compression = false;
-        serverAliveInterval = 0;
-        serverAliveCountMax = 3;
-        hashKnownHosts = false;
-        userKnownHostsFile = "~/.ssh/known_hosts";
-        controlMaster = "no";
-        controlPath = "~/.ssh/master-%r@%n:%p";
-        controlPersist = "no";
-        setEnv.TERM = "xterm-256color";
+        ForwardAgent = false;
+        AddKeysToAgent = "no";
+        Compression = false;
+        ServerAliveInterval = 0;
+        ServerAliveCountMax = 3;
+        HashKnownHosts = false;
+        UserKnownHostsFile = "~/.ssh/known_hosts";
+        ControlMaster = "no";
+        ControlPath = "~/.ssh/master-%r@%n:%p";
+        ControlPersist = "no";
+        SetEnv.TERM = "xterm-256color";
       };
       kcvl = {
-        hostname = "192.168.100.149";
-        user = "reohakuta";
-        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        HostName = "192.168.100.149";
+        User = "reohakuta";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 96GB; RTX 6000 Ada x2
       "paras paras02 paras02.lan" = {
-        hostname = "paras02.lan";
-        user = "student";
-        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        HostName = "paras02.lan";
+        User = "student";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 96GB; RTX 6000 Pro Blackwell Max-Q
       "snorlax snorlax06 snorlax06.lan" = {
-        hostname = "snorlax06.lan";
-        user = "student";
-        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        HostName = "snorlax06.lan";
+        User = "student";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 48GB; RTX 3090 Ti x2; retiring soon
       "squirtle squirtle05 squirtle05.lan" = {
-        hostname = "squirtle05.lan";
-        user = "student";
-        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        HostName = "squirtle05.lan";
+        User = "student";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 128GB; preparing
       "nidoking nidoking07 nidoking07.lan" = {
-        hostname = "nidoking07.lan";
-        user = "student";
-        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        HostName = "nidoking07.lan";
+        User = "student";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 128GB; preparing
       "nidoqueen nidoqueen08 nidoqueen08.lan" = {
-        hostname = "nidoqueen08.lan";
-        user = "student";
-        proxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        HostName = "nidoqueen08.lan";
+        User = "student";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
     };
   };

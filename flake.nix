@@ -92,6 +92,7 @@
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
         overlays = [
+          inputs.actrun.inputs.moonbit-overlay.overlays.default
           inputs.actrun.overlays.default
           localOverlay
           (final: _prev: {

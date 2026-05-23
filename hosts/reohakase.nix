@@ -16,6 +16,7 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
 
   nixpkgs.overlays = [
+    inputs.actrun.inputs.moonbit-overlay.overlays.default
     inputs.actrun.overlays.default
     (final: _prev: {
       mole = final.callPackage ../pkgs/mole.nix { };
