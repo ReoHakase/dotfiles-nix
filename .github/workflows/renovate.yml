@@ -76,4 +76,6 @@ jobs:
           RENOVATE_ALLOW_POST_UPGRADE_COMMAND_TEMPLATING: "true"
         with:
           configurationFile: .github/renovate.json5
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Prefer a PAT or GitHub App token so Renovate PRs can trigger normal
+          # PR/push workflows. GITHUB_TOKEN is a fallback for low-privilege runs.
+          token: ${{ secrets.RENOVATE_TOKEN || secrets.GITHUB_TOKEN }}

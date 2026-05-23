@@ -8,17 +8,29 @@
     "helpers:pinGitHubActionDigests",
   ],
   timezone: "Asia/Tokyo",
-  schedule: ["before 6am every weekday"],
+  schedule: ["before 6am"],
   labels: ["dependencies"],
   prConcurrentLimit: 4,
   prHourlyLimit: 4,
+  automerge: true,
+  automergeType: "pr",
+  platformAutomerge: false,
+  commitMessageLowerCase: "never",
+  commitMessagePrefix: "build(deps): ⬆️",
+  commitMessageAction: "update",
 
   // flake.lock は nix manager が rev / narHash を更新。個別 *.nix の fetchurl hash 等は
   // packageRules の postUpgradeTasks（curl + nix hash / nix-update）で追随させる。
   nix: { enabled: true },
   lockFileMaintenance: {
     enabled: true,
-    schedule: ["before 6am on monday"],
+    schedule: ["before 6am"],
+    automerge: true,
+    automergeType: "pr",
+    platformAutomerge: false,
+    commitMessageAction: "update",
+    commitMessageTopic: "flake inputs",
+    commitMessageExtra: null,
   },
 
   customManagers: [
@@ -45,16 +57,14 @@
     {
       matchManagers: ["nix"],
       groupName: "flake inputs",
-      semanticCommitType: "chore",
-      semanticCommitScope: "flake",
+      commitMessageTopic: "flake inputs",
     },
     {
       description: "Recompute Vicinae fetchurl SRI hash after semver bump.",
-      matchManagers: ["regex"],
+      matchManagers: ["custom.regex"],
       matchDatasources: ["github-releases"],
       matchPackageNames: ["vicinaehq/vicinae"],
-      semanticCommitType: "chore",
-      semanticCommitScope: "vicinae",
+      commitMessageTopic: "Vicinae AppImage",
       postUpgradeTasks: {
         commands: ["bash scripts/renovate/bump-vicinae-appimage.sh {{{newVersion}}}"],
         fileFilters: ["pkgs/appimages/vicinae.nix"],
@@ -63,7 +73,7 @@
     },
   ],
 
-  allowedPostUpgradeCommands: [
+  allowedCommands: [
     "^bash scripts/renovate/bump-vicinae-appimage\\.sh [-\\.0-9A-Za-z+]+$",
   ],
 }
