@@ -39,6 +39,8 @@ in
   };
 
   home.packages = with pkgs; [
+    # Ubuntu の nfs-common 相当（mount.nfs など）。
+    nfs-utils
     sshfs
     # Neovim / nvim-treesitter / Lazy プラグインのビルド（make / CMake）
     gnumake
