@@ -21,6 +21,7 @@ in
     cloc
     commitlint-rs
     copilot-language-server
+    curl-impersonate
     dotenvx
     entr
     lefthook
