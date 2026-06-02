@@ -82,12 +82,36 @@
           ];
         };
 
-      localOverlay = final: _prev: {
-        mole = final.callPackage ./pkgs/mole.nix { };
-        turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
-        similarity = final.callPackage ./pkgs/similarity.nix { };
-        harano-aji-fonts = final.callPackage ./pkgs/harano-aji-fonts.nix { };
-      };
+      localOverlay =
+        final: _prev:
+        {
+          mole = final.callPackage ./pkgs/mole.nix { };
+          turso-cli = final.callPackage ./pkgs/turso-cli.nix { };
+          similarity = final.callPackage ./pkgs/similarity.nix { };
+          harano-aji-fonts = final.callPackage ./pkgs/harano-aji-fonts.nix { };
+        }
+        // _prev.lib.optionalAttrs _prev.stdenv.hostPlatform.isDarwin {
+          matio = _prev.matio.overrideAttrs (old: {
+            postFixup = (old.postFixup or "") + ''
+              hdf5Dylibs=(${final.hdf5}/lib/libhdf5.[0-9]*.dylib)
+              hdf5AbiDylibs=()
+              for candidate in "''${hdf5Dylibs[@]}"; do
+                case "$(basename "$candidate")" in
+                  *.*.*.dylib) ;;
+                  *) hdf5AbiDylibs+=("$candidate") ;;
+                esac
+              done
+
+              if [ "''${#hdf5AbiDylibs[@]}" -ne 1 ]; then
+                echo "expected exactly one hdf5 ABI dylib, found ''${#hdf5AbiDylibs[@]}" >&2
+                exit 1
+              fi
+
+              hdf5Dylib="''${hdf5AbiDylibs[0]}"
+              install_name_tool -change "@rpath/$(basename "$hdf5Dylib")" "$hdf5Dylib" "$out/lib/libmatio.13.dylib"
+            '';
+          });
+        };
 
       pkgsLinux = import nixpkgs {
         system = linuxSystem;
@@ -118,7 +142,12 @@
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         specialArgs = {
-          inherit inputs self user;
+          inherit
+            inputs
+            localOverlay
+            self
+            user
+            ;
         };
         modules = [
           inputs.nix-homebrew.darwinModules.nix-homebrew

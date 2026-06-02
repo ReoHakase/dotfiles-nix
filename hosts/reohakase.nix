@@ -3,6 +3,7 @@
   pkgs,
   user,
   inputs,
+  localOverlay,
   ...
 }:
 {
@@ -18,12 +19,7 @@
   nixpkgs.overlays = [
     inputs.actrun.inputs.moonbit-overlay.overlays.default
     inputs.actrun.overlays.default
-    (final: _prev: {
-      mole = final.callPackage ../pkgs/mole.nix { };
-      turso-cli = final.callPackage ../pkgs/turso-cli.nix { };
-      similarity = final.callPackage ../pkgs/similarity.nix { };
-      harano-aji-fonts = final.callPackage ../pkgs/harano-aji-fonts.nix { };
-    })
+    localOverlay
   ];
 
   nixpkgs.config = {
