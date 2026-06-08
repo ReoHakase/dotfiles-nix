@@ -14,6 +14,7 @@
   - [ディレクトリ構成](#ディレクトリ構成)
     - [Git と flake（コミットしてから実行すべきか）](#git-と-flakeコミットしてから実行すべきか)
   - [初回・日常のコマンド](#初回日常のコマンド)
+  - [Dev Containers の dotfiles install](#dev-containers-の-dotfiles-install)
   - [Ubuntu LTS（reohakuta-kcvl）: Home Manager のみ](#ubuntu-ltsreohakuta-kcvl-home-manager-のみ)
   - [何がどこで管理されているか](#何がどこで管理されているか)
     - [nix-darwin（`hosts/reohakase.nix`）](#nix-darwinhostsreohakasenix)
@@ -150,6 +151,36 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 
 > [!TIP]
 > 適用後は新しいターミナルを開くか `exec zsh` で、Nix 管理の `zsh` と HM を読み込ませる。
+
+## Dev Containers の dotfiles install
+
+[Dev Containers の dotfiles 機能](https://code.visualstudio.com/docs/devcontainers/containers#_personalizing-with-dotfile-repositories)向けに、リポジトリ直下の [`install.sh`](install.sh) を用意している。これは Dev Container 内で **Home Manager を適用するだけ**の entrypoint で、**Nix と Home Manager のインストールは責務に含めない**。コンテナイメージ、Feature、またはプロジェクト側のセットアップで、dotfiles install より前に `nix` と `home-manager` が PATH から見える状態にしておく。
+
+VS Code の User Settings 例:
+
+```jsonc
+{
+  "dotfiles.repository": "ReoHakase/dotfiles-nix",
+  "dotfiles.targetPath": "~/dotfiles",
+  "dotfiles.installCommand": "install.sh"
+}
+```
+
+`dotfiles.targetPath` は、Dev Containers が **コンテナ内で dotfiles リポジトリを clone する場所**を指す。上の例では、Mac 側の `~/dotfiles` ではなく、Dev Container 内の `~/dotfiles` にこのリポジトリが clone され、そのディレクトリで `./install.sh` が実行される。`install.sh` は自身の配置場所をリポジトリ root として扱うため、必要なら `~/.dotfiles` など別の clone 先に変えてもよい。
+
+`install.sh` は、`DOTFILES_HM_OUTPUT` があればそれを使い、未指定なら Dev Container 内の `$(id -un)@$(hostname -s)` から `homeConfigurations.<user>@<host>` を自動解決する。たとえば現在の Linux 向け出力は `homeConfigurations.reohakuta@reohakuta-kcvl` なので、ユーザー名やホスト名が一致するコンテナなら追加設定なしで適用できる。
+
+ユーザー名が `vscode` だったり、ホスト名がコンテナ ID になる環境では flake 出力と一致しない。その場合は `.devcontainer/devcontainer.json` などで明示的に上書きする:
+
+```jsonc
+{
+  "remoteEnv": {
+    "DOTFILES_HM_OUTPUT": "reohakuta@reohakuta-kcvl"
+  }
+}
+```
+
+Dev Containers CLI の実装では `installCommand` はシェルコマンド文字列ではなく、dotfiles の `targetPath` 内にある実行ファイル名として扱われる。つまり `DOTFILES_HM_OUTPUT=... ./install.sh` のようには書かず、上の `remoteEnv` で環境変数を渡す。`install.sh` は冒頭にリポジトリ URL を表示し、ログには `[ReoHakase/dotfiles-nix]` prefix を付ける。候補が見つからない場合は、解決した出力名と利用可能な `homeConfigurations` を表示して異常終了する。
 
 
 ## Ubuntu LTS（reohakuta-kcvl）: Home Manager のみ
