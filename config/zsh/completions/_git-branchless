@@ -1,0 +1,317 @@
+#compdef git-branchless
+#description Branchless workflow for Git
+
+local curcontext="$curcontext" state line ret=1
+typeset -A opt_args
+
+local -a commands common_options rewrite_options navigation_options hidden_option color_modes
+
+commands=(
+  'amend:amend the current HEAD commit'
+  'bug-report:gather information for a bug report'
+  'difftool:use the partial commit selector as a difftool'
+  'gc:run internal garbage collection'
+  'hide:hide commits from the smartlog'
+  'hook:run a branchless hook command'
+  'init:initialize or uninstall the branchless workflow'
+  'install-man-pages:install man pages to a path'
+  'move:move a subtree of commits'
+  'next:move to a later commit in the current stack'
+  'prev:move to an earlier commit in the current stack'
+  'query:evaluate a revset query'
+  'repair:restore internal invariants'
+  'restack:fix commits abandoned by a previous rewrite'
+  'record:create a commit by interactively selecting changes'
+  'reword:reword commits'
+  'smartlog:show the smartlog'
+  'snapshot:run a command inside a snapshot'
+  'submit:push commits or create review objects'
+  'switch:switch to a branch or commit'
+  'sync:move local stacks on top of the main branch'
+  'test:run a command on each selected commit'
+  'undo:return to a previous repository state'
+  'unhide:unhide commits in the smartlog'
+  'wrap:wrap a Git command in a branchless transaction'
+  'help:print help for a command'
+)
+
+color_modes=(
+  'auto:automatically determine whether to display colors'
+  'always:always display colors'
+  'never:never display colors'
+)
+
+common_options=(
+  '-C[change to a directory before executing]:working directory:_directories'
+  '--color=[force terminal colors]:color mode:(auto always never)'
+  '(-h --help)-h[print help]'
+  '(-h --help)--help[print help]'
+)
+
+hidden_option=('--hidden[include hidden commits when evaluating revsets]')
+
+rewrite_options=(
+  '(-f --force-rewrite)-f[force moving public commits]'
+  '(-f --force-rewrite)--force-rewrite[force moving public commits]'
+  '--fr[force moving public commits]'
+  '--in-memory[only attempt an in-memory rebase]'
+  '--on-disk[try an on-disk rebase directly]'
+  '--no-deduplicate-commits[do not deduplicate commits during rebase]'
+  '(-m --merge)-m[attempt to resolve merge conflicts]'
+  '(-m --merge)--merge[attempt to resolve merge conflicts]'
+  '--debug-dump-rebase-constraints[print rebase constraints before executing]'
+  '--debug-dump-rebase-plan[print the rebase plan before executing]'
+)
+
+navigation_options=(
+  '(-a --all)-a[traverse as many commits as possible]'
+  '(-a --all)--all[traverse as many commits as possible]'
+  '(-b --branch)-b[move branches rather than commits]'
+  '(-b --branch)--branch[move branches rather than commits]'
+  '(-o --oldest)-o[choose the oldest next commit]'
+  '(-o --oldest)--oldest[choose the oldest next commit]'
+  '(-n --newest)-n[choose the newest next commit]'
+  '(-n --newest)--newest[choose the newest next commit]'
+  '(-i --interactive)-i[prompt for the commit to advance to]'
+  '(-i --interactive)--interactive[prompt for the commit to advance to]'
+  '(-m --merge)-m[attempt to merge local changes]'
+  '(-m --merge)--merge[attempt to merge local changes]'
+  '(-f --force)-f[discard conflicting local changes]'
+  '(-f --force)--force[discard conflicting local changes]'
+)
+
+__git_branchless_refs() {
+  local -a refs
+  refs=(${(f)"$(_call_program git-refs git for-each-ref --format='%(refname:short)' refs/heads refs/remotes refs/tags 2>/dev/null)"})
+
+  if (( ${#refs} )); then
+    compadd -- "${refs[@]}"
+  else
+    _message -e git-refs 'git ref'
+  fi
+}
+
+__git_branchless_revsets() {
+  local -a revsets
+  revsets=(
+    'all():all commits'
+    'draft():draft commits'
+    'heads():head commits'
+    'public():public commits'
+    'stack():current stack'
+    'visible():visible commits'
+  )
+
+  _alternative \
+    'revset-patterns:revset pattern:_describe -t revset-patterns "revset pattern" revsets' \
+    'git-refs:git ref:__git_branchless_refs'
+}
+
+__git_branchless_command_args() {
+  _arguments -C -s -S "${common_options[@]}" "$@"
+}
+
+_arguments -C -s -S \
+  "${common_options[@]}" \
+  '(-V --version)-V[print version]' \
+  '(-V --version)--version[print version]' \
+  '1:command:->command' \
+  '*::argument:->argument' && ret=0
+
+case "$state" in
+  command)
+    _describe -t commands 'git-branchless command' commands && ret=0
+    ;;
+  argument)
+    curcontext="${curcontext%:*}-${line[1]}:"
+    case "$line[1]" in
+      amend)
+        __git_branchless_command_args \
+          "${rewrite_options[@]}" \
+          '--reparent[keep descendant commit contents exactly the same]' && ret=0
+        ;;
+      bug-report | gc)
+        __git_branchless_command_args && ret=0
+        ;;
+      difftool)
+        __git_branchless_command_args \
+          '(-d --dir-diff)-d[compare directories recursively]' \
+          '(-d --dir-diff)--dir-diff[compare directories recursively]' \
+          '--read-only[disable editing controls]' \
+          '(-N --dry-run)-N[show what would be written]' \
+          '(-N --dry-run)--dry-run[show what would be written]' \
+          '(-b --base)-b[use a base file for a three-way diff]:base file:_files' \
+          '(-b --base)--base=[use a base file for a three-way diff]:base file:_files' \
+          '(-o --output)-o[write resolved conflicts to this file]:output file:_files' \
+          '(-o --output)--output=[write resolved conflicts to this file]:output file:_files' \
+          ':left file:_files' \
+          ':right file:_files' && ret=0
+        ;;
+      hide)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          '--no-delete-branches[do not delete branches pointing to hidden commits]' \
+          '(-r --recursive)-r[also process descendant commits]' \
+          '(-r --recursive)--recursive[also process descendant commits]' \
+          '*:revset:__git_branchless_revsets' && ret=0
+        ;;
+      unhide)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          '(-r --recursive)-r[also process descendant commits]' \
+          '(-r --recursive)--recursive[also process descendant commits]' \
+          '*:revset:__git_branchless_revsets' && ret=0
+        ;;
+      hook | snapshot | test)
+        __git_branchless_command_args \
+          '*::command:_normal' && ret=0
+        ;;
+      wrap)
+        __git_branchless_command_args \
+          '--git-executable=[git executable to invoke]:git executable:_command_names -e' \
+          '*::command:_normal' && ret=0
+        ;;
+      init)
+        __git_branchless_command_args \
+          '--uninstall[uninstall the branchless workflow]' \
+          '--main-branch=[main branch name]:branch name:__git_branchless_refs' && ret=0
+        ;;
+      install-man-pages)
+        __git_branchless_command_args ':path:_directories' && ret=0
+        ;;
+      move)
+        __git_branchless_command_args \
+          '(-s --source)-s[source commit to move]:source revset:__git_branchless_revsets' \
+          '(-s --source)--source=[source commit to move]:source revset:__git_branchless_revsets' \
+          '(-b --base)-b[commit inside the subtree to move]:base revset:__git_branchless_revsets' \
+          '(-b --base)--base=[commit inside the subtree to move]:base revset:__git_branchless_revsets' \
+          '(-x --exact)-x[specific commits to move]:exact revset:__git_branchless_revsets' \
+          '(-x --exact)--exact=[specific commits to move]:exact revset:__git_branchless_revsets' \
+          '(-d --dest)-d[destination commit]:destination revset:__git_branchless_revsets' \
+          '(-d --dest)--dest=[destination commit]:destination revset:__git_branchless_revsets' \
+          "${hidden_option[@]}" \
+          "${rewrite_options[@]}" \
+          '(-F --fixup)-F[squash moved commits into the destination]' \
+          '(-F --fixup)--fixup[squash moved commits into the destination]' \
+          '(-I --insert)-I[insert the subtree between destination and children]' \
+          '(-I --insert)--insert[insert the subtree between destination and children]' && ret=0
+        ;;
+      next | prev)
+        __git_branchless_command_args \
+          "${navigation_options[@]}" \
+          '::number of commits:' && ret=0
+        ;;
+      query)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          '(-b --branches)-b[print attached branches]' \
+          '(-b --branches)--branches[print attached branches]' \
+          '(-r --raw)-r[print raw commit OIDs]' \
+          '(-r --raw)--raw[print raw commit OIDs]' \
+          ':revset:__git_branchless_revsets' && ret=0
+        ;;
+      repair)
+        __git_branchless_command_args \
+          '--no-dry-run[apply changes]' && ret=0
+        ;;
+      restack)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          "${rewrite_options[@]}" \
+          '*:revset:__git_branchless_revsets' && ret=0
+        ;;
+      sync)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          "${rewrite_options[@]}" \
+          '(-p --pull)-p[run git fetch before syncing]' \
+          '(-p --pull)--pull[run git fetch before syncing]' \
+          '--update[run git fetch before syncing]' \
+          '*:revset:__git_branchless_revsets' && ret=0
+        ;;
+      record)
+        __git_branchless_command_args \
+          '(-m --message)-m[commit message]:message:' \
+          '(-m --message)--message=[commit message]:message:' \
+          '(-i --interactive)-i[select changes interactively]' \
+          '(-i --interactive)--interactive[select changes interactively]' \
+          '(-c --create)-c[create and switch to a new branch]:branch name:' \
+          '(-c --create)--create=[create and switch to a new branch]:branch name:' \
+          '(-d --detach)-d[detach the current branch before committing]' \
+          '(-d --detach)--detach[detach the current branch before committing]' \
+          '(-I --insert)-I[insert the new commit between current commit and children]' \
+          '(-I --insert)--insert[insert the new commit between current commit and children]' \
+          '(-s --stash)-s[switch back to the previous commit after committing]' \
+          '(-s --stash)--stash[switch back to the previous commit after committing]' && ret=0
+        ;;
+      reword)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          '(-f --force-rewrite)-f[force rewording public commits]' \
+          '(-f --force-rewrite)--force-rewrite[force rewording public commits]' \
+          '(-m --message)-m[message to apply to commits]:message:' \
+          '(-m --message)--message=[message to apply to commits]:message:' \
+          '(-d --discard)-d[discard original commit messages]' \
+          '(-d --discard)--discard[discard original commit messages]' \
+          '--fixup=[commit to fix up]:commit:__git_branchless_refs' \
+          '*:revset:__git_branchless_revsets' && ret=0
+        ;;
+      smartlog)
+        __git_branchless_command_args \
+          '--event-id=[show smartlog at event ID]:event ID:' \
+          '--reverse[print the smartlog in reverse order]' \
+          '--exact[do not automatically add HEAD and main branch]' \
+          "${hidden_option[@]}" \
+          '::revset:__git_branchless_revsets' && ret=0
+        ;;
+      submit)
+        __git_branchless_command_args \
+          "${hidden_option[@]}" \
+          '(-F --forge)-F[forge kind]:forge:(branch github phabricator)' \
+          '(-F --forge)--forge=[forge kind]:forge:(branch github phabricator)' \
+          '(-c --create)-c[create missing remote objects]' \
+          '(-c --create)--create[create missing remote objects]' \
+          '(-d --draft)-d[create review objects in draft mode]' \
+          '(-d --draft)--draft[create review objects in draft mode]' \
+          '(-m --message)-m[message to include with create or update]:message:' \
+          '(-m --message)--message=[message to include with create or update]:message:' \
+          '(-j --jobs)-j[number of parallel jobs]:jobs:' \
+          '(-j --jobs)--jobs=[number of parallel jobs]:jobs:' \
+          '(-s --strategy)-s[execution strategy]:strategy:(working-copy worktree)' \
+          '(-s --strategy)--strategy=[execution strategy]:strategy:(working-copy worktree)' \
+          '(-n --dry-run)-n[report what would be pushed or created]' \
+          '(-n --dry-run)--dry-run[report what would be pushed or created]' \
+          '*:revset:__git_branchless_revsets' && ret=0
+        ;;
+      switch)
+        __git_branchless_command_args \
+          '(-i --interactive)-i[interactively select a commit]' \
+          '(-i --interactive)--interactive[interactively select a commit]' \
+          '(-c --create)-c[create a branch at the target]:branch name:' \
+          '(-c --create)--create=[create a branch at the target]:branch name:' \
+          '(-f --force)-f[discard working copy changes if necessary]' \
+          '(-f --force)--force[discard working copy changes if necessary]' \
+          '(-m --merge)-m[start merge conflict resolution if needed]' \
+          '(-m --merge)--merge[start merge conflict resolution if needed]' \
+          '(-d --detach)-d[detach after switching to a branch]' \
+          '(-d --detach)--detach[detach after switching to a branch]' \
+          '::target:__git_branchless_refs' && ret=0
+        ;;
+      undo)
+        __git_branchless_command_args \
+          '(-i --interactive)-i[browse previous repository states]' \
+          '(-i --interactive)--interactive[browse previous repository states]' \
+          '(-y --yes)-y[skip confirmation]' \
+          '(-y --yes)--yes[skip confirmation]' && ret=0
+        ;;
+      help)
+        _describe -t commands 'git-branchless command' commands && ret=0
+        ;;
+      *)
+        _default && ret=0
+        ;;
+    esac
+    ;;
+esac
+
+return ret

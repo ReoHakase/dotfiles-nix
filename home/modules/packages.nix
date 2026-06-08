@@ -2,6 +2,14 @@
 
 let
   inherit (pkgs.stdenv.hostPlatform) system;
+  gitBranchlessWithCompletions = pkgs.symlinkJoin {
+    name = "${pkgs.git-branchless.name}-with-zsh-completion";
+    paths = [ pkgs.git-branchless ];
+    postBuild = ''
+      install -Dm444 ${../../config/zsh/completions/_git-branchless} \
+        "$out/share/zsh/site-functions/_git-branchless"
+    '';
+  };
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
 in
 {
@@ -39,6 +47,7 @@ in
     gettext
     gh
     git
+    gitBranchlessWithCompletions
     gnupg
     graphviz
     hyperfine
