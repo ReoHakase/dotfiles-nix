@@ -81,7 +81,7 @@ in
     similarity
     turso-cli
     # Official https://get.tur.so/install.sh also drops libsql's sqld next to turso (~/.turso).
-    # Our turso-cli derivation is CLI-only; nixpkgs sqld supplies the local server binary.
+    # nixpkgs turso-cli is CLI-only; nixpkgs sqld supplies the local server binary.
     sqld
     tcl
     tk
