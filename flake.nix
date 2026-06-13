@@ -86,7 +86,6 @@
         final: _prev:
         {
           mole = final.callPackage ./pkgs/mole.nix { };
-          similarity = final.callPackage ./pkgs/similarity.nix { };
           harano-aji-fonts = final.callPackage ./pkgs/harano-aji-fonts.nix { };
         }
         // _prev.lib.optionalAttrs _prev.stdenv.hostPlatform.isDarwin {
@@ -164,7 +163,6 @@
           cursor-appimage
           harano-aji-fonts
           proton-vpn
-          similarity
           turso-cli
           veracrypt
           vicinae-appimage
@@ -175,7 +173,6 @@
         inherit (pkgsDarwin)
           harano-aji-fonts
           mole
-          similarity
           turso-cli
           ;
       };
