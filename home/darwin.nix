@@ -27,7 +27,6 @@ in
   ];
 
   xdg.configFile = {
-    "glide/glide.toml".source = ../config/glide/glide.toml;
     "karabiner/karabiner.json".source = ../config/karabiner/karabiner.json;
     "karabiner/assets".source = ../config/karabiner/assets;
   };

@@ -125,7 +125,6 @@
       "discord"
       "figma"
       "ghostty"
-      "glide"
       "iina"
       "karabiner-elements"
       "keka"
