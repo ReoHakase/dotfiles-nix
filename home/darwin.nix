@@ -32,11 +32,5 @@ in
     "karabiner/assets".source = ../config/karabiner/assets;
   };
 
-  home.packages =
-    with pkgs;
-    [
-      mole
-      terminal-notifier
-    ]
-    ++ nixCasks;
+  home.packages = [ pkgs.terminal-notifier ] ++ nixCasks;
 }

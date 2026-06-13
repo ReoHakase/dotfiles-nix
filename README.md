@@ -272,7 +272,7 @@ chsh -s "$(which zsh)"
 
 - **共通（`home/common.nix`）:** `home/modules/*` と `agent-skills-nix` の import、HM 共通の土台（stateVersion、manual、fontconfig、xdg）
 - **共有モジュール（`home/modules/`）:** zsh、starship、direnv、mise、neovim、git、gh、ssh、tmux、lazygit、Ghostty shader、CLI パッケージ、TeX Live、GPG pinentry、Agent Skills
-- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath`、`terminal-notifier`、`mole` など（**`/Library/TeX/texbin` は入れない**）
+- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner・Glide、macOS 向け `sessionPath`、`terminal-notifier` など（**`/Library/TeX/texbin` は入れない**）。`mole` は Homebrew formula（`hosts/reohakase.nix`）で管理。
 - **Linux（`home/linux.nix` + `home/modules/linux/`）:** Linux 向け `sessionPath`、`PYTHONNOUSERSITE`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`、**GUI**
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 

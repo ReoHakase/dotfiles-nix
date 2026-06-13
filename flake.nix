@@ -85,7 +85,6 @@
       localOverlay =
         final: _prev:
         {
-          mole = final.callPackage ./pkgs/mole.nix { };
           harano-aji-fonts = final.callPackage ./pkgs/harano-aji-fonts.nix { };
         }
         // _prev.lib.optionalAttrs _prev.stdenv.hostPlatform.isDarwin {
@@ -172,7 +171,6 @@
       packages.aarch64-darwin = {
         inherit (pkgsDarwin)
           harano-aji-fonts
-          mole
           turso-cli
           ;
       };

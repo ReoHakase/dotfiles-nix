@@ -108,6 +108,7 @@
     ];
     brews = [
       "macos-fuse-t/cask/sshfs-fuse-t"
+      "mole"
     ];
     casks = [
       "affinity"
