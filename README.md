@@ -154,7 +154,7 @@ nix run nix-darwin --extra-experimental-features 'nix-command flakes' -- \
 
 ## Dev Containers の dotfiles install
 
-[Dev Containers の dotfiles 機能](https://code.visualstudio.com/docs/devcontainers/containers#_personalizing-with-dotfile-repositories)向けに、リポジトリ直下の [`install.sh`](install.sh) を用意している。これは Dev Container 内で **Home Manager を適用するだけ**の entrypoint で、**Nix と Home Manager のインストールは責務に含めない**。コンテナイメージ、Feature、またはプロジェクト側のセットアップで、dotfiles install より前に `nix` と `home-manager` が PATH から見える状態にしておく。
+[Dev Containers の dotfiles 機能](https://code.visualstudio.com/docs/devcontainers/containers#_personalizing-with-dotfile-repositories)向けに、リポジトリ直下の [`install.sh`](install.sh) を用意している。これは Dev Container 内で Home Manager を適用する entrypoint。基本はコンテナイメージ、Feature、またはプロジェクト側のセットアップで、dotfiles install より前に `nix` が PATH から見える状態にしておく。必要な場合だけ、`DOTFILES_AUTO_INSTALL_NIX=1` で [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer) による Nix の自動インストールを opt-in できる。
 
 VS Code の User Settings 例:
 
@@ -168,9 +168,20 @@ VS Code の User Settings 例:
 
 `dotfiles.targetPath` は、Dev Containers が **コンテナ内で dotfiles リポジトリを clone する場所**を指す。上の例では、Mac 側の `~/dotfiles` ではなく、Dev Container 内の `~/dotfiles` にこのリポジトリが clone され、そのディレクトリで `./install.sh` が実行される。`install.sh` は自身の配置場所をリポジトリ root として扱うため、必要なら `~/.dotfiles` など別の clone 先に変えてもよい。
 
-`install.sh` は、`DOTFILES_HM_OUTPUT` があればそれを使い、未指定なら Dev Container 内の `$(id -un)@$(hostname -s)` から `homeConfigurations.<user>@<host>` を自動解決する。たとえば現在の Linux 向け出力は `homeConfigurations.reohakuta@reohakuta-kcvl` なので、ユーザー名やホスト名が一致するコンテナなら追加設定なしで適用できる。
+`install.sh` は、Dev Container 内の `$(id -un)@$(hostname -s)` から `homeConfigurations.<user>@<host>` を自動解決する。たとえば現在の Linux 向け出力は `homeConfigurations.reohakuta@reohakuta-kcvl` なので、ユーザー名やホスト名が一致するコンテナなら追加設定なしで適用できる。
 
-ユーザー名が `vscode` だったり、ホスト名がコンテナ ID になる環境では flake 出力と一致しない。その場合は `.devcontainer/devcontainer.json` などで明示的に上書きする:
+ユーザー名が `vscode` だったり、ホスト名がコンテナ ID になる環境では flake 出力と一致しない。その場合は `.devcontainer/devcontainer.json` などで `DOTFILES_HM_USER` / `DOTFILES_HM_HOST` を明示する:
+
+```jsonc
+{
+  "remoteEnv": {
+    "DOTFILES_HM_USER": "reohakuta",
+    "DOTFILES_HM_HOST": "reohakuta-kcvl"
+  }
+}
+```
+
+出力名を直接指定したい場合は `DOTFILES_HM_OUTPUT` を使う。優先順位は `--hm-output`、`DOTFILES_HM_OUTPUT`、`DOTFILES_HM_USER` / `DOTFILES_HM_HOST` と現在値から作る `<user>@<host>` の順。
 
 ```jsonc
 {
@@ -180,8 +191,17 @@ VS Code の User Settings 例:
 }
 ```
 
-Dev Containers CLI の実装では `installCommand` はシェルコマンド文字列ではなく、dotfiles の `targetPath` 内にある実行ファイル名として扱われる。つまり `DOTFILES_HM_OUTPUT=... ./install.sh` のようには書かず、上の `remoteEnv` で環境変数を渡す。`install.sh` は冒頭にリポジトリ URL を表示し、ログには `[ReoHakase/dotfiles-nix]` prefix を付ける。候補が見つからない場合は、解決した出力名と利用可能な `homeConfigurations` を表示して異常終了する。
+`nix` が無いコンテナでも dotfiles 側で bootstrap したい場合だけ、次のように opt-in する。`home-manager` コマンドが無い場合は直接インストールせず、`nix run github:nix-community/home-manager -- switch ...` で初回適用する。
 
+```jsonc
+{
+  "remoteEnv": {
+    "DOTFILES_AUTO_INSTALL_NIX": "1"
+  }
+}
+```
+
+Dev Containers CLI の実装では `installCommand` はシェルコマンド文字列ではなく、dotfiles の `targetPath` 内にある実行ファイル名として扱われる。つまり `install.sh --hm-output ...` や `DOTFILES_HM_OUTPUT=... ./install.sh` のようには書かず、Dev Containers では上の `remoteEnv` で環境変数を渡す。`--hm-output` / `--auto-install-nix` は、コンテナ内で手動実行するときや wrapper から呼ぶときの option。`install.sh` は冒頭にリポジトリ URL を表示し、ログには `[ReoHakase/dotfiles-nix]` prefix を付ける。候補が見つからない場合は、解決した出力名と利用可能な `homeConfigurations` を表示して異常終了する。
 
 ## Ubuntu LTS（reohakuta-kcvl）: Home Manager のみ
 

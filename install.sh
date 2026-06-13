@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Dev Containers dotfiles entrypoint.
-# This script assumes Nix and Home Manager are already installed.
 set -euo pipefail
 
 LOG_PREFIX="[ReoHakase/dotfiles-nix]"
 REPOSITORY_URL="https://github.com/ReoHakase/dotfiles-nix"
+DETERMINATE_NIX_INSTALLER_URL="https://install.determinate.systems/nix"
+DETERMINATE_NIX_INSTALLER_DOCS="https://github.com/DeterminateSystems/nix-installer"
 
 prefix_stream() {
   while IFS= read -r line; do
@@ -21,48 +22,218 @@ die() {
   exit 1
 }
 
-log "repository: ${REPOSITORY_URL}"
+usage() {
+  cat <<'USAGE'
+Usage: install.sh [OPTIONS]
+
+Dev Containers dotfiles entrypoint for ReoHakase/dotfiles-nix.
+
+Options:
+  --hm-output <name>   Use homeConfigurations.<name> directly.
+  --auto-install-nix  Install Nix with Determinate Nix Installer if nix is missing.
+  -h, --help          Show this help.
+
+Environment:
+  DOTFILES_HM_OUTPUT         Same role as --hm-output, lower priority.
+  DOTFILES_HM_USER           Override the user part for automatic <user>@<host> resolution.
+  DOTFILES_HM_HOST           Override the host part for automatic <user>@<host> resolution.
+  DOTFILES_AUTO_INSTALL_NIX  Enable Nix auto-install when set to 1, true, yes, or on.
+
+Resolution order:
+  1. --hm-output
+  2. DOTFILES_HM_OUTPUT
+  3. ${DOTFILES_HM_USER:-$(id -un)}@${DOTFILES_HM_HOST:-$(hostname -s)}
+USAGE
+}
+
+is_truthy() {
+  case "${1:-}" in
+    1 | true | TRUE | yes | YES | on | ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-user_name="$(id -un 2>/dev/null || true)"
+runtime_user="$(id -un 2>/dev/null || true)"
+auto_install_nix=false
+hm_output_arg=""
 
-if [ -z "$user_name" ]; then
+if [ -z "$runtime_user" ]; then
   die "could not determine the current user with 'id -un'."
 fi
 
-path_prefix=(
-  "/etc/profiles/per-user/${user_name}/bin"
-  "/nix/var/nix/profiles/default/bin"
-)
+prepend_nix_paths() {
+  local path_prefix=(
+    "/etc/profiles/per-user/${runtime_user}/bin"
+    "/nix/var/nix/profiles/default/bin"
+  )
 
-if [ -n "${HOME:-}" ]; then
-  path_prefix=("${HOME}/.nix-profile/bin" "${path_prefix[@]}")
+  if [ -n "${HOME:-}" ]; then
+    path_prefix=("${HOME}/.nix-profile/bin" "${path_prefix[@]}")
+  fi
+
+  export PATH="$(IFS=:; printf '%s' "${path_prefix[*]}"):${PATH:-}"
+}
+
+source_nix_profile() {
+  local profile
+  local restore_nounset=false
+
+  case "$-" in
+    *u*)
+      restore_nounset=true
+      set +u
+      ;;
+  esac
+
+  for profile in \
+    "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" \
+    "/nix/var/nix/profiles/default/etc/profile.d/nix.sh"; do
+    if [ -r "$profile" ]; then
+      # shellcheck disable=SC1090
+      . "$profile"
+    fi
+  done
+
+  if [ -n "${HOME:-}" ] && [ -r "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]; then
+    # shellcheck disable=SC1090
+    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+  fi
+
+  if [ "$restore_nounset" = true ]; then
+    set -u
+  fi
+}
+
+systemd_is_available() {
+  [ -d /run/systemd/system ]
+}
+
+install_nix() {
+  command -v curl >/dev/null 2>&1 ||
+    die "nix is missing and --auto-install-nix was requested, but curl was not found."
+
+  if [ "$(id -u)" -ne 0 ] && ! command -v sudo >/dev/null 2>&1; then
+    die "nix is missing and --auto-install-nix was requested, but the current user is not root and sudo was not found."
+  fi
+
+  local -a installer_args
+
+  # Determinate Nix Installer docs:
+  # https://github.com/DeterminateSystems/nix-installer
+  #
+  # Dev Containers dotfiles run after the container exists, so this script can
+  # only bootstrap missing prerequisites in-place. We use the Determinate
+  # installer because it enables flakes by default and supports non-interactive
+  # Linux/container installs. In containers without systemd, the documented
+  # `linux --init none` planner avoids trying to register a daemon service.
+  if [ "$(uname -s)" = "Linux" ]; then
+    if systemd_is_available; then
+      installer_args=(install linux --no-confirm)
+    else
+      installer_args=(install linux --no-confirm --init none)
+    fi
+  else
+    installer_args=(install --no-confirm)
+  fi
+
+  log "dotfiles install: nix was not found; installing Nix with Determinate Nix Installer."
+  log "dotfiles install: Determinate Nix Installer docs: ${DETERMINATE_NIX_INSTALLER_DOCS}"
+  log "dotfiles install: running installer with args: ${installer_args[*]}"
+
+  set +e
+  (
+    set -o pipefail
+    curl -fsSL "$DETERMINATE_NIX_INSTALLER_URL" | sh -s -- "${installer_args[@]}"
+  ) 2>&1 | prefix_stream
+  local status=${PIPESTATUS[0]}
+  set -e
+
+  if [ "$status" -ne 0 ]; then
+    die "Determinate Nix Installer failed with exit code ${status}."
+  fi
+
+  source_nix_profile
+  prepend_nix_paths
+
+  command -v nix >/dev/null 2>&1 ||
+    die "Determinate Nix Installer completed, but nix was still not found in PATH."
+}
+
+if is_truthy "${DOTFILES_AUTO_INSTALL_NIX:-}"; then
+  auto_install_nix=true
 fi
 
-export PATH="$(IFS=:; printf '%s' "${path_prefix[*]}"):${PATH:-}"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --hm-output)
+      shift
+      [ "$#" -gt 0 ] || die "--hm-output requires a value."
+      hm_output_arg="$1"
+      ;;
+    --hm-output=*)
+      hm_output_arg="${1#--hm-output=}"
+      [ -n "$hm_output_arg" ] || die "--hm-output requires a non-empty value."
+      ;;
+    --auto-install-nix)
+      auto_install_nix=true
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      [ "$#" -eq 0 ] || die "unexpected positional arguments: $*"
+      break
+      ;;
+    *)
+      die "unknown option: $1"
+      ;;
+  esac
+  shift
+done
 
-command -v nix >/dev/null 2>&1 ||
-  die "nix was not found in PATH. Install Nix with flakes enabled before running Dev Containers dotfiles; this script does not install Nix."
+log "repository: ${REPOSITORY_URL}"
 
-command -v home-manager >/dev/null 2>&1 ||
-  die "home-manager was not found in PATH. Install Home Manager before running Dev Containers dotfiles; this script does not install Home Manager."
+prepend_nix_paths
 
-if [ -n "${DOTFILES_HM_OUTPUT:-}" ]; then
+if ! command -v nix >/dev/null 2>&1; then
+  if [ "$auto_install_nix" = true ]; then
+    install_nix
+  else
+    die "nix was not found in PATH. Install Nix with flakes enabled first, or rerun with --auto-install-nix / DOTFILES_AUTO_INSTALL_NIX=1."
+  fi
+fi
+
+if [ -n "$hm_output_arg" ]; then
+  resolved_output="$hm_output_arg"
+  resolution_source="--hm-output"
+elif [ -n "${DOTFILES_HM_OUTPUT:-}" ]; then
   resolved_output="$DOTFILES_HM_OUTPUT"
   resolution_source="DOTFILES_HM_OUTPUT"
 else
-  host_name="$(hostname -s 2>/dev/null || true)"
+  user_name="${DOTFILES_HM_USER:-$runtime_user}"
+  host_name="${DOTFILES_HM_HOST:-}"
+
+  if [ -z "$host_name" ]; then
+    host_name="$(hostname -s 2>/dev/null || true)"
+  fi
 
   if [ -z "$host_name" ]; then
     host_name="$(hostname 2>/dev/null || true)"
   fi
 
   if [ -z "$host_name" ]; then
-    die "could not determine the current hostname with 'hostname -s'. Set DOTFILES_HM_OUTPUT to a homeConfigurations output."
+    die "could not determine the current hostname with 'hostname -s'. Set DOTFILES_HM_OUTPUT or DOTFILES_HM_HOST."
   fi
 
   resolved_output="${user_name}@${host_name}"
-  resolution_source="current user and hostname"
+  if [ -n "${DOTFILES_HM_USER:-}" ] || [ -n "${DOTFILES_HM_HOST:-}" ]; then
+    resolution_source="DOTFILES_HM_USER/DOTFILES_HM_HOST with current defaults"
+  else
+    resolution_source="current user and hostname"
+  fi
 fi
 
 if ! available_outputs="$(
@@ -78,7 +249,7 @@ if ! printf '%s\n' "$available_outputs" | grep -Fqx -- "$resolved_output"; then
   {
     log "dotfiles install: homeConfigurations.${resolved_output} was not found."
     log "dotfiles install: resolved from ${resolution_source}."
-    log "dotfiles install: set DOTFILES_HM_OUTPUT to one of the available outputs or add a matching flake output."
+    log "dotfiles install: set --hm-output or DOTFILES_HM_OUTPUT to one of the available outputs, or add a matching flake output."
     log "dotfiles install: available homeConfigurations:"
 
     if [ -n "$available_outputs" ]; then
@@ -91,10 +262,18 @@ if ! printf '%s\n' "$available_outputs" | grep -Fqx -- "$resolved_output"; then
 fi
 
 log "dotfiles install: using homeConfigurations.${resolved_output}"
-log "dotfiles install: running home-manager switch"
+
+if command -v home-manager >/dev/null 2>&1; then
+  home_manager_command=(home-manager switch -b hm-backup --flake "${repo_root}#${resolved_output}")
+else
+  log "dotfiles install: home-manager was not found; using nix run github:nix-community/home-manager for this switch."
+  home_manager_command=(nix run github:nix-community/home-manager -- switch -b hm-backup --flake "${repo_root}#${resolved_output}")
+fi
+
+log "dotfiles install: running: ${home_manager_command[*]}"
 
 set +e
-home-manager switch -b hm-backup --flake "${repo_root}#${resolved_output}" 2>&1 | prefix_stream
+("${home_manager_command[@]}") 2>&1 | prefix_stream
 status=${PIPESTATUS[0]}
 set -e
 
