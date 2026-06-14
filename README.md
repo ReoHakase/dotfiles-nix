@@ -191,6 +191,26 @@ VS Code の User Settings 例:
 }
 ```
 
+Dev Container や Singularity コンテナだけで使う最小構成は、hostname がランダムでも解決できるように `DOTFILES_HM_OUTPUT` で直接指定する。amd64 container は `vscode@devcontainer`、arm64 container は `vscode@devcontainer-aarch64` を使う。この構成には `nvim` / `gh` / `codex` / `lazygit` / `mise` / agent skills / shell 周りだけを入れ、`uv` や言語 runtime はプロジェクトごとの `nix develop` に任せる。
+
+`vscode@devcontainer` は互換用の出力名であり、実際の `home.username` と `home.homeDirectory` は `install.sh` が実行時に補完する。未指定なら `DOTFILES_HM_USERNAME=$(id -un)`、`DOTFILES_HM_HOME=$HOME` を使うため、`$HOME` が `/workspace/.container/home` のようなコンテナ固有パスでも追加の bind なしで適用できる。明示したい場合だけ `DOTFILES_HM_USERNAME` / `DOTFILES_HM_HOME` を渡す。
+
+```jsonc
+{
+  "remoteEnv": {
+    "DOTFILES_HM_OUTPUT": "vscode@devcontainer"
+  }
+}
+```
+
+```jsonc
+{
+  "remoteEnv": {
+    "DOTFILES_HM_OUTPUT": "vscode@devcontainer-aarch64"
+  }
+}
+```
+
 `nix` が無いコンテナでも dotfiles 側で bootstrap したい場合だけ、次のように opt-in する。`home-manager` コマンドが無い場合は直接インストールせず、`nix run github:nix-community/home-manager -- switch ...` で初回適用する。
 
 ```jsonc

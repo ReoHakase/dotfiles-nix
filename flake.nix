@@ -59,6 +59,8 @@
       linuxSystem = "x86_64-linux";
       linuxUser = "reohakuta";
       linuxHmHostname = "reohakuta-kcvl";
+      containerX86System = "x86_64-linux";
+      containerAarch64System = "aarch64-linux";
       pkgsFor =
         system:
         import nixpkgs {
@@ -134,6 +136,15 @@
         extraSpecialArgs = { inherit inputs; };
         modules = [ ./home/linux.nix ];
       };
+      homeContainerFor =
+        system:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = pkgsFor system;
+          extraSpecialArgs = { inherit inputs; };
+          modules = [ ./home/container.nix ];
+        };
+      homeContainerX86 = homeContainerFor containerX86System;
+      homeContainerAarch64 = homeContainerFor containerAarch64System;
     in
     {
       darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
@@ -154,9 +165,12 @@
       };
 
       homeConfigurations."${linuxUser}@${linuxHmHostname}" = homeLinux;
+      homeConfigurations."vscode@devcontainer" = homeContainerX86;
+      homeConfigurations."vscode@devcontainer-aarch64" = homeContainerAarch64;
 
       packages.${linuxSystem} = {
         home-reohakuta-kcvl = homeLinux.activationPackage;
+        home-vscode-devcontainer = homeContainerX86.activationPackage;
         ghostty = pkgsLinux.callPackage ./pkgs/gui/ghostty.nix { };
         inherit (pkgsLinux)
           cursor-appimage
@@ -166,6 +180,10 @@
           veracrypt
           vicinae-appimage
           ;
+      };
+
+      packages.${containerAarch64System} = {
+        home-vscode-devcontainer = homeContainerAarch64.activationPackage;
       };
 
       packages.aarch64-darwin = {

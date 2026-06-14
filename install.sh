@@ -37,6 +37,8 @@ Environment:
   DOTFILES_HM_OUTPUT         Same role as --hm-output, lower priority.
   DOTFILES_HM_USER           Override the user part for automatic <user>@<host> resolution.
   DOTFILES_HM_HOST           Override the host part for automatic <user>@<host> resolution.
+  DOTFILES_HM_USERNAME       Override home.username for vscode@devcontainer outputs.
+  DOTFILES_HM_HOME           Override home.homeDirectory for vscode@devcontainer outputs.
   DOTFILES_AUTO_INSTALL_NIX  Enable Nix auto-install when set to 1, true, yes, or on.
 
 Resolution order:
@@ -263,11 +265,31 @@ fi
 
 log "dotfiles install: using homeConfigurations.${resolved_output}"
 
+use_impure=false
+case "$resolved_output" in
+  vscode@devcontainer | vscode@devcontainer-aarch64)
+    export DOTFILES_HM_USERNAME="${DOTFILES_HM_USERNAME:-$runtime_user}"
+    if [ -z "${DOTFILES_HM_HOME:-}" ]; then
+      [ -n "${HOME:-}" ] ||
+        die "HOME is empty. Set DOTFILES_HM_HOME when using ${resolved_output}."
+      export DOTFILES_HM_HOME="$HOME"
+    fi
+    use_impure=true
+    log "dotfiles install: ${resolved_output} will use home.username=${DOTFILES_HM_USERNAME}"
+    log "dotfiles install: ${resolved_output} will use home.homeDirectory=${DOTFILES_HM_HOME}"
+    ;;
+esac
+
+home_manager_args=(switch -b hm-backup --flake "${repo_root}#${resolved_output}")
+if [ "$use_impure" = true ]; then
+  home_manager_args=(switch --impure -b hm-backup --flake "${repo_root}#${resolved_output}")
+fi
+
 if command -v home-manager >/dev/null 2>&1; then
-  home_manager_command=(home-manager switch -b hm-backup --flake "${repo_root}#${resolved_output}")
+  home_manager_command=(home-manager "${home_manager_args[@]}")
 else
   log "dotfiles install: home-manager was not found; using nix run github:nix-community/home-manager for this switch."
-  home_manager_command=(nix run github:nix-community/home-manager -- switch -b hm-backup --flake "${repo_root}#${resolved_output}")
+  home_manager_command=(nix run github:nix-community/home-manager -- "${home_manager_args[@]}")
 fi
 
 log "dotfiles install: running: ${home_manager_command[*]}"
