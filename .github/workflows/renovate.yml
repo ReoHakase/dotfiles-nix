@@ -72,10 +72,11 @@ jobs:
           RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
           # repository 情報を明示。self-hosted でも必須。
           RENOVATE_REPOSITORIES: ${{ github.repository }}
-          # Self-hosted 固有: post-upgrade コマンドの allowlist を config 側で解釈させる。
+          # Self-hosted/global-only options. Keep them out of .github/renovate.json5
+          # because Renovate also reads that file as repository config.
           RENOVATE_ALLOW_POST_UPGRADE_COMMAND_TEMPLATING: "true"
+          RENOVATE_ALLOWED_COMMANDS: '["^bash scripts/renovate/bump-vicinae-appimage\\.sh [-\\.0-9A-Za-z+]+$"]'
         with:
-          configurationFile: .github/renovate.json5
           # Prefer a PAT or GitHub App token so Renovate PRs can trigger normal
-          # PR/push workflows. GITHUB_TOKEN is a fallback for low-privilege runs.
-          token: ${{ secrets.RENOVATE_TOKEN || secrets.GITHUB_TOKEN }}
+          # PR/push workflows. github.token is a low-privilege fallback.
+          token: ${{ secrets.RENOVATE_TOKEN || github.token }}

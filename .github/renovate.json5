@@ -66,14 +66,12 @@
       matchPackageNames: ["vicinaehq/vicinae"],
       commitMessageTopic: "Vicinae AppImage",
       postUpgradeTasks: {
+        // The command allowlist is self-hosted/global-only, so renovate.yml
+        // provides it via RENOVATE_ALLOWED_COMMANDS instead of this repo config.
         commands: ["bash scripts/renovate/bump-vicinae-appimage.sh {{{newVersion}}}"],
         fileFilters: ["pkgs/appimages/vicinae.nix"],
         executionMode: "update",
       },
     },
-  ],
-
-  allowedCommands: [
-    "^bash scripts/renovate/bump-vicinae-appimage\\.sh [-\\.0-9A-Za-z+]+$",
   ],
 }
