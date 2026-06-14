@@ -111,6 +111,62 @@ prepend_nix_paths() {
   export PATH="$(IFS=:; printf '%s' "${path_prefix[*]}"):${PATH:-}"
 }
 
+setup_nix_command() {
+  nix_command=(nix)
+
+  if [ -z "${NP_LOCATION:-}" ]; then
+    return 0
+  fi
+
+  local store="${NP_LOCATION}/.nix-portable/nix"
+  if [ ! -d "${store}/store" ]; then
+    return 0
+  fi
+
+  local nixbin=""
+  local candidate
+  for candidate in /nix/store/*-nix-*/bin/nix; do
+    [ -x "$candidate" ] || continue
+    if [ -z "$nixbin" ]; then
+      nixbin="$candidate"
+    fi
+    case "$candidate" in
+      *-nix-2.34.*)
+        nixbin="$candidate"
+        break
+        ;;
+    esac
+  done
+
+  [ -n "$nixbin" ] || return 0
+
+  local bindir
+  local wrapper_dir
+  local tool
+  bindir="$(dirname "$nixbin")"
+  wrapper_dir="${TMPDIR:-/tmp}/dotfiles-nix-direct-bin"
+  rm -rf "$wrapper_dir"
+  mkdir -p "$wrapper_dir"
+
+  for tool in nix nix-env nix-build nix-store; do
+    [ -x "${bindir}/${tool}" ] || continue
+    cat >"${wrapper_dir}/${tool}" <<WRAPPER
+#!/usr/bin/env bash
+exec "${bindir}/${tool}" --store "${store}" "\$@"
+WRAPPER
+    chmod +x "${wrapper_dir}/${tool}"
+  done
+
+  if [ -n "${HOME:-}" ]; then
+    mkdir -p "${HOME}/.local/state/nix/profiles" 2>/dev/null || true
+  fi
+  mkdir -p "${store}/var/nix/profiles/per-user/${runtime_user}" 2>/dev/null || true
+
+  export PATH="${wrapper_dir}:${PATH:-}"
+  nix_command=("${wrapper_dir}/nix")
+  log "dotfiles install: using nix-portable store at ${store}"
+}
+
 source_nix_profile() {
   local profile
   local restore_nounset=false
@@ -233,10 +289,13 @@ done
 log "repository: ${REPOSITORY_URL}"
 
 prepend_nix_paths
+declare -a nix_command
+setup_nix_command
 
 if ! command -v nix >/dev/null 2>&1; then
   if [ "$auto_install_nix" = true ]; then
     install_nix
+    setup_nix_command
   else
     die "nix was not found in PATH. Install Nix with flakes enabled first, or rerun with --auto-install-nix / DOTFILES_AUTO_INSTALL_NIX=1."
   fi
@@ -273,7 +332,7 @@ else
 fi
 
 if ! available_outputs="$(
-  nix eval --raw \
+  "${nix_command[@]}" eval --raw \
     --apply 'attrs: builtins.concatStringsSep "\n" (builtins.attrNames attrs)' \
     "${repo_root}#homeConfigurations" \
     2> >(prefix_stream >&2)
@@ -321,7 +380,7 @@ if command -v home-manager >/dev/null 2>&1; then
   home_manager_command=(home-manager "${home_manager_args[@]}")
 else
   log "dotfiles install: home-manager was not found; using nix run github:nix-community/home-manager for this switch."
-  home_manager_command=(nix run github:nix-community/home-manager -- "${home_manager_args[@]}")
+  home_manager_command=("${nix_command[@]}" run github:nix-community/home-manager -- "${home_manager_args[@]}")
 fi
 
 log "dotfiles install: running: ${home_manager_command[*]}"
