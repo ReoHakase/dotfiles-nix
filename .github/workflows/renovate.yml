@@ -23,6 +23,11 @@ on:
         required: false
         default: ""
         type: string
+      ignoreSchedule:
+        description: "Ignore Renovate schedule for this manual run"
+        required: false
+        default: true
+        type: boolean
 
 concurrency:
   group: renovate-${{ github.ref }}
@@ -76,6 +81,7 @@ jobs:
           # because Renovate also reads that file as repository config.
           RENOVATE_ALLOW_POST_UPGRADE_COMMAND_TEMPLATING: "true"
           RENOVATE_ALLOWED_COMMANDS: '["^bash scripts/renovate/bump-vicinae-appimage\\.sh [-\\.0-9A-Za-z+]+$"]'
+          RENOVATE_FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.ignoreSchedule && '{"schedule":null}' || '{}' }}
         with:
           # Prefer a PAT or GitHub App token so Renovate PRs can trigger normal
           # PR/push workflows. github.token is a low-privilege fallback.
