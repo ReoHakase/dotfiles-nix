@@ -1,5 +1,6 @@
-{ inputs, ... }:
+{ inputs, lib, ... }:
 let
+  localOverride = ./container.local.nix;
   envOr =
     name: fallback:
     let
@@ -16,10 +17,11 @@ in
     ./modules/container/packages.nix
     ./modules/container/shell.nix
     ./modules/container/terminal.nix
-  ];
+  ]
+  ++ lib.optional (builtins.pathExists localOverride) localOverride;
 
-  home.username = envOr "DOTFILES_HM_USERNAME" "vscode";
-  home.homeDirectory = envOr "DOTFILES_HM_HOME" "/home/vscode";
+  home.username = lib.mkDefault (envOr "DOTFILES_HM_USERNAME" "vscode");
+  home.homeDirectory = lib.mkDefault (envOr "DOTFILES_HM_HOME" "/home/vscode");
   home.stateVersion = "24.11";
 
   programs.home-manager.enable = true;
