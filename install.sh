@@ -89,6 +89,16 @@ write_container_home_override() {
 OVERRIDE
 }
 
+copy_repo_for_path_flake() {
+  local source_root="$1"
+  local copy_root="${TMPDIR:-/tmp}/dotfiles-nix-flake"
+
+  rm -rf "$copy_root"
+  mkdir -p "$copy_root"
+  tar --exclude="./.git" -C "$source_root" -cf - . | tar -C "$copy_root" -xf -
+  printf 'path:%s' "$copy_root"
+}
+
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 runtime_user="$(id -un 2>/dev/null || true)"
 auto_install_nix=false
@@ -357,6 +367,7 @@ if ! printf '%s\n' "$available_outputs" | grep -Fqx -- "$resolved_output"; then
 fi
 
 log "dotfiles install: using homeConfigurations.${resolved_output}"
+home_manager_flake_ref="${repo_root}#${resolved_output}"
 
 case "$resolved_output" in
   vscode@devcontainer | vscode@devcontainer-aarch64)
@@ -371,10 +382,11 @@ case "$resolved_output" in
     write_container_home_override "${repo_root}/home/container.local.nix" \
       "$DOTFILES_HM_USERNAME" \
       "$DOTFILES_HM_HOME"
+    home_manager_flake_ref="$(copy_repo_for_path_flake "$repo_root")#${resolved_output}"
     ;;
 esac
 
-home_manager_args=(switch -b hm-backup --flake "${repo_root}#${resolved_output}")
+home_manager_args=(switch -b hm-backup --flake "$home_manager_flake_ref")
 
 if command -v home-manager >/dev/null 2>&1; then
   home_manager_command=(home-manager "${home_manager_args[@]}")
