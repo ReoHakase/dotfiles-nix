@@ -1,5 +1,37 @@
-{ lib, pkgs, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  osc52TmuxCopyPath = "${config.xdg.configHome}/tmux/osc52-tmux-copy";
+  osc52TmuxCopy = ''
+    #!${pkgs.runtimeShell}
+    set -eu
+
+    tmp="$(${pkgs.coreutils}/bin/mktemp "''${TMPDIR:-/tmp}/osc52-tmux-copy.XXXXXX")"
+    trap '${pkgs.coreutils}/bin/rm -f -- "$tmp"' EXIT
+    ${pkgs.coreutils}/bin/cat > "$tmp"
+
+    encoded="$(${pkgs.coreutils}/bin/base64 -w 0 < "$tmp")"
+    if [ -n "''${TMUX-}" ]; then
+      client_tty="$(${pkgs.tmux}/bin/tmux display-message -p '#{client_tty}' 2>/dev/null || true)"
+      if [ -n "$client_tty" ] && [ -w "$client_tty" ]; then
+        printf '\033]52;c;%s\a' "$encoded" > "$client_tty"
+        exit 0
+      fi
+    fi
+
+    printf '\033]52;c;%s\a' "$encoded"
+  '';
+in
+{
+  xdg.configFile."tmux/osc52-tmux-copy" = {
+    text = osc52TmuxCopy;
+    executable = true;
+  };
+
   programs.lazygit = {
     enable = true;
     settings = {
@@ -21,7 +53,7 @@
 
   programs.tmux =
     let
-      clipboardCommand = "${pkgs.xclip}/bin/xclip -selection clipboard -in";
+      clipboardCommand = osc52TmuxCopyPath;
     in
     {
       enable = true;
@@ -44,8 +76,10 @@
         set -g pane-base-index 1
         set -g renumber-windows on
         set -g default-command "exec ${pkgs.zsh}/bin/zsh"
-        set -g set-clipboard on
+        set -g set-clipboard external
+        set -as terminal-features ',xterm-256color:clipboard,tmux-256color:clipboard,screen-256color:clipboard'
         set -g copy-command "${clipboardCommand}"
+        set -g mode-style "bg=#677696,fg=#d7dae0"
         set -g status-style "bg=default,fg=#9da5b4"
         set -g window-status-current-style "bg=#23272e,fg=#d7dae0,bold"
         set -g pane-active-border-style "fg=#4aa5f0"
@@ -79,8 +113,8 @@
         unbind-key -q -T root MouseDown3Status
         unbind-key -q -T root MouseDown3StatusLeft
         bind-key -T root MouseUp3Pane display-menu -T "#[align=centre]#{pane_index} (#{pane_id})" -t = -x M -y M \
-          "Copy word" c "copy-mode -q ; set-buffer '#{q:mouse_word}'" \
-          "Copy line" l "copy-mode -q ; set-buffer '#{q:mouse_line}'" \
+          "Copy word" c "copy-mode -q ; set-buffer -w '#{q:mouse_word}'" \
+          "Copy line" l "copy-mode -q ; set-buffer -w '#{q:mouse_line}'" \
           "" \
           "Horizontal split" h "split-window -h" \
           "Vertical split" v "split-window -v" \

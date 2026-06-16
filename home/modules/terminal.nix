@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -16,15 +17,17 @@ let
     };
     rtpFilePath = "tmux-autoreload.tmux";
   };
-  tmuxPowerkit = pkgs.callPackage (
-    pkgs.fetchFromGitHub {
+  tmuxPowerkit = pkgs.tmuxPlugins.mkTmuxPlugin {
+    pluginName = "tmux-powerkit";
+    version = "unstable-2026-01-12";
+    src = pkgs.fetchFromGitHub {
       owner = "fabioluciano";
       repo = "tmux-powerkit";
       rev = "372b891e6c1884dd3b959f101336c92fa89056ec";
       hash = "sha256-rYDxaELzJNmn2+ndLBjhUSNZjwg8tf7lT4iwCAU4nfQ=";
-    }
-    + "/default.nix"
-  ) { };
+    };
+    rtpFilePath = "tmux-powerkit.tmux";
+  };
   tmuxCowboy = pkgs.tmuxPlugins.mkTmuxPlugin {
     pluginName = "cowboy";
     version = "2021-05-11";
@@ -86,11 +89,37 @@ let
       [menu-border]="#3e4452"
     )
   '';
+  osc52TmuxCopyPath = "${config.xdg.configHome}/tmux/osc52-tmux-copy";
+  osc52TmuxCopy = ''
+    #!${pkgs.runtimeShell}
+    set -eu
+
+    tmp="$(${pkgs.coreutils}/bin/mktemp "''${TMPDIR:-/tmp}/osc52-tmux-copy.XXXXXX")"
+    trap '${pkgs.coreutils}/bin/rm -f -- "$tmp"' EXIT
+    ${pkgs.coreutils}/bin/cat > "$tmp"
+
+    encoded="$(${pkgs.coreutils}/bin/base64 -w 0 < "$tmp")"
+    if [ -n "''${TMUX-}" ]; then
+      client_tty="$(${pkgs.tmux}/bin/tmux display-message -p '#{client_tty}' 2>/dev/null || true)"
+      if [ -n "$client_tty" ] && [ -w "$client_tty" ]; then
+        printf '\033]52;c;%s\a' "$encoded" > "$client_tty"
+        exit 0
+      fi
+    fi
+
+    printf '\033]52;c;%s\a' "$encoded"
+  '';
 in
 {
   xdg.configFile = {
     "ghostty/config".source = ../../config/ghostty/config;
     "ghostty/shaders".source = ghosttyCursorShaders;
+  }
+  // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+    "tmux/osc52-tmux-copy" = {
+      text = osc52TmuxCopy;
+      executable = true;
+    };
   };
 
   programs.lazygit = {
@@ -114,11 +143,7 @@ in
 
   programs.tmux =
     let
-      clipboardCommand =
-        if pkgs.stdenv.isDarwin then
-          "/usr/bin/pbcopy"
-        else
-          "${pkgs.xclip}/bin/xclip -selection clipboard -in";
+      clipboardCommand = if pkgs.stdenv.isDarwin then "/usr/bin/pbcopy" else osc52TmuxCopyPath;
     in
     {
       enable = true;
@@ -173,8 +198,10 @@ in
         set -g pane-base-index 1
         set -g renumber-windows on
         set -g default-command "exec ${pkgs.zsh}/bin/zsh"
-        set -g set-clipboard on
+        set -g set-clipboard external
+        set -as terminal-features ',xterm-256color:clipboard,tmux-256color:clipboard,screen-256color:clipboard'
         set -g copy-command "${clipboardCommand}"
+        set -g mode-style "bg=#677696,fg=#d7dae0"
 
         source-file ${pkgs.tmuxPlugins.tmux-which-key}/share/tmux-plugins/tmux-which-key/plugin/init.example.tmux
         unbind-key -q -T prefix Space
@@ -205,8 +232,8 @@ in
         unbind-key -q -T root MouseDown3Status
         unbind-key -q -T root MouseDown3StatusLeft
         bind-key -T root MouseUp3Pane display-menu -T "#[align=centre]#{pane_index} (#{pane_id})" -t = -x M -y M \
-          "Copy word" c "copy-mode -q ; set-buffer '#{q:mouse_word}'" \
-          "Copy line" l "copy-mode -q ; set-buffer '#{q:mouse_line}'" \
+          "Copy word" c "copy-mode -q ; set-buffer -w '#{q:mouse_word}'" \
+          "Copy line" l "copy-mode -q ; set-buffer -w '#{q:mouse_line}'" \
           "" \
           "Horizontal split" h "split-window -h" \
           "Vertical split" v "split-window -v" \
