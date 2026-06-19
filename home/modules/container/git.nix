@@ -45,10 +45,5 @@
       browser = "";
       version = "1";
     };
-    hosts."github.com" = {
-      git_protocol = "ssh";
-      users.ReoHakase = null;
-      user = "ReoHakase";
-    };
   };
 }
