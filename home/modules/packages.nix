@@ -78,6 +78,7 @@ in
     ripgrep
     sesh
     supabase-cli
+    termsvg
     turso-cli
     # Official https://get.tur.so/install.sh also drops libsql's sqld next to turso (~/.turso).
     # nixpkgs turso-cli is CLI-only; nixpkgs sqld supplies the local server binary.
