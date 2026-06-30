@@ -241,17 +241,17 @@
     "mizchi-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1777045904,
-        "narHash": "sha256-RybJvW2FYiHR/Aalg33/0C5XKGVJ6Jj9kOCS5z4Nkh8=",
+        "lastModified": 1782383356,
+        "narHash": "sha256-uBt8fBdOBuz9FdWrW4JSZFhtfWMcG4mD7qp6lE2chfk=",
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "rev": "d7999453cdb4e0e09df1c7f82fd23752539c546c",
         "type": "github"
       },
       "original": {
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "rev": "d7999453cdb4e0e09df1c7f82fd23752539c546c",
         "type": "github"
       }
     },
@@ -432,17 +432,17 @@
     "reohakase-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1778073579,
-        "narHash": "sha256-QF907DFKDmWiMFOYCY+70PG8TuWGHvwpfkT4vTS8yb8=",
+        "lastModified": 1782059969,
+        "narHash": "sha256-VKT82PHdCCZHqTzDWNVJ5BoQ8VYewi3MyGoV1y3WWOs=",
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "bdc317003cc64835552a5df26ba1ed7159f9964d",
+        "rev": "70f9326626a531fb10a0faf7ac9f5c79421d11fc",
         "type": "github"
       },
       "original": {
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "bdc317003cc64835552a5df26ba1ed7159f9964d",
+        "rev": "70f9326626a531fb10a0faf7ac9f5c79421d11fc",
         "type": "github"
       }
     },

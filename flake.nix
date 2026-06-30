@@ -31,7 +31,7 @@
       inputs.home-manager.follows = "home-manager";
     };
     mizchi-skills = {
-      url = "github:mizchi/skills/a2b5a796a5f22fc05fb515cef106993b84cf08cc";
+      url = "github:mizchi/skills/d7999453cdb4e0e09df1c7f82fd23752539c546c";
       flake = false;
     };
     ast-grep-agent-skill = {
@@ -39,7 +39,7 @@
       flake = false;
     };
     reohakase-skills = {
-      url = "github:ReoHakase/skills/bdc317003cc64835552a5df26ba1ed7159f9964d";
+      url = "github:ReoHakase/skills/70f9326626a531fb10a0faf7ac9f5c79421d11fc";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
