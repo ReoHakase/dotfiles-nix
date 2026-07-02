@@ -195,6 +195,26 @@
         "type": "github"
       }
     },
+    "herdr": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1783014260,
+        "narHash": "sha256-EjkkqbNgkhmH0h22hLGxiFLT0lupDMfp+HQsqEI37RQ=",
+        "owner": "ogulcancelik",
+        "repo": "herdr",
+        "rev": "32146f19d87448d8e3bb4019be6b8d9ff1cb72ee",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ogulcancelik",
+        "repo": "herdr",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -451,6 +471,7 @@
         "actrun": "actrun",
         "agent-skills": "agent-skills",
         "ast-grep-agent-skill": "ast-grep-agent-skill",
+        "herdr": "herdr",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
         "mizchi-skills": "mizchi-skills",

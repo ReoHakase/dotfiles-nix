@@ -43,6 +43,10 @@
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    herdr = {
+      url = "github:ogulcancelik/herdr";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

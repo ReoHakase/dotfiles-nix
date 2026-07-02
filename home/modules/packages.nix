@@ -11,6 +11,7 @@ let
     '';
   };
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
+  herdrPkgs = inputs.herdr.packages.${system};
 in
 {
   home.packages = with pkgs; [
@@ -50,6 +51,7 @@ in
     gitBranchlessWithCompletions
     gnupg
     graphviz
+    herdrPkgs.herdr
     hyperfine
     inetutils
     jdk
