@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   ...
 }:
 
@@ -31,5 +30,5 @@ in
     "karabiner/assets".source = ../config/karabiner/assets;
   };
 
-  home.packages = [ pkgs.terminal-notifier ] ++ nixCasks;
+  home.packages = nixCasks;
 }

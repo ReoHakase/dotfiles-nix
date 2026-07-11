@@ -43,14 +43,6 @@
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    herdr = {
-      url = "github:ogulcancelik/herdr";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    workmux = {
-      url = "github:raine/workmux";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -115,7 +107,23 @@
               fi
 
               hdf5Dylib="''${hdf5AbiDylibs[0]}"
-              install_name_tool -change "@rpath/$(basename "$hdf5Dylib")" "$hdf5Dylib" "$out/lib/libmatio.13.dylib"
+              matioDylibs=("$out"/lib/libmatio.[0-9]*.dylib)
+              matioAbiDylibs=()
+              for candidate in "''${matioDylibs[@]}"; do
+                [ -e "$candidate" ] || continue
+                case "$(basename "$candidate")" in
+                  *.*.*.dylib) ;;
+                  *) matioAbiDylibs+=("$candidate") ;;
+                esac
+              done
+
+              if [ "''${#matioAbiDylibs[@]}" -ne 1 ]; then
+                echo "expected exactly one matio ABI dylib, found ''${#matioAbiDylibs[@]}" >&2
+                exit 1
+              fi
+
+              matioDylib="''${matioAbiDylibs[0]}"
+              install_name_tool -change "@rpath/$(basename "$hdf5Dylib")" "$hdf5Dylib" "$matioDylib"
             '';
           });
         };

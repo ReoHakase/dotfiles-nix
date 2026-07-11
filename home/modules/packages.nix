@@ -11,8 +11,6 @@ let
     '';
   };
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
-  herdrPkgs = inputs.herdr.packages.${system};
-  workmuxPkgs = inputs.workmux.packages.${system};
 in
 {
   home.packages = with pkgs; [
@@ -52,7 +50,6 @@ in
     gitBranchlessWithCompletions
     gnupg
     graphviz
-    herdrPkgs.herdr
     hyperfine
     inetutils
     jdk
@@ -73,7 +70,6 @@ in
     nixd
     nixfmt
     nmap
-    opencode
     openssl
     p7zip
     pkgconf
@@ -93,7 +89,6 @@ in
     uv
     vips
     wget
-    workmuxPkgs.default
     yazi
     xz
     zstd

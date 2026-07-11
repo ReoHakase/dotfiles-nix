@@ -230,7 +230,7 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | Mac（`home/darwin.nix`） | Ubuntu（`home/linux.nix`） |
 | ------------------------ | --------------------------- |
 | Karabiner の `xdg.configFile` | 無し（macOS用） |
-| `pinentry_mac` / `terminal-notifier` | `pinentry-gtk2`（GPG 用） |
+| `pinentry_mac` | `pinentry-gtk2`（GPG 用） |
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
 | zsh 追記 | [`home/modules/shell.nix`](home/modules/shell.nix) で共通生成。Linux だけ `PYTHONNOUSERSITE=1` を `home/linux.nix` で追加 |
 | NixCasks 等の macOS GUI | [home/modules/linux/gui-apps.nix](home/modules/linux/gui-apps.nix)（Ghostty・Cursor・Proton VPN・VeraCrypt・Vicinae）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,proton-vpn,veracrypt,vicinae-appimage}` |
@@ -292,7 +292,7 @@ chsh -s "$(which zsh)"
 
 - **共通（`home/common.nix`）:** `home/modules/*` と `agent-skills-nix` の import、HM 共通の土台（stateVersion、manual、fontconfig、xdg）
 - **共有モジュール（`home/modules/`）:** zsh、starship、direnv、mise、neovim、git、gh、ssh、tmux、lazygit、Ghostty shader、CLI パッケージ、TeX Live、GPG pinentry、Agent Skills
-- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner、macOS 向け `sessionPath`、`terminal-notifier` など（**`/Library/TeX/texbin` は入れない**）。`mole` は Homebrew formula（`hosts/reohakase.nix`）で管理。
+- **macOS（`home/darwin.nix`、`home/default.nix` 経由）:** Karabiner、macOS 向け `sessionPath`（**`/Library/TeX/texbin` は入れない**）。`mole` は Homebrew formula（`hosts/reohakase.nix`）で管理。
 - **Linux（`home/linux.nix` + `home/modules/linux/`）:** Linux 向け `sessionPath`、`PYTHONNOUSERSITE`、`tailscale` と **userspace** の `systemd.user` `tailscaled`、`TS_SOCKET`、**GUI**
 > [!NOTE] > **なぜ `hosts/` と `home/` が分かれるか:** システム全体（ユーザー作成・defaults・Homebrew）と、ユーザーのホーム・ドットファイルの責務が違うため。概要は会話メモか [MANUAL.md](MANUAL.md) を参照。
 
@@ -329,7 +329,7 @@ chsh -s "$(which zsh)"
 ### Homebrew の整理（formula・cask 以外から進める）
 
 - [x] `which -a git rg fzf` で **`/etc/profiles/per-user/<ユーザー>/bin` が先**であることを確認した
-- [x] Nix と重複していた formula を **`brew uninstall` / `cleanup` で削減**した（CLI は nixpkgs、`opencode` 等は `home.packages`）— 手順は [MANUAL.md](MANUAL.md)「Homebrew」
+- [x] Nix と重複していた formula を **`brew uninstall` / `cleanup` で削減**した（CLI は nixpkgs、共有 CLI は `home.packages`）— 手順は [MANUAL.md](MANUAL.md)「Homebrew」
 - [ ] （任意・後回しでよい）Cask / GUI の扱いを決めた（Homebrew のまま / 手動 / nix-darwin `homebrew` / NixCasks など）
 - [ ] （任意）`brew` を cask 専用として残すかどうか
 
