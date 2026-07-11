@@ -47,6 +47,10 @@
       url = "github:ogulcancelik/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    workmux = {
+      url = "github:raine/workmux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

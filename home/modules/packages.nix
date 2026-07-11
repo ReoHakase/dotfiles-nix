@@ -12,6 +12,7 @@ let
   };
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
   herdrPkgs = inputs.herdr.packages.${system};
+  workmuxPkgs = inputs.workmux.packages.${system};
 in
 {
   home.packages = with pkgs; [
@@ -92,6 +93,7 @@ in
     uv
     vips
     wget
+    workmuxPkgs.default
     yazi
     xz
     zstd
