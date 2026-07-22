@@ -31,15 +31,15 @@
       inputs.home-manager.follows = "home-manager";
     };
     mizchi-skills = {
-      url = "github:mizchi/skills/a2b5a796a5f22fc05fb515cef106993b84cf08cc";
+      url = "github:mizchi/skills/7a0d72866a0bb3e9ac3e2768c328b09ba2bc40c4";
       flake = false;
     };
     ast-grep-agent-skill = {
-      url = "github:ast-grep/agent-skill/577f4d4507678f2c8cee150fae25e6ce309f70b1";
+      url = "github:ast-grep/agent-skill/c2a9bc154f4ffe08b25d28d5e852dfac8c0d0d8a";
       flake = false;
     };
     reohakase-skills = {
-      url = "github:ReoHakase/skills/bdc317003cc64835552a5df26ba1ed7159f9964d";
+      url = "github:ReoHakase/skills/70f9326626a531fb10a0faf7ac9f5c79421d11fc";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
