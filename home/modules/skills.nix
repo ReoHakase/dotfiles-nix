@@ -7,11 +7,6 @@ _: {
         input = "mizchi-skills";
         filter.maxDepth = 1;
       };
-      ast-grep = {
-        input = "ast-grep-agent-skill";
-        subdir = "ast-grep/skills";
-        filter.maxDepth = 1;
-      };
       reohakase = {
         input = "reohakase-skills";
         filter.maxDepth = 1;
@@ -21,12 +16,10 @@ _: {
     skills.enable = [
       "empirical-prompt-tuning"
       "tech-article-reproducibility"
-      "apm-usage"
       "nix-setup"
-      "justfile"
       "dotenvx"
-      "ast-grep"
       "conventional-commit"
+      "github-issue-pr-ops"
       "agentskills-authoring"
     ];
 

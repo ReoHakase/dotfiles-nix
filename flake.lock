@@ -46,23 +46,6 @@
         "type": "github"
       }
     },
-    "ast-grep-agent-skill": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1769044697,
-        "narHash": "sha256-LgGFtPieyKtoru22AhHW8hvkJ8kCHO2Cr8rBOWGuxvY=",
-        "owner": "ast-grep",
-        "repo": "agent-skill",
-        "rev": "577f4d4507678f2c8cee150fae25e6ce309f70b1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ast-grep",
-        "repo": "agent-skill",
-        "rev": "577f4d4507678f2c8cee150fae25e6ce309f70b1",
-        "type": "github"
-      }
-    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -432,17 +415,17 @@
     "reohakase-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1778073579,
-        "narHash": "sha256-QF907DFKDmWiMFOYCY+70PG8TuWGHvwpfkT4vTS8yb8=",
+        "lastModified": 1785567154,
+        "narHash": "sha256-7beIw4jEHkBOyvJXuMAIqa4EWD2eYGu88sU1efRA8Bs=",
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "bdc317003cc64835552a5df26ba1ed7159f9964d",
+        "rev": "442fb019353593bbf14b76693ab2cf3bb2ac3fe5",
         "type": "github"
       },
       "original": {
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "bdc317003cc64835552a5df26ba1ed7159f9964d",
+        "rev": "442fb019353593bbf14b76693ab2cf3bb2ac3fe5",
         "type": "github"
       }
     },
@@ -450,7 +433,6 @@
       "inputs": {
         "actrun": "actrun",
         "agent-skills": "agent-skills",
-        "ast-grep-agent-skill": "ast-grep-agent-skill",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",
         "mizchi-skills": "mizchi-skills",

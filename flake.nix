@@ -34,12 +34,8 @@
       url = "github:mizchi/skills/a2b5a796a5f22fc05fb515cef106993b84cf08cc";
       flake = false;
     };
-    ast-grep-agent-skill = {
-      url = "github:ast-grep/agent-skill/577f4d4507678f2c8cee150fae25e6ce309f70b1";
-      flake = false;
-    };
     reohakase-skills = {
-      url = "github:ReoHakase/skills/bdc317003cc64835552a5df26ba1ed7159f9964d";
+      url = "github:ReoHakase/skills/442fb019353593bbf14b76693ab2cf3bb2ac3fe5";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
