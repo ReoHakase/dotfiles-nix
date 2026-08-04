@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -76,6 +77,11 @@
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
+    package =
+      if pkgs.stdenv.isDarwin then
+        inputs.nixpkgs-starship.legacyPackages.${pkgs.stdenv.hostPlatform.system}.starship
+      else
+        pkgs.starship;
     settings = builtins.fromTOML ''
       # Get editor completions based on the config schema
       "$schema" = 'https://starship.rs/config-schema.json'
