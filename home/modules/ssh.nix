@@ -66,15 +66,41 @@ in
         User = "student";
         ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
         LocalForward = [
+          # local 3100 -> remote 3000: OpenWebUI
           {
-            bind.port = 3003;
+            bind.port = 3100;
             host.address = "127.0.0.1";
             host.port = 3000;
           }
+          # local 8100 -> remote 8000: Qwen vLLM backend
           {
-            bind.port = 8008;
+            bind.port = 8100;
             host.address = "127.0.0.1";
             host.port = 8000;
+          }
+          # local 8101 -> remote 8001: Sarashina wrapper
+          {
+            bind.port = 8101;
+            host.address = "127.0.0.1";
+            host.port = 8001;
+          }
+          # local 8102 -> remote 8002: llm-jp 9B wrapper
+          {
+            bind.port = 8102;
+            host.address = "127.0.0.1";
+            host.port = 8002;
+          }
+          # local 8103 -> remote 8003: Jagle wrapper
+          {
+            bind.port = 8103;
+            host.address = "127.0.0.1";
+            host.port = 8003;
+          }
+          # local 8110 -> remote 8010: OpenAI-compatible API proxy
+          {
+            bind.port = 8110;
+            host.address = "127.0.0.1";
+            host.port = 8010;
           }
         ];
         ExitOnForwardFailure = true;
