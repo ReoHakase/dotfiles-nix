@@ -61,6 +61,24 @@ in
         User = "reohakuta";
         ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
+      kcvl-llm = {
+        HostName = "nidoking07.lan";
+        User = "student";
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+        LocalForward = [
+          {
+            bind.port = 3003;
+            host.address = "127.0.0.1";
+            host.port = 3000;
+          }
+          {
+            bind.port = 8008;
+            host.address = "127.0.0.1";
+            host.port = 8000;
+          }
+        ];
+        ExitOnForwardFailure = true;
+      };
       # 96GB; RTX 6000 Ada x2
       "paras paras02 paras02.lan" = {
         HostName = "paras02.lan";
