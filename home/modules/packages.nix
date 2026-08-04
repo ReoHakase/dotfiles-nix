@@ -21,22 +21,18 @@ in
     noto-fonts-cjk-serif
 
     actrun
-    act
-    arp-scan
     bat
     bottom
     brotli
     cloc
     commitlint-rs
     copilot-language-server
-    curl-impersonate
     dotenvx
     entr
     lefthook
     llmAgentsPkgs.claude-code
     llmAgentsPkgs.codex
     dnsutils
-    eternal-terminal
     exiftool
     eza
     fastfetch
@@ -52,8 +48,6 @@ in
     graphviz
     hyperfine
     inetutils
-    jdk
-    just
     lazygit
     lazyssh
     imagemagick
@@ -73,17 +67,13 @@ in
     openssl
     p7zip
     pkgconf
-    rWrapper
     ripgrep
-    sesh
     supabase-cli
     termsvg
     turso-cli
     # Official https://get.tur.so/install.sh also drops libsql's sqld next to turso (~/.turso).
     # nixpkgs turso-cli is CLI-only; nixpkgs sqld supplies the local server binary.
     sqld
-    tcl
-    tk
     tree-sitter
     typst
     uv
