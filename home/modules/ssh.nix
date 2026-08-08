@@ -43,28 +43,30 @@ in
     enable = true;
     enableDefaultConfig = false;
     settings = {
+      labProxyJump = lib.hm.dag.entryBefore [ "kcvl" ] {
+        header = ''Match originalhost kcvl,kcvl-llm,paras,paras02,paras02.lan,snorlax,snorlax06,snorlax06.lan,squirtle,squirtle05,squirtle05.lan,nidoking,nidoking07,nidoking07.lan,nidoqueen,nidoqueen08,nidoqueen08.lan exec "if command -v dscacheutil >/dev/null; then dscacheutil -q host -a name vision.is.kit.ac.jp; else getent ahostsv4 vision.is.kit.ac.jp; fi | grep -q 133.16.196.98"'';
+        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
+      };
       "*" = {
         ForwardAgent = false;
         AddKeysToAgent = "no";
         Compression = false;
-        ServerAliveInterval = 0;
+        ServerAliveInterval = 30;
         ServerAliveCountMax = 3;
         HashKnownHosts = false;
         UserKnownHostsFile = "~/.ssh/known_hosts";
-        ControlMaster = "no";
+        ControlMaster = "auto";
         ControlPath = "~/.ssh/master-%r@%n:%p";
-        ControlPersist = "no";
+        ControlPersist = "10m";
         SetEnv.TERM = "xterm-256color";
       };
       kcvl = {
         HostName = "192.168.100.149";
         User = "reohakuta";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       kcvl-llm = {
         HostName = "nidoking07.lan";
         User = "student";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
         LocalForward = [
           # local 3100 -> remote 3000: OpenWebUI
           {
@@ -109,31 +111,26 @@ in
       "paras paras02 paras02.lan" = {
         HostName = "paras02.lan";
         User = "student";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 96GB; RTX 6000 Pro Blackwell Max-Q
       "snorlax snorlax06 snorlax06.lan" = {
         HostName = "snorlax06.lan";
         User = "student";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 48GB; RTX 3090 Ti x2; retiring soon
       "squirtle squirtle05 squirtle05.lan" = {
         HostName = "squirtle05.lan";
         User = "student";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 128GB; preparing
       "nidoking nidoking07 nidoking07.lan" = {
         HostName = "nidoking07.lan";
         User = "student";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       # 128GB; preparing
       "nidoqueen nidoqueen08 nidoqueen08.lan" = {
         HostName = "nidoqueen08.lan";
         User = "student";
-        ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
     };
   };
