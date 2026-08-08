@@ -44,7 +44,7 @@ in
     enableDefaultConfig = false;
     settings = {
       labProxyJump = lib.hm.dag.entryBefore [ "kcvl" ] {
-        header = ''Match originalhost kcvl,kcvl-llm,paras,paras02,paras02.lan,snorlax,snorlax06,snorlax06.lan,squirtle,squirtle05,squirtle05.lan,nidoking,nidoking07,nidoking07.lan,nidoqueen,nidoqueen08,nidoqueen08.lan exec "if command -v dscacheutil >/dev/null; then dscacheutil -q host -a name vision.is.kit.ac.jp; else getent ahostsv4 vision.is.kit.ac.jp; fi | grep -q 133.16.196.98"'';
+        header = "Match originalhost kcvl,kcvl-llm,paras,paras02,paras02.lan,snorlax,snorlax06,snorlax06.lan,squirtle,squirtle05,squirtle05.lan,nidoking,nidoking07,nidoking07.lan,nidoqueen,nidoqueen08,nidoqueen08.lan !localnetwork 192.168.100.0/24";
         ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       "*" = {
