@@ -48,7 +48,7 @@ in
         ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       "*" = {
-        ForwardAgent = false;
+        ForwardAgent = true;
         AddKeysToAgent = "no";
         Compression = false;
         ServerAliveInterval = 30;
@@ -63,6 +63,7 @@ in
       kcvl = {
         HostName = "192.168.100.149";
         User = "reohakuta";
+        AddKeysToAgent = "yes";
       };
       kcvl-llm = {
         HostName = "nidoking07.lan";
