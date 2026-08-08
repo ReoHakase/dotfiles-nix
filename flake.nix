@@ -11,7 +11,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     # starship 1.26.0 built with rustc 1.96.1 crashes cctools ld on aarch64-darwin.
-    nixpkgs-starship.url = "github:NixOS/nixpkgs/3e41b24abd260e8f71dbe2f5737d24122f972158";
+    nixpkgs-starship.url = "github:NixOS/nixpkgs/a50ab42bfe17b6cb772d43a8b9c8fef9d650c556";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager = {
@@ -33,11 +33,11 @@
       inputs.home-manager.follows = "home-manager";
     };
     mizchi-skills = {
-      url = "github:mizchi/skills/a2b5a796a5f22fc05fb515cef106993b84cf08cc";
+      url = "github:mizchi/skills/7a0d72866a0bb3e9ac3e2768c328b09ba2bc40c4";
       flake = false;
     };
     reohakase-skills = {
-      url = "github:ReoHakase/skills/442fb019353593bbf14b76693ab2cf3bb2ac3fe5";
+      url = "github:ReoHakase/skills/9037240b078d1bd394fc1b9e3f6dc21785efa25c";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";

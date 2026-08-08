@@ -224,17 +224,17 @@
     "mizchi-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1777045904,
-        "narHash": "sha256-RybJvW2FYiHR/Aalg33/0C5XKGVJ6Jj9kOCS5z4Nkh8=",
+        "lastModified": 1784050221,
+        "narHash": "sha256-ayMrZJ+3OD+f4azULSfgFh84UIQSoi+fhSOYvwWq45A=",
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "rev": "7a0d72866a0bb3e9ac3e2768c328b09ba2bc40c4",
         "type": "github"
       },
       "original": {
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "rev": "7a0d72866a0bb3e9ac3e2768c328b09ba2bc40c4",
         "type": "github"
       }
     },
@@ -382,17 +382,17 @@
     },
     "nixpkgs-starship": {
       "locked": {
-        "lastModified": 1781607440,
-        "narHash": "sha256-rxO+uc/KFbSJp+pgyXRuAX6QlG9hJdnt0BXpEQRXY+U=",
+        "lastModified": 1786213133,
+        "narHash": "sha256-rqSeHvC2lRgFBWLbfTNZrd+XIsgL8jYQo+KANn4Je/Y=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3e41b24abd260e8f71dbe2f5737d24122f972158",
+        "rev": "a50ab42bfe17b6cb772d43a8b9c8fef9d650c556",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3e41b24abd260e8f71dbe2f5737d24122f972158",
+        "rev": "a50ab42bfe17b6cb772d43a8b9c8fef9d650c556",
         "type": "github"
       }
     },
@@ -431,17 +431,17 @@
     "reohakase-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1785567154,
-        "narHash": "sha256-7beIw4jEHkBOyvJXuMAIqa4EWD2eYGu88sU1efRA8Bs=",
+        "lastModified": 1785568507,
+        "narHash": "sha256-SGes06pP+A1LePgXdINXqWKZgRErTNR1/rlUf89v8AQ=",
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "442fb019353593bbf14b76693ab2cf3bb2ac3fe5",
+        "rev": "9037240b078d1bd394fc1b9e3f6dc21785efa25c",
         "type": "github"
       },
       "original": {
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "442fb019353593bbf14b76693ab2cf3bb2ac3fe5",
+        "rev": "9037240b078d1bd394fc1b9e3f6dc21785efa25c",
         "type": "github"
       }
     },
