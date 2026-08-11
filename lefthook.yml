@@ -7,13 +7,13 @@ pre-commit:
   commands:
     nix-format:
       glob: "*.nix"
-      run: nix --option warn-dirty false develop -c nixfmt --check {staged_files}
+      run: nix --option warn-dirty false develop --profile .nix-profiles/dev-shell -c nixfmt --check {staged_files}
     nix-lint:
       glob: "*.nix"
-      run: nix --option warn-dirty false develop -c sh -c 'for file do statix check "$file"; done' sh {staged_files}
+      run: nix --option warn-dirty false develop --profile .nix-profiles/dev-shell -c sh -c 'for file do statix check "$file"; done' sh {staged_files}
     nix-dead-code:
       glob: "*.nix"
-      run: nix --option warn-dirty false develop -c deadnix --fail {staged_files}
+      run: nix --option warn-dirty false develop --profile .nix-profiles/dev-shell -c deadnix --fail {staged_files}
     nix-lockfile:
       glob: "{flake.nix,flake.lock}"
       run: nix --option warn-dirty false flake lock --no-update-lock-file

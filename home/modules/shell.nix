@@ -56,6 +56,7 @@
         gpull = "git pull origin HEAD";
         "gc-" = "git reset --soft HEAD^";
         gc = "git commit -S";
+        nd = "nix develop --profile .nix-profiles/dev-shell";
         ghi = "gh issue create";
         ghp = "gh pr create";
         ghw = "gh repo view -w";

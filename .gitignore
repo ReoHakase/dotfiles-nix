@@ -1,6 +1,7 @@
 result
 result-*
 .direnv
+.nix-profiles/
 *.swp
 .DS_Store
 home/container.local.nix

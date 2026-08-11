@@ -122,9 +122,11 @@ nix flake lock
 Git hook を入れる:
 
 ```bash
-nix develop -c lefthook install
-nix develop -c lefthook run pre-commit --all-files
+nix develop --profile .nix-profiles/dev-shell -c lefthook install
+nix develop --profile .nix-profiles/dev-shell -c lefthook run pre-commit --all-files
 ```
+
+`--profile .nix-profiles/dev-shell` は dev-shell を Nix の GC root として保持する。Determinate Nix の自動 GC 後も hook 用ツールを毎回ダウンロードしないため、`.nix-profiles/` は Git 管理外にしている。対話的に入るときは Home Manager の `nd` 略語を使う。
 
 `pre-commit` は staged の Nix ファイルに `nixfmt --check` / `statix check` / `deadnix --fail` をかけ、`flake.nix` / `flake.lock` 変更時は `nix flake lock --no-update-lock-file` で lockfile の同期漏れを止める。
 
