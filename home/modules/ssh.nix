@@ -64,6 +64,15 @@ in
         HostName = "192.168.100.149";
         User = "reohakuta";
         AddKeysToAgent = "yes";
+        LocalForward = [
+          # local 2719 -> remote 2719: service on kcvl
+          {
+            bind.port = 2719;
+            host.address = "127.0.0.1";
+            host.port = 2719;
+          }
+        ];
+        ExitOnForwardFailure = false;
       };
       kcvl-llm = {
         HostName = "nidoking07.lan";
