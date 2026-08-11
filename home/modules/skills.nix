@@ -21,6 +21,7 @@ _: {
       "conventional-commit"
       "github-issue-pr-ops"
       "agentskills-authoring"
+      "minimum-impl"
     ];
 
     targets = {
