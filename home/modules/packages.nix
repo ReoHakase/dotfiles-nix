@@ -41,6 +41,7 @@ in
     fzf
     gcc
     gettext
+    gdrive3
     gh
     git
     gitBranchlessWithCompletions
