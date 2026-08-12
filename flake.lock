@@ -431,17 +431,17 @@
     "reohakase-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1786390033,
-        "narHash": "sha256-a8eOQuzarY1bJjHBR6UPQYQudHl7Go9R30PGqktMOIA=",
+        "lastModified": 1786482228,
+        "narHash": "sha256-fmxzgj5EYXvndxygln2mFjd9MFYut+vlyXbW/yqV2rw=",
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "de46e107352f2b12fba4684fcf7dd73fbedcd73e",
+        "rev": "0d8a99c7ce7b72e5494b98638a25bab340a1aaba",
         "type": "github"
       },
       "original": {
         "owner": "ReoHakase",
         "repo": "skills",
-        "rev": "de46e107352f2b12fba4684fcf7dd73fbedcd73e",
+        "rev": "0d8a99c7ce7b72e5494b98638a25bab340a1aaba",
         "type": "github"
       }
     },

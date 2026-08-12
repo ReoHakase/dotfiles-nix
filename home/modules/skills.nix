@@ -20,6 +20,7 @@ _: {
       "dotenvx"
       "conventional-commit"
       "github-issue-pr-ops"
+      "github-issue-pr-image-attach"
       "agentskills-authoring"
       "minimum-impl"
     ];

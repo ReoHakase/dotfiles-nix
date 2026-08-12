@@ -37,7 +37,7 @@
       flake = false;
     };
     reohakase-skills = {
-      url = "github:ReoHakase/skills/de46e107352f2b12fba4684fcf7dd73fbedcd73e";
+      url = "github:ReoHakase/skills/0d8a99c7ce7b72e5494b98638a25bab340a1aaba";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
