@@ -224,17 +224,17 @@
     "mizchi-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1777045904,
-        "narHash": "sha256-RybJvW2FYiHR/Aalg33/0C5XKGVJ6Jj9kOCS5z4Nkh8=",
+        "lastModified": 1789581361,
+        "narHash": "sha256-ubk5JXgYS4JxNnJB4PQo++qITH1stTNHZqm3lX/0uwo=",
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "rev": "aa223d8c85ba4313e2ec6fb9251cc65d46ed3291",
         "type": "github"
       },
       "original": {
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "a2b5a796a5f22fc05fb515cef106993b84cf08cc",
+        "rev": "aa223d8c85ba4313e2ec6fb9251cc65d46ed3291",
         "type": "github"
       }
     },
@@ -382,17 +382,17 @@
     },
     "nixpkgs-starship": {
       "locked": {
-        "lastModified": 1781607440,
-        "narHash": "sha256-rxO+uc/KFbSJp+pgyXRuAX6QlG9hJdnt0BXpEQRXY+U=",
+        "lastModified": 1789761729,
+        "narHash": "sha256-xt5pGoZlPIlvqbli6e9+3HZ2zRXLK/6QxoQ/QOPqYaA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3e41b24abd260e8f71dbe2f5737d24122f972158",
+        "rev": "55e65d239a9ff7b7880b21d8f01b695ca348df91",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "3e41b24abd260e8f71dbe2f5737d24122f972158",
+        "rev": "55e65d239a9ff7b7880b21d8f01b695ca348df91",
         "type": "github"
       }
     },
