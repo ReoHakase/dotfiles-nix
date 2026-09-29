@@ -105,6 +105,7 @@
     onActivation.cleanup = "uninstall";
     taps = [
       "macos-fuse-t/cask"
+      "stablyai/orca"
     ];
     brews = [
       "macos-fuse-t/cask/sshfs-fuse-t"
@@ -136,6 +137,7 @@
       "morisawa-desktop-manager"
       "notion"
       "orbstack"
+      "stablyai/orca/orca"
       "protonvpn"
       "ptaru/tap/vidpreview"
       "raycast"

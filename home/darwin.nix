@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   ...
 }:
 
@@ -30,5 +31,25 @@ in
     "karabiner/assets".source = ../config/karabiner/assets;
   };
 
-  home.packages = nixCasks;
+  home.packages = nixCasks ++ [
+    (pkgs.writeShellApplication {
+      name = "orca-kcvl-tunnel";
+      runtimeInputs = [
+        pkgs.gawk
+        pkgs.coreutils
+      ];
+      text = ''
+        # Resolve the existing kcvl target, including Match/ProxyJump, but omit
+        # unrelated forwards. A separate connection owns only this tunnel.
+        # OpenSSH closes process-substitution descriptors before reading -F.
+        ssh_config=$(mktemp "''${TMPDIR:-/tmp}/orca-kcvl.XXXXXX")
+        trap 'rm -f "$ssh_config"' EXIT
+        /usr/bin/ssh -G kcvl | awk '
+          $1 !~ /^(localforward|remoteforward|dynamicforward)$/
+        ' > "$ssh_config"
+        /usr/bin/ssh -F "$ssh_config" -S none -o ControlMaster=no -o ExitOnForwardFailure=yes \
+          -N -T -L 127.0.0.1:16768:127.0.0.1:6768 kcvl
+      '';
+    })
+  ];
 }

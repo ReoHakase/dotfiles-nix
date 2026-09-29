@@ -12,6 +12,7 @@ in
   imports = [
     ./common.nix
     ./modules/linux/gui-apps.nix
+    ./modules/linux/orca.nix
     ./modules/linux/tailscale.nix
   ];
 

@@ -20,6 +20,7 @@
 - [NixCasks（GUI）](#nixcasksgui)
 - [Agent Skills](#agent-skills)
 - [Linux（Ubuntu）GUI: Ghostty・Cursor・Vicinae](#linuxubuntu-gui-ghosttycursorvicinae)
+- [Orca: Mac desktop と kcvl headless server](#orca-mac-desktop-と-kcvl-headless-server)
 - [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
 - [秘密情報（GPG・SSH など）](#秘密情報gpgssh-など)
 - [nixd（エディタ連携）](#nixdエディタ連携)
@@ -238,6 +239,64 @@ nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
 ```
 
 **Vicinae のバージョン更新:** `pkgs/appimages/vicinae.nix` の `version` と `src.url` をリリースに合わせ、`hash` を更新する。手元で一度取り込んだあとなら `nix hash path /nix/store/…-Vicinae-x86_64.AppImage` で SRI にできる。未取得なら `nix-prefetch-url '<AppImage の URL>' --type sha256` で store に入れてから同様に hash を得る。
+
+## Orca: Mac desktop と kcvl headless server
+
+Mac は `hosts/reohakase.nix` の公式 Homebrew Cask `stablyai/orca/orca`、kcvl は `pkgs/appimages/orca.nix` の固定リリースを使う。Linux は公式 AppImage を `appimageTools` で展開し、ELF の依存ライブラリを Nix store に向けて修正する。Ubuntu 24.04 の user namespace 制限により `wrapType2` の bubblewrap が起動できないため、この方式を使う。OS の制限やファイアウォールは変更しない。
+
+Linux の CLI は GNOME のスクリーンリーダーとの衝突を避けて `orca-ide`。Home Manager の `home/modules/linux/orca.nix` が `reohakuta` のユーザーサービスを定義する。GUI セッションには依存せず、Nix の Xvfb を使う。既存の `DISPLAY` は引き継がない。コンテナ向け構成には含めない。
+
+### ビルドと適用
+
+```bash
+# Mac（管理者認証が必要）
+./scripts/apply-system.sh
+
+# kcvl
+nix build '.#orca-ide' --no-link
+home-manager switch --flake '.#reohakuta@reohakuta-kcvl'
+systemctl --user start orca-serve
+systemctl --user is-active orca-serve
+orca-ide --version
+orca-ide status --json
+```
+
+未追跡ファイルも検証する場合は、`.git` 等を除いた一時スナップショットを作り `path:/そのディレクトリ#...` を対象にする。private flake input を取得できないホストには、認証済みの Mac から `nix flake archive --to ssh://kcvl path:/スナップショット` で inputs を転送できる。認証トークンのコピーは不要。
+
+ログアウト後も常駐させるには `loginctl show-user reohakuta -p Linger` が `yes` であることを確認する。未設定ホストでは一度だけ管理者が `sudo loginctl enable-linger reohakuta` を実行する。
+
+### Mac から接続
+
+1. Mac のターミナルで `orca-kcvl-tunnel` を起動したままにする。`Ctrl+C` で終了する。
+2. kcvl の `journalctl --user -u orca-serve -u 'app-orca-*.scope' -b -o cat` で最新起動の ready JSON を確認し、`pairing.url` を取得する。Electron は自身を別の systemd scope に移すため、サービス名だけでは ready が見つからないことがある。この URL は認証情報なので Git・共有ログ・スクリーンショットに含めない。
+3. Mac の Orca → Settings → Remote Orca Servers → Add Server で名前を `kcvl` とし、URL を貼り付ける。
+4. Connected を確認し、kcvl のプロジェクトを選ぶ。既定の実行先変更は必要に応じて Advanced → Active Server で行う。
+
+トンネルは既存の SSH `kcvl` 設定（踏み台・鍵を含む）から接続先を解決する。既存の2719番転送などは引き継がず、独立した SSH 接続で **Mac `127.0.0.1:16768` → kcvl `127.0.0.1:6768`** のみを転送する。ポート競合時は失敗として終了する。切断後は同じコマンドを再実行する。
+
+サーバーは **`0.0.0.0:6768` で LAN からの接続も受け付ける**。`--pairing-address ws://127.0.0.1:16768` は Mac のトンネル向け接続先を示すだけで、待受をループバックに制限しない。この URL はトンネルのない別端末では使えない。公開インターネット向けのポート開放は設定しない。
+
+Agent CLI と認証は kcvl のものを使う。Mac のログイン状態は転送されない。必要なら kcvl で `orca-ide account add --agent codex` 等を実行する。
+
+### 停止・診断・更新
+
+```bash
+systemctl --user status orca-serve
+ss -ltn 'sport = :6768'
+systemctl --user stop orca-serve
+systemctl --user reset-failed orca-serve
+systemctl --user start orca-serve
+```
+
+起動前に6768番の競合を検査する。ready JSON の `boundEndpoint` も6768番であることを確認し、自動選択された別ポートを成功扱いしない。ready の `type` は `orca_server_ready`、`schemaVersion` は `1`。起動失敗の再試行は5秒間隔、300秒内に5回まで。同一プロファイルの重複起動（終了コード3）は再試行しない。
+
+Linux の更新は `pkgs/appimages/orca.nix` の `version` と `hash` を更新してビルドする。ハッシュは **ダウンロードしたファイルの SHA-256** を使用する（`nix hash file --type sha256 <AppImage>`）。headless server は自動更新しない。Mac は公式 Cask／アプリの更新に従い、接続時のバージョン互換性も確認する。
+
+この Ubuntu では Chromium の sandbox を利用できないため、公式 CLI の namespace 検査が `--no-sandbox` を自動付与する。root ではなく `reohakuta` として動作するが、Chromium sandbox による分離はない。Nix 設定では OS 全体の AppArmor／user namespace 制限を変更しない。
+
+更新・再起動前には稼働中端末を確認する。端末 daemon が `orca-daemon-*.scope` に分離されていれば、サービス再起動をまたいで端末を保持できる。分離を確認できない場合は作業中の端末がなくなるまで再起動を延期する。更新前に Orca の状態ディレクトリ（`~/.config/orca`、`~/.config/Orca`、`~/.orca` の存在するもの）を保護された場所へバックアップする。ロールバックは Nix の旧世代だけでなく、更新で移行された状態との互換性も確認する。
+
+参考: [公式 headless guide](https://github.com/stablyai/orca/blob/main/docs/reference/headless-linux-server.md)、[Remote Orca Servers](https://www.onorca.dev/docs/remote-servers)。
 
 ## Apptainer・GPU とコンテナ
 
