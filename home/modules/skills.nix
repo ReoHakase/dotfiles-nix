@@ -18,6 +18,9 @@ _: {
       "tech-article-reproducibility"
       "nix-setup"
       "dotenvx"
+      "conventional-commit"
+      "github-issue-pr-ops"
+      "minimum-impl"
     ];
 
     targets = {
