@@ -6,7 +6,7 @@
 
 let
   user = "ReoHakase";
-  nixCasks = [ ];
+  nixCasks = [ pkgs.openscreen ];
 in
 {
   imports = [ ./common.nix ];

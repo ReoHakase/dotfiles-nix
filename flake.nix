@@ -86,6 +86,7 @@
         final: _prev:
         {
           harano-aji-fonts = final.callPackage ./pkgs/harano-aji-fonts.nix { };
+          openscreen = final.callPackage ./pkgs/gui/openscreen.nix { };
         }
         // _prev.lib.optionalAttrs _prev.stdenv.hostPlatform.isDarwin {
           matio = _prev.matio.overrideAttrs (old: {
@@ -205,6 +206,7 @@
       packages.aarch64-darwin = {
         inherit (pkgsDarwin)
           harano-aji-fonts
+          openscreen
           turso-cli
           ;
       };
