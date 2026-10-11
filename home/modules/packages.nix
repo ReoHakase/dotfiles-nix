@@ -11,6 +11,7 @@ let
     '';
   };
   llmAgentsPkgs = inputs.llm-agents.packages.${system};
+  vitePlus = inputs.nix-vite-plus.packages.${system}.vp;
 in
 {
   home.packages = with pkgs; [
@@ -79,6 +80,7 @@ in
     typst
     uv
     vips
+    vitePlus
     wget
     yazi
     xz
