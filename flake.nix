@@ -139,7 +139,6 @@
           localOverlay
           (final: _prev: {
             cursor-appimage = import ./pkgs/appimages/cursor.nix final;
-            orca-ide = final.callPackage ./pkgs/appimages/orca.nix { };
             vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };
           })
         ];
@@ -195,7 +194,6 @@
         inherit (pkgsLinux)
           cursor-appimage
           harano-aji-fonts
-          orca-ide
           proton-vpn
           turso-cli
           veracrypt
