@@ -11,6 +11,7 @@
 - [変更の適用（update）](#変更の適用update)
 - [`config/` の追加・削除・編集](#config-の追加削除編集config-を宣言管理するとき)
 - [`~/.config` とリポジトリのずれ・衝突](#config-とリポジトリが食い違った衝突したとき)
+- [macOS: SSID に応じた DNS 自動切り替え](#macos-ssid-に応じた-dns-自動切り替え)
 - [評価だけ確認](#評価だけ確認ビルド適用なし)
 - [ディスク不足と Nix ストア](#ディスク不足no-space-left-on-deviceと-nix-ストア)
 - [`sudo` 時の `$HOME` 警告](#sudo-時のhome-警告について)
@@ -122,6 +123,55 @@
    - バックアップに退避されていない「そのまま残ったファイル」の場合は、**中身を確認したうえで**リネーム・削除してから `switch` をやり直す（消す前に `cp` や `git diff` で退避）。
 
 > [!TIP] > **コンフリクトを減らす:** 宣言管理するパスは **`config/` だけ編集**し、`switch` で反映する。大きいデータ（Raycast の extensions など）は **リポジトリに含めず**、ローカルや別バックアップで管理する。変更後は **`git status` がきれいな状態**で `nix flake check` / `switch` すると、Nix の「Git に無いパス」エラーを避けやすい。
+
+## macOS: SSID に応じた DNS 自動切り替え
+
+macOS 標準の構成プロファイルで、主回線に応じて DNS を切り替える。SSID 判定と切り替えは OS が行うため、常駐アプリや監視スクリプトは不要。
+
+| 主回線 | DNS |
+| --- | --- |
+| Wi-Fi: `kcvl_guest`（完全一致） | DHCP で配られる学校 DNS |
+| その他の Wi-Fi | Cloudflare `1.1.1.1` の DNS over HTTPS |
+| 有線 LAN など、Wi-Fi 以外 | DHCP で配られる DNS |
+
+正本は `config/macos/cloudflare-dns.mobileconfig`。`home/darwin.nix` が `~/.config/macos/cloudflare-dns.mobileconfig` に配布する。`OnDemandRules` は、学校 SSID の除外 → Wi-Fi で有効化 → その他では無効化の順で評価する。
+
+### 初回の導入
+
+1. Wi-Fi と有線 LAN の DNS に手動指定がなく、DHCP を使う設定であることを確認する。プロファイルが無効な回線では元の DNS 設定を使うため、手動 DNS が残っていると DHCP の DNS には戻らない。
+2. 新規ファイルを `git add config/macos/cloudflare-dns.mobileconfig` で追跡し、リポジトリ直下で `./scripts/apply-system.sh` を実行する。
+3. 配布されたプロファイルを開く。
+
+   ```bash
+   open "$HOME/.config/macos/cloudflare-dns.mobileconfig"
+   ```
+
+4. **システム設定 → 一般 → デバイス管理**で「Cloudflare DNS — Wi-Fi except kcvl_guest」を開き、内容を確認してインストールする。管理者認証を求められたら認証する。
+
+ファイルを開く代わりに、「デバイス管理」の追加ボタンから同じ `.mobileconfig` を選択してもインストールできる。
+
+Home Manager の適用はファイルの配布まで。プロファイルのインストールはシステム設定で行う。既存の無関係なプロファイルはそのままにする。
+
+### 更新と削除
+
+- **更新:** 正本を編集して `./scripts/apply-system.sh` を実行し、上記の `open` とシステム設定からのインストールを繰り返す。`PayloadIdentifier` と `PayloadUUID` は変更せず、同じプロファイルを置き換える。
+- **削除:** システム設定の「デバイス管理」でこのプロファイルを削除すると、各回線の元の DNS 設定に戻る。配布もやめる場合は Home Manager のエントリと正本を削除して再適用する。Nix 側のファイルを削除するだけでは、インストール済みプロファイルは消えない。
+
+### 切り替えの確認
+
+インストール後、その他の Wi-Fi → `kcvl_guest` → 有線 LAN を主回線に切り替え、表の DNS が使われることと、スリープ復帰後も名前解決できることを確認する。接続できない回線の確認は未実施として扱う。
+
+```bash
+# OS 標準リゾルバーによる名前解決
+dscacheutil -q host -a name example.com
+
+# DHCP で配られた Wi-Fi の DNS（en0 はこの Mac の Wi-Fi）
+ipconfig getoption en0 domain_name_server
+```
+
+その他の Wi-Fi では [Cloudflare の接続確認](https://1.1.1.1/help)で DNS over HTTPS の利用も確認する。VPN、iCloud プライベートリレー、ブラウザー独自の暗号化 DNS が有効だと、OS の設定とは別の結果になる場合があるため、それらを使わない状態で切り分ける。これらの設定はこのプロファイルでは変更しない。`dig` / `nslookup` や `networksetup -getdnsservers` の結果だけでは、OS の DoH 利用を確認できない。
+
+仕様: [Apple の DNS 設定と OnDemandRules](https://developer.apple.com/documentation/devicemanagement/dnssettings/ondemandruleselement)、[Cloudflare DoH](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/)、[Apple のプロファイル導入・削除手順](https://support.apple.com/ja-jp/guide/mac-help/mh35561/26/mac/26)。
 
 ## 評価だけ確認（ビルド適用なし）
 

@@ -29,6 +29,7 @@ in
   xdg.configFile = {
     "karabiner/karabiner.json".source = ../config/karabiner/karabiner.json;
     "karabiner/assets".source = ../config/karabiner/assets;
+    "macos/cloudflare-dns.mobileconfig".source = ../config/macos/cloudflare-dns.mobileconfig;
   };
 
   home.packages = nixCasks;
