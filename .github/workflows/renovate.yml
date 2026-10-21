@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: "24.22.0"
+          node-version: "24.22.1"
 
       # post-upgrade で使うもの: nix-update（nix-update-flake-package.sh）、nix-prefetch、curl など。
       - name: Install helper tools via Nix
