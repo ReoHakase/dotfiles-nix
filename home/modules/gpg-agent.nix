@@ -5,7 +5,8 @@
 }:
 
 let
-  pinentryPackage = if pkgs.stdenv.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-gtk2;
+  pinentryPackage =
+    if pkgs.stdenv.hostPlatform.isDarwin then pkgs.pinentry_mac else pkgs.pinentry-gnome3;
 in
 {
   # gpg-agent.conf は Nix が入れた pinentry の絶対パスを指す。

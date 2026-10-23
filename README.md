@@ -232,7 +232,7 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | Mac（`home/darwin.nix`） | Ubuntu（`home/linux.nix`） |
 | ------------------------ | --------------------------- |
 | Karabiner の `xdg.configFile` | 無し（macOS用） |
-| `pinentry_mac` | `pinentry-gtk2`（GPG 用） |
+| `pinentry_mac` | `pinentry-gnome3`（GPG 用） |
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
 | zsh 追記 | [`home/modules/shell.nix`](home/modules/shell.nix) で共通生成。Linux だけ `PYTHONNOUSERSITE=1` を `home/linux.nix` で追加 |
 | NixCasks 等の macOS GUI | [home/modules/linux/gui-apps.nix](home/modules/linux/gui-apps.nix)（Ghostty・Cursor・Proton VPN・VeraCrypt）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,proton-vpn,veracrypt}` |

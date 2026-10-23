@@ -19,12 +19,12 @@ let
   };
   tmuxPowerkit = pkgs.tmuxPlugins.mkTmuxPlugin {
     pluginName = "tmux-powerkit";
-    version = "unstable-2026-01-12";
+    version = "7.6.0";
     src = pkgs.fetchFromGitHub {
       owner = "fabioluciano";
       repo = "tmux-powerkit";
-      rev = "372b891e6c1884dd3b959f101336c92fa89056ec";
-      hash = "sha256-rYDxaELzJNmn2+ndLBjhUSNZjwg8tf7lT4iwCAU4nfQ=";
+      rev = "v7.6.0";
+      hash = "sha256-ZWHhF2phqNU+pMI96q9mFG+oA8WszJ1HrRvKubL3rJk=";
     };
     rtpFilePath = "tmux-powerkit.tmux";
   };
@@ -41,8 +41,8 @@ let
   ghosttyCursorShaders = pkgs.fetchFromGitHub {
     owner = "sahaj-b";
     repo = "ghostty-cursor-shaders";
-    rev = "4faa83e4b9306750fc8de64b38c6f53c57862db8";
-    hash = "sha256-ruhEqXnWRCYdX5mRczpY3rj1DTdxyY3BoN9pdlDOKrE=";
+    rev = "9ad9158a93c0de0c045e1c6b27df37da698bc8af";
+    hash = "sha256-TnoQvptwjs6P5/JfJO1CR3yhCfCcaw5wvPr5oEhn4Ho=";
   };
   tmuxPowerkitOneDarkProNightFlat = pkgs.writeText "tmux-powerkit-onedark-pro-night-flat.sh" ''
     declare -gA THEME_COLORS=(
