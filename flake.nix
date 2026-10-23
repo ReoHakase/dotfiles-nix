@@ -139,7 +139,6 @@
           localOverlay
           (final: _prev: {
             cursor-appimage = import ./pkgs/appimages/cursor.nix final;
-            vicinae-appimage = final.callPackage ./pkgs/appimages/vicinae.nix { };
           })
         ];
         config.allowUnfree = true;
@@ -197,7 +196,6 @@
           proton-vpn
           turso-cli
           veracrypt
-          vicinae-appimage
           ;
       };
 

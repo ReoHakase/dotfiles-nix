@@ -35,7 +35,7 @@
 | OS 統合      | [nix-darwin](https://github.com/LnL7/nix-darwin)（`system.defaults`、ユーザシェル、`/etc/nix` など） |
 | ユーザ環境   | [home-manager](https://github.com/nix-community/home-manager)（zsh、starship、nvim、パッケージ群）   |
 | Agent Skills | [agent-skills-nix](https://github.com/Kyure-A/agent-skills-nix)（`.agents` / `.claude` / `.cursor` 向け skill 配布） |
-| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。GUI は **Ghostty（nixpkgs）・Cursor（nixpkgs の AppImage 版）・Proton VPN（nixpkgs）・VeraCrypt（nixpkgs）・Vicinae（公式 AppImage + 固定 hash）** を Home Manager で入れられる（`home/modules/linux/gui-apps.nix`）。 |
+| Linux（Ubuntu 等） | nix-darwin に相当する OS 統合は**無し**。`home/linux.nix` + `homeConfigurations.reohakuta@reohakuta-kcvl` のみ適用。GUI は **Ghostty（nixpkgs）・Cursor（nixpkgs の AppImage 版）・Proton VPN（nixpkgs）・VeraCrypt（nixpkgs）** を Home Manager で入れられる（`home/modules/linux/gui-apps.nix`）。 |
 | 入力         | `nixpkgs-unstable`（`flake.nix` の `inputs` を参照）                                                 |
 | LaTeX（LuaLaTeX + 日本語） | [`home/modules/tex.nix`](home/modules/tex.nix) の TeX Live（`collection-langjapanese` 等）。**BasicTeX は使わない**（Nix に統一）。設定例: [traP: TeXエンジン比較](https://trap.jp/post/2596/)。`~/.latexmkrc` は [`config/latex/latexmkrc`](config/latex/latexmkrc) を HM が配布。`graphicscache` を使うなら別途 `pkgs.ghostscript` を足すなど。 |
 
@@ -77,7 +77,7 @@ home/common.nix        # 共有 Home Manager entry（home/modules/* を import�
 home/modules/          # shell/git/ssh/terminal/editor/packages/tex/gpg-agent/skills など
 home/modules/linux/    # Linux 向け GUI と user-space Tailscale
 pkgs/gui/ghostty.nix   # Linux: nixpkgs の ghostty を薄く再エクスポート（flake の `packages` 用）
-pkgs/appimages/        # Linux: Cursor（nixpkgs の AppImage 版）・Vicinae（固定 URL + hash）
+pkgs/appimages/        # Linux: Cursor（nixpkgs の AppImage 版）
 config/latex/latexmkrc  # LuaLaTeX 用 ~/.latexmkrc の元ファイル
 scripts/apply-system.sh # darwin-rebuild を root で実行するヘルパー
 .github/workflows/nix.yml      # Nix 検証 CI（lint + Linux/Darwin eval）
@@ -235,7 +235,7 @@ macOS の `nix-darwin`（ログインシェル・`system.defaults`・Homebrew ca
 | `pinentry_mac` | `pinentry-gtk2`（GPG 用） |
 | `sessionPath` に Homebrew・TeX 等 | `~/.nix-profile/bin` 中心 |
 | zsh 追記 | [`home/modules/shell.nix`](home/modules/shell.nix) で共通生成。Linux だけ `PYTHONNOUSERSITE=1` を `home/linux.nix` で追加 |
-| NixCasks 等の macOS GUI | [home/modules/linux/gui-apps.nix](home/modules/linux/gui-apps.nix)（Ghostty・Cursor・Proton VPN・VeraCrypt・Vicinae）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,proton-vpn,veracrypt,vicinae-appimage}` |
+| NixCasks 等の macOS GUI | [home/modules/linux/gui-apps.nix](home/modules/linux/gui-apps.nix)（Ghostty・Cursor・Proton VPN・VeraCrypt）。個別に `nix build` する場合は `packages.x86_64-linux.{ghostty,cursor-appimage,proton-vpn,veracrypt}` |
 | `services.tailscale`（launchd + CLI、`hosts/reohakase.nix`） | `systemd.user` の `tailscaled`（userspace）、`pkgs.tailscale`、`TS_SOCKET`（root 無し。サブネットルータ等は制限あり） |
 
 **前提:** Nix（flakes 有効）を入れる（例: [Determinate Nix Installer](https://github.com/DeterminateSystems/nix-installer)）。Linux のユーザー名・ホームが `reohakuta` / `/home/reohakuta` でない場合は `home/linux.nix` と `flake.nix` の `linuxUser` / `linuxHmHostname` / `homeConfigurations` 名を合わせる。**ARM PC** なら `flake.nix` の `linuxSystem` を `"aarch64-linux"` に変更する。
@@ -249,7 +249,6 @@ nix build '.#packages.x86_64-linux.home-reohakuta-kcvl' --no-link
 # （任意）Linux GUI パッケージだけ確認する場合
 # nix build '.#packages.x86_64-linux.ghostty' --no-link
 # nix build '.#packages.x86_64-linux.cursor-appimage' --no-link
-# nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
 ```
 
 初回適用（Home Manager 未インストールでも可）:
@@ -272,7 +271,7 @@ grep zsh /etc/shells || echo '/nix/var/nix/profiles/default/bin/zsh' | sudo tee 
 chsh -s "$(which zsh)"
 ```
 
-**Linux GUI:** `home/modules/linux/gui-apps.nix` で **Ghostty**（nixpkgs）、**Cursor**（nixpkgs の `code-cursor` / AppImage ラッパー）、**Proton VPN**（nixpkgs の `proton-vpn`）、**VeraCrypt**（nixpkgs）、**Vicinae**（GitHub リリースの AppImage を `fetchurl` + SRI hash で固定）を入れている。Vicinae のバージョンを上げるときは `pkgs/appimages/vicinae.nix` の `version` / `url` / `hash` を更新し、`nix-prefetch-url '<url>' --type sha256` や `nix hash path <store-path>` で hash を取り直す。詳細は [MANUAL.md](MANUAL.md) の「Linux（Ubuntu）GUI」。
+**Linux GUI:** `home/modules/linux/gui-apps.nix` で **Ghostty**（nixpkgs）、**Cursor**（nixpkgs の `code-cursor` / AppImage ラッパー）、**Proton VPN**（nixpkgs の `proton-vpn`）、**VeraCrypt**（nixpkgs）を入れている。詳細は [MANUAL.md](MANUAL.md) の「Linux（Ubuntu）GUI」。
 
 **Apptainer / GPU:** ドライバはホストに入れ、`nvidia-smi` がホストで通ることを先に確認する。コンテナでは `apptainer exec --nv`（`home/linux.nix` の zsh 略記 `apx-nv`）を参照。ホストの `uv` / venv とコンテナ内 Python の切り分けは [MANUAL.md](MANUAL.md) の「Apptainer・GPU とコンテナ」。
 

@@ -1,10 +1,9 @@
-# Self-hosted Renovate。flake.lock とカスタム Nix（固定出力 fetchurl の hash など）を PR で追従。
-# post-upgrade で scripts/renovate/*（curl + nix hash、bundled の nix-update）を叩くので Nix を入れる。
+# Self-hosted Renovate。flake.lock と GitHub Actions を PR で追従。
 name: Renovate
 
 on:
   schedule:
-    # 03:00 JST = 18:00 UTC。flake 入力ロックと Vicinae AppImage（fetchurl の hash を含む）などを PR。
+    # 03:00 JST = 18:00 UTC。flake 入力ロックなどを PR。
     - cron: "0 18 * * *"
   workflow_dispatch:
     inputs:
@@ -48,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      # post-upgrade tasks で nix-update / nix-prefetch-url を使うため Nix を入れる。
+      # Nix manager による flake.lock の更新用。
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
 
@@ -60,16 +59,6 @@ jobs:
         with:
           node-version: "24.22.1"
 
-      # post-upgrade で使うもの: nix-update（nix-update-flake-package.sh）、nix-prefetch、curl など。
-      - name: Install helper tools via Nix
-        run: |
-          nix profile install \
-            nixpkgs#nix-update \
-            nixpkgs#nix-prefetch \
-            nixpkgs#jq \
-            nixpkgs#gnused \
-            nixpkgs#curl
-
       - name: Run Renovate
         uses: renovatebot/github-action@a63d9a7bc606f7336fd20b47f2f32259a35e6213 # v46.3.9
         env:
@@ -77,10 +66,6 @@ jobs:
           RENOVATE_DRY_RUN: ${{ inputs.dryRun }}
           # repository 情報を明示。self-hosted でも必須。
           RENOVATE_REPOSITORIES: ${{ github.repository }}
-          # Self-hosted/global-only options. Keep them out of .github/renovate.json5
-          # because Renovate also reads that file as repository config.
-          RENOVATE_ALLOW_POST_UPGRADE_COMMAND_TEMPLATING: "true"
-          RENOVATE_ALLOWED_COMMANDS: '["^bash scripts/renovate/bump-vicinae-appimage\\.sh [-\\.0-9A-Za-z+]+$"]'
           RENOVATE_FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.ignoreSchedule && '{"schedule":null}' || '{}' }}
         with:
           # Prefer a PAT or GitHub App token so Renovate PRs can trigger normal

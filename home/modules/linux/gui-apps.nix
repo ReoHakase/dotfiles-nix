@@ -11,6 +11,5 @@
     cursor-appimage
     proton-vpn
     veracrypt
-    vicinae-appimage
   ];
 }

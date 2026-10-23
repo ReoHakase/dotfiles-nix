@@ -20,7 +20,7 @@
 - [次の作業の目安](#次の作業の目安cask-以外)
 - [NixCasks（GUI）](#nixcasksgui)
 - [Agent Skills](#agent-skills)
-- [Linux（Ubuntu）GUI: Ghostty・Cursor・Vicinae](#linuxubuntu-gui-ghosttycursorvicinae)
+- [Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt](#linuxubuntu-gui-ghosttycursorproton-vpnveracrypt)
 - [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
 - [秘密情報（GPG・SSH など）](#秘密情報gpgssh-など)
 - [nixd（エディタ連携）](#nixdエディタ連携)
@@ -259,7 +259,7 @@ Agent Skills は [`home/modules/skills.nix`](home/modules/skills.nix) で [`agen
 
 skill を増減するときは `home/modules/skills.nix` の source / `skills.enable` と、必要なら `flake.nix` の input を編集してから `nix flake lock` → `nix flake check` → `switch`。旧 APM の `~/.apm/apm.yml` / lockfile と activation-time install は使わない。
 
-## Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt・Vicinae
+## Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt
 
 macOS では [NixCasks](#nixcasksgui) や Homebrew cask で GUI を足すことが多いが、**この flake の Ubuntu 向け Home Manager** では次を宣言している（`home/modules/linux/gui-apps.nix`）。
 
@@ -269,9 +269,8 @@ macOS では [NixCasks](#nixcasksgui) や Homebrew cask で GUI を足すこと�
 | Cursor | nixpkgs の **`code-cursor`**（Linux では AppImage ベース）。[`pkgs/appimages/cursor.nix`](pkgs/appimages/cursor.nix) で `cursor-appimage` という名前に寄せている | `cursor-appimage` |
 | Proton VPN | nixpkgs の `proton-vpn`。macOS では Homebrew cask の `protonvpn` で入れる | `proton-vpn` |
 | VeraCrypt | nixpkgs の `veracrypt`。macOS では FUSE-T 版の Homebrew cask `veracrypt-fuse-t` で入れる | `veracrypt` |
-| Vicinae | 公式リリースの AppImage を `fetchurl` で固定。[`pkgs/appimages/vicinae.nix`](pkgs/appimages/vicinae.nix) で `appimageTools.wrapType2` | `vicinae-appimage` |
 
-`flake.nix` の **`pkgsLinux` 用 overlay** で `cursor-appimage` / `vicinae-appimage` を定義しているため、Home Manager の `pkgs` からも同じ名前で参照できる。
+`flake.nix` の **`pkgsLinux` 用 overlay** で `cursor-appimage` を定義しているため、Home Manager の `pkgs` からも同じ名前で参照できる。
 
 CLI の `sshfs` は Ubuntu 向けの `home/linux.nix` で nixpkgs の通常版 `sshfs` を入れる。macOS の SSHFS は FUSE-T tap の `sshfs-fuse-t` に寄せる。
 
@@ -284,12 +283,9 @@ nix build '.#packages.x86_64-linux.ghostty' --no-link
 nix build '.#packages.x86_64-linux.cursor-appimage' --no-link
 nix build '.#packages.x86_64-linux.proton-vpn' --no-link
 nix build '.#packages.x86_64-linux.veracrypt' --no-link
-nix build '.#packages.x86_64-linux.vicinae-appimage' --no-link
 ```
 
 未追跡ファイルも検証する場合は、`.git` 等を除いた一時スナップショットを作り `path:/そのディレクトリ#...` を対象にする。private flake input を取得できないホストには、認証済みの Mac から `nix flake archive --to ssh://kcvl path:/スナップショット` で inputs を転送できる。認証トークンのコピーは不要。
-
-**Vicinae のバージョン更新:** `pkgs/appimages/vicinae.nix` の `version` と `src.url` をリリースに合わせ、`hash` を更新する。手元で一度取り込んだあとなら `nix hash path /nix/store/…-Vicinae-x86_64.AppImage` で SRI にできる。未取得なら `nix-prefetch-url '<AppImage の URL>' --type sha256` で store に入れてから同様に hash を得る。
 
 ## Apptainer・GPU とコンテナ
 
@@ -416,7 +412,7 @@ Nix 検証用 workflow は `actrun workflow run .github/workflows/nix.yml` で�
 
 ### Renovate
 
-`.github/workflows/renovate.yml` は毎日 03:00 JST に self-hosted Renovate を実行する。`.github/renovate.json5` では Nix manager と `lockFileMaintenance` を有効にし、`flake.lock` / GitHub Actions / Vicinae AppImage の固定 hash 更新 PR を作る。Renovate PR は `build(deps): ⬆️ ...` の Conventional Commit + Gitmoji 形式に揃え、CI が通ったあと Renovate 側で automerge する（`platformAutomerge = false`）。
+`.github/workflows/renovate.yml` は毎日 03:00 JST に self-hosted Renovate を実行する。`.github/renovate.json5` では Nix manager と `lockFileMaintenance` を有効にし、`flake.lock` / GitHub Actions 更新 PR を作る。Renovate PR は `build(deps): ⬆️ ...` の Conventional Commit + Gitmoji 形式に揃え、CI が通ったあと Renovate 側で automerge する（`platformAutomerge = false`）。
 
 workflow には `RENOVATE_TOKEN` secret を設定しておくと、Renovate が作った PR でも通常の PR / push workflow が動く。未設定時は `GITHUB_TOKEN` に fallback するが、GitHub の制限で後続 CI が発火しない場合がある。
 

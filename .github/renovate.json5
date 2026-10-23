@@ -19,8 +19,7 @@
   commitMessagePrefix: "build(deps): ⬆️",
   commitMessageAction: "update",
 
-  // flake.lock は nix manager が rev / narHash を更新。個別 *.nix の fetchurl hash 等は
-  // packageRules の postUpgradeTasks（curl + nix hash / nix-update）で追随させる。
+  // flake.lock は nix manager が rev / narHash を更新する。
   nix: { enabled: true },
   lockFileMaintenance: {
     enabled: true,
@@ -32,19 +31,6 @@
     commitMessageTopic: "flake inputs",
     commitMessageExtra: null,
   },
-
-  customManagers: [
-    {
-      description: "Vicinae AppImage (fixed-output fetchurl)",
-      customType: "regex",
-      managerFilePatterns: ["^pkgs/appimages/vicinae\\.nix$"],
-      matchStrings: ['version\\s*=\\s*"(?<currentValue>[^"]+)";'],
-      datasourceTemplate: "github-releases",
-      depNameTemplate: "vicinaehq/vicinae",
-      extractVersionTemplate: "^v(?<version>.+)$",
-      versioningTemplate: "semver",
-    },
-  ],
 
   packageRules: [
     {
@@ -58,20 +44,6 @@
       matchManagers: ["nix"],
       groupName: "flake inputs",
       commitMessageTopic: "flake inputs",
-    },
-    {
-      description: "Recompute Vicinae fetchurl SRI hash after semver bump.",
-      matchManagers: ["custom.regex"],
-      matchDatasources: ["github-releases"],
-      matchPackageNames: ["vicinaehq/vicinae"],
-      commitMessageTopic: "Vicinae AppImage",
-      postUpgradeTasks: {
-        // The command allowlist is self-hosted/global-only, so renovate.yml
-        // provides it via RENOVATE_ALLOWED_COMMANDS instead of this repo config.
-        commands: ["bash scripts/renovate/bump-vicinae-appimage.sh {{{newVersion}}}"],
-        fileFilters: ["pkgs/appimages/vicinae.nix"],
-        executionMode: "update",
-      },
     },
   ],
 }
