@@ -23,7 +23,7 @@ palette = 14=4cd1e0
 palette = 15=e6e6e6
 
 font-family = GeistMono Nerd Font
-font-feature = -dlig
+font-feature = dlig
 
 clipboard-read = allow
 clipboard-write = allow
