@@ -23,13 +23,15 @@ class LocalAPIOnly(urllib.request.HTTPRedirectHandler):
         raise RuntimeError("Strata API redirected the request. Check the SSH tunnel.")
 
 
-def ssh(*args, capture=False, check=True):
+def ssh(*args, capture=False, check=True, background=False):
     config = os.environ.get("QWEN_SSH_CONFIG")
     options = ["-F", config] if config else []
     return subprocess.run(
         ["ssh", *options, "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", *args],
-        check=check, text=True, stdout=subprocess.PIPE if capture else None,
-        stderr=subprocess.PIPE if capture else None, stdin=subprocess.DEVNULL,
+        check=check, text=True,
+        stdout=subprocess.DEVNULL if background else subprocess.PIPE if capture else None,
+        stderr=subprocess.DEVNULL if background else subprocess.PIPE if capture else None,
+        stdin=subprocess.DEVNULL,
     )
 
 
@@ -105,7 +107,8 @@ def configure_clients(model, key):
 
 def start():
     if ssh("-O", "check", HOST, capture=True, check=False).returncode:
-        ssh("-M", "-N", "-f", "-o", "ControlPersist=no", "-o", "ExitOnForwardFailure=yes", HOST)
+        # A forked master must not keep the caller's stdout/stderr pipes open.
+        ssh("-M", "-N", "-f", "-o", "ControlPersist=no", "-o", "ExitOnForwardFailure=yes", HOST, background=True)
     key = remote('cat "${XDG_CONFIG_HOME:-$HOME/.config}/strata-kcvl/api-key"', capture=True).stdout.strip()
     if not re.fullmatch(r"[0-9a-f]{64}", key):
         raise RuntimeError("Missing or invalid API key. Run strata-qwen-setup on kcvl first.")

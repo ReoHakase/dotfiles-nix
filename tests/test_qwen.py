@@ -55,8 +55,12 @@ class ClientTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, server(respond):
             root = Path(directory)
             ssh = root / "ssh"
-            ssh.write_text('#!/usr/bin/env python3\nimport sys\nsys.stdin.read()\n'
+            ssh.write_text('#!/usr/bin/env python3\nimport sys, subprocess\nsys.stdin.read()\n'
                            'if sys.argv[1:3] != ["-F", "/nix/store/generated-ssh-config"]: sys.exit(2)\n'
+                           'if "check" in sys.argv: sys.exit(1)\n'
+                           'if "-M" in sys.argv:\n'
+                           '    subprocess.Popen([sys.executable, "-c", "import time; time.sleep(8)"])\n'
+                           '    sys.exit(0)\n'
                            f'print({KEY!r} if "cat " in sys.argv[-1] else "")\n')
             ssh.chmod(0o755)
             aichat = root / "aichat"
@@ -65,7 +69,7 @@ class ClientTests(unittest.TestCase):
             code = (f'import sys; sys.path.insert(0, {str(ROOT / "scripts")!r}); import qwen; '
                     f'qwen.BASE={qwen.BASE!r}; sys.argv=["qwen", "chat"]; qwen.main()')
             result = subprocess.run([sys.executable, "-c", code], text=True, input="日本語の質問\n",
-                                    capture_output=True, check=True,
+                                    capture_output=True, check=True, timeout=5,
                                     env={**os.environ, "XDG_CONFIG_HOME": str(root / "config"),
                                          "QWEN_SSH_CONFIG": "/nix/store/generated-ssh-config",
                                          "PATH": str(root) + os.pathsep + os.environ["PATH"]})
