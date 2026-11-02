@@ -22,6 +22,7 @@
 - [Agent Skills](#agent-skills)
 - [Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt](#linuxubuntu-gui-ghosttycursorproton-vpnveracrypt)
 - [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
+- [kcvlのStrata・QwenをMacから使う](docs/strata.md)
 - [秘密情報（GPG・SSH など）](#秘密情報gpgssh-など)
 - [nixd（エディタ連携）](#nixdエディタ連携)
 - [Flake と Git](#flake-と-git)

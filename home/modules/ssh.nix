@@ -44,7 +44,7 @@ in
     enableDefaultConfig = false;
     settings = {
       labProxyJump = lib.hm.dag.entryBefore [ "kcvl" ] {
-        header = "Match originalhost kcvl,kcvl-llm,paras,paras02,paras02.lan,snorlax,snorlax06,snorlax06.lan,squirtle,squirtle05,squirtle05.lan,nidoking,nidoking07,nidoking07.lan,nidoqueen,nidoqueen08,nidoqueen08.lan !localnetwork 192.168.100.0/24";
+        header = "Match originalhost kcvl,kcvl-strata,kcvl-llm,paras,paras02,paras02.lan,snorlax,snorlax06,snorlax06.lan,squirtle,squirtle05,squirtle05.lan,nidoking,nidoking07,nidoking07.lan,nidoqueen,nidoqueen08,nidoqueen08.lan !localnetwork 192.168.100.0/24";
         ProxyJump = "reoo.hakuta@gw.vision.is.kit.ac.jp";
       };
       "*" = {
@@ -73,6 +73,20 @@ in
           }
         ];
         ExitOnForwardFailure = false;
+      };
+      kcvl-strata = {
+        HostName = "192.168.100.149";
+        User = "reohakuta";
+        ForwardAgent = false;
+        ExitOnForwardFailure = true;
+        LocalForward = [
+          {
+            bind.address = "127.0.0.1";
+            bind.port = 8180;
+            host.address = "127.0.0.1";
+            host.port = 8080;
+          }
+        ];
       };
       kcvl-llm = {
         HostName = "nidoking07.lan";
