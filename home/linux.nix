@@ -13,6 +13,7 @@ in
     ./common.nix
     ./modules/linux/gui-apps.nix
     ./modules/linux/tailscale.nix
+    ./modules/strata.nix
   ];
 
   home.username = user;

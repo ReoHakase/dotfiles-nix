@@ -4,6 +4,7 @@ result-*
 .nix-profiles/
 *.swp
 .DS_Store
+__pycache__/
 home/container.local.nix
 
 
