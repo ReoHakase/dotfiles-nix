@@ -24,8 +24,10 @@ class LocalAPIOnly(urllib.request.HTTPRedirectHandler):
 
 
 def ssh(*args, capture=False, check=True):
+    config = os.environ.get("QWEN_SSH_CONFIG")
+    options = ["-F", config] if config else []
     return subprocess.run(
-        ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", *args],
+        ["ssh", *options, "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", *args],
         check=check, text=True, stdout=subprocess.PIPE if capture else None,
         stderr=subprocess.PIPE if capture else None, stdin=subprocess.DEVNULL,
     )

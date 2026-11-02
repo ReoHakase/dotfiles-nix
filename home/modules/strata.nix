@@ -18,6 +18,7 @@ let
       ];
       text = ''
         export STRATA_DESKTOP_APP=${lib.escapeShellArg "${release.desktop}/Applications/Strata.app"}
+        export QWEN_SSH_CONFIG=${lib.escapeShellArg (toString config.home.file.".ssh/config".source)}
         exec ${lib.getExe pkgs.python3} ${../../scripts/qwen.py} ${operation} "$@"
       '';
     };

@@ -46,6 +46,8 @@ qwen-stop                  # サーバー停止・RAM解放・専用トンネル
 
 `kcvl-strata`は`kcvl`と同じホストへ接続し、`127.0.0.1:8180`をkcvlの`127.0.0.1:8080`へ転送する。学外では既存の踏み台設定を使う。ポートが他のプロセスに使われていれば起動は失敗する。Macのスリープや接続断後は起動コマンドを再実行する。サーバーは自動起動しないため、kcvl再起動後も同様に開始できる。
 
+qwenコマンドにはNix生成済みのSSH設定を同梱する。そのため、Macのシステム全体を切り替える前にも、ビルド済みコマンドを専用のNixプロファイルへ導入して利用できる。`QWEN_SSH_CONFIG`はラッパーが設定する内部変数で、`~/.ssh/config`を手動で書き換える必要はない。
+
 初回の`qwen-desktop`は、公式アプリの`~/.strata/data/model-providers.json`へ`kcvl Strata`というカスタム接続を登録する。登録・モデル変更時はアプリを終了してから実行する。他の接続は保持する。初期画面では`Go straight to the app`を選び、Chatのモデル選択から`kcvl Strata`内のQwenを選ぶ。接続はOpenAI Chat Completions、ベースURLは`http://127.0.0.1:8180/v1`。Mac側でローカルモデルの取得やエンジン起動は不要。
 
 APIキーはkcvlの`~/.config/strata-kcvl/api-key`で生成し、Macの`~/.config/strata-kcvl/`へSSHで同期する。生成したAIChat/OpenCode設定とアプリの接続ファイルは所有者だけが読めるモードで保存する。AIChatとOpenCodeは専用設定を使い、キーをコマンド引数へ含めない。OpenCode 2系は`--standalone`で起動し、既存のバックグラウンドサーバーと専用設定が混ざるのを避ける。通常のツール権限確認は維持する。
