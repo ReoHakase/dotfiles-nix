@@ -123,7 +123,6 @@
       "alt-tab"
       "antigravity"
       "arc"
-      "azookey"
       "betterdisplay"
       "canva"
       "chatgpt"
