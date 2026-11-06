@@ -14,6 +14,14 @@ in
   home.username = user;
   home.homeDirectory = "/Users/${user}";
 
+  programs.java = {
+    enable = true;
+    package = pkgs.jdk17;
+  };
+
+  # SDK 本体と AVD は Android Studio の SDK / Device Manager で管理する。
+  home.sessionVariables.ANDROID_HOME = "${config.home.homeDirectory}/Library/Android/sdk";
+
   home.sessionPath = [
     "/etc/profiles/per-user/${user}/bin"
     "/nix/var/nix/profiles/default/bin"
@@ -22,6 +30,9 @@ in
     "${config.home.homeDirectory}/.cache/.bun/bin"
     "${config.home.homeDirectory}/.cache/lm-studio/bin"
     "${config.home.homeDirectory}/.antigravity/antigravity/bin"
+    "${config.home.sessionVariables.ANDROID_HOME}/platform-tools"
+    "${config.home.sessionVariables.ANDROID_HOME}/emulator"
+    "${config.home.sessionVariables.ANDROID_HOME}/cmdline-tools/latest/bin"
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];

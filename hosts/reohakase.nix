@@ -121,6 +121,7 @@
     casks = [
       "affinity"
       "alt-tab"
+      "android-studio"
       "antigravity"
       "arc"
       "azookey"

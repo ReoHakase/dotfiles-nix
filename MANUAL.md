@@ -9,6 +9,7 @@
 - [Determinate Nix と nix-darwin](#determinate-nix-と-nix-darwin)
 - [インストール（新しい Mac / 初回）](#インストール新しい-mac--初回)
 - [変更の適用（update）](#変更の適用update)
+- [Expo: Android 開発環境（macOS）](#expo-android-開発環境macos)
 - [`config/` の追加・削除・編集](#config-の追加削除編集config-を宣言管理するとき)
 - [`~/.config` とリポジトリのずれ・衝突](#config-とリポジトリが食い違った衝突したとき)
 - [macOS: SSID に応じた DNS 自動切り替え](#macos-ssid-に応じた-dns-自動切り替え)
@@ -68,6 +69,66 @@
 1. `flake.nix` の `inputs` を変えたら `nix flake lock` で `flake.lock` を更新し、動作確認後にコミットする。
 2. 設定を反映: `./scripts/apply-system.sh`（または `darwin-rebuild switch --flake .#reohakase`。初回後は `darwin-rebuild` が PATH に乗ることが多い）。
 3. `home/*.nix` / `home/modules/*.nix` / `hosts/*.nix` を変えたら必ず上記の **switch** を実行する。
+
+## Expo: Android 開発環境（macOS）
+
+Apple Silicon Mac 向けに、Android Studio は `hosts/reohakase.nix` の Homebrew cask、JDK 17 は `home/darwin.nix` の `programs.java` で管理する。Home Manager が `JAVA_HOME`、`ANDROID_HOME=$HOME/Library/Android/sdk` と SDK 関連コマンドへの `PATH` を設定する。Node.js・pnpm・Bun は既存の mise 管理を使う。
+
+SDK・システムイメージ・仮想端末（AVD）は Android Studio で管理する。Nix の適用だけでは SDK や AVD は作成されない。
+
+### 適用と初回設定
+
+1. リポジトリ直下で `./scripts/apply-system.sh` を実行し、完了後に新しいターミナルを開く。
+2. `open -a "Android Studio"` で起動し、初回の Setup Wizard を進める。SDK の保存先は **`~/Library/Android/sdk`** にそろえる。
+3. **Settings > Languages & Frameworks > Android SDK**（または Welcome 画面の **More Actions > SDK Manager**）を開く。
+4. **SDK Platforms** で **Android SDK Platform 37** を選ぶ。Expo SDK 58 は `compileSdkVersion=37`、`targetSdkVersion=36` のため、コンパイル用には Platform 37 が必要。[Expo SDK 公式仕様](https://docs.expo.dev/versions/latest/#support-for-android-and-ios-versions)
+5. **SDK Tools** で次を導入し、表示されるライセンスを確認して承諾する。
+   - Android SDK Platform-Tools（`adb`）
+   - Android SDK Command-line Tools (latest)（`sdkmanager`・`avdmanager`）
+   - Android Emulator
+   - Android SDK Build-Tools（アプリの Gradle 設定が要求するバージョン。必要なら **Show Package Details** で選択）
+6. Welcome 画面の **More Actions > Virtual Device Manager**、またはプロジェクト内の **Device Manager** から仮想端末を作成する。Pixel 系の端末を選び、**Google APIs / ARM 64 v8a (`arm64-v8a`)** のシステムイメージをダウンロードする。OS の API レベルはアプリの対応範囲内で選び、まずは API 37 を使う。
+7. Device Manager の再生ボタンで仮想端末を起動する。
+
+SDK の保存先を変える場合は `home/darwin.nix` の `ANDROID_HOME` も変更して再適用する。生成された `~/.zshrc` へ手作業で追記しない。SDK の操作方法は [Android Studio の SDK Manager](https://developer.android.com/studio/intro/update#sdk-manager)、AVD の操作方法は [仮想端末の作成・管理](https://developer.android.com/studio/run/managing-avds)を参照。
+
+### 初回設定後の確認
+
+新しいターミナルで次を実行する。`java`・`javac` は 17、`ANDROID_HOME` は SDK Manager の保存先と一致することを確認する。
+
+```bash
+printf 'JAVA_HOME=%s\nANDROID_HOME=%s\n' "$JAVA_HOME" "$ANDROID_HOME"
+java -version
+javac -version
+adb version
+sdkmanager --version
+emulator -list-avds
+adb devices
+```
+
+`emulator -list-avds` に作成した AVD、`adb devices` に起動済みエミュレーターが表示されれば、Expo から使用できる。コマンドが見つからない場合は SDK Tools の導入状態と SDK の保存先を確認する。
+
+### Expo プロジェクトで実行
+
+対象アプリのディレクトリで依存関係をインストールしたあと、エミュレーターを起動して実行する。
+
+```bash
+npx expo install --check
+npx expo run:android
+```
+
+初回のネイティブビルド後、JavaScript / TypeScript の変更時は次で開発サーバーを起動し、ターミナルで `a` を押してエミュレーターで開く。ネイティブ依存や設定を変更したときは `npx expo run:android` で再ビルドする。
+
+```bash
+npx expo start
+```
+
+ブラウザからエミュレーターを操作する [Expo Device Hub](https://github.com/expo/expo-device-hub) は任意。必要な Expo アプリのディレクトリで導入し、開発サーバーが表示するリンクから開く。
+
+```bash
+npx expo install expo-device-hub
+npx expo start
+```
 
 ## `config/` の追加・削除・編集（`~/.config` を宣言管理するとき）
 
