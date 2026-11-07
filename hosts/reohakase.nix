@@ -124,7 +124,6 @@
       "android-studio"
       "antigravity"
       "arc"
-      "azookey"
       "betterdisplay"
       "canva"
       "chatgpt"
