@@ -21,6 +21,7 @@ _: {
       "conventional-commit"
       "github-issue-pr-ops"
       "minimum-impl"
+      "retro"
     ];
 
     targets = {
