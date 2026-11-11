@@ -44,6 +44,10 @@
       url = "github:ReoHakase/skills/2fce097e345b1635291b49c004fe28e07101fa5c";
       flake = false;
     };
+    yomiyasu = {
+      url = "github:nanaism/yomiyasu/7b212ff2f037953b8c233ae315e5c08e7fc36da6";
+      flake = false;
+    };
     llm-agents.url = "github:numtide/llm-agents.nix";
   };
 

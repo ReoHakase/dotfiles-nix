@@ -480,7 +480,8 @@
         "nix-homebrew": "nix-homebrew",
         "nix-vite-plus": "nix-vite-plus",
         "nixpkgs": "nixpkgs_3",
-        "reohakase-skills": "reohakase-skills"
+        "reohakase-skills": "reohakase-skills",
+        "yomiyasu": "yomiyasu"
       }
     },
     "systems": {
@@ -596,6 +597,23 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "yomiyasu": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794341672,
+        "narHash": "sha256-6+CiX3zd2iMUNm6ZlMJ/UVbAAMnm46GpW8aig/SagLg=",
+        "owner": "nanaism",
+        "repo": "yomiyasu",
+        "rev": "7b212ff2f037953b8c233ae315e5c08e7fc36da6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nanaism",
+        "repo": "yomiyasu",
+        "rev": "7b212ff2f037953b8c233ae315e5c08e7fc36da6",
         "type": "github"
       }
     }

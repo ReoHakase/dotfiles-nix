@@ -7,6 +7,11 @@ _: {
         input = "mizchi-skills";
         filter.maxDepth = 1;
       };
+      nanaism = {
+        input = "yomiyasu";
+        subdir = "skills";
+        filter.maxDepth = 1;
+      };
       reohakase = {
         input = "reohakase-skills";
         filter.maxDepth = 1;
@@ -22,6 +27,7 @@ _: {
       "github-issue-pr-ops"
       "minimum-impl"
       "retro"
+      "yomiyasu"
     ];
 
     targets = {
