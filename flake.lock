@@ -242,17 +242,17 @@
     "mizchi-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1792324323,
-        "narHash": "sha256-QYE0a9wYoMPaH+mnWzLx5DjDcuTtWE14fs60kX41fKA=",
+        "lastModified": 1794414371,
+        "narHash": "sha256-DI2I8J/ODhYNi3a4daSGnwkbnNH0y/fET4jOCKhrSug=",
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "ab4eb2f7a92a13fb37c225ab427f2f492143ace1",
+        "rev": "195bb34cb5220c3610ec4ba49007cae2fb10373e",
         "type": "github"
       },
       "original": {
         "owner": "mizchi",
         "repo": "skills",
-        "rev": "ab4eb2f7a92a13fb37c225ab427f2f492143ace1",
+        "rev": "195bb34cb5220c3610ec4ba49007cae2fb10373e",
         "type": "github"
       }
     },
@@ -603,17 +603,17 @@
     "yomiyasu": {
       "flake": false,
       "locked": {
-        "lastModified": 1794341672,
-        "narHash": "sha256-6+CiX3zd2iMUNm6ZlMJ/UVbAAMnm46GpW8aig/SagLg=",
+        "lastModified": 1794395769,
+        "narHash": "sha256-q5S0vynPmQ7XwVm6dDm1O9p+y7MgbwPmOuKmVRa9cjw=",
         "owner": "nanaism",
         "repo": "yomiyasu",
-        "rev": "7b212ff2f037953b8c233ae315e5c08e7fc36da6",
+        "rev": "2318a6d0820a58d3f8cfadc75af86978bb739185",
         "type": "github"
       },
       "original": {
         "owner": "nanaism",
         "repo": "yomiyasu",
-        "rev": "7b212ff2f037953b8c233ae315e5c08e7fc36da6",
+        "rev": "2318a6d0820a58d3f8cfadc75af86978bb739185",
         "type": "github"
       }
     }
