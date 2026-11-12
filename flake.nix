@@ -37,7 +37,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     mizchi-skills = {
-      url = "github:mizchi/skills/ab4eb2f7a92a13fb37c225ab427f2f492143ace1";
+      url = "github:mizchi/skills/195bb34cb5220c3610ec4ba49007cae2fb10373e";
       flake = false;
     };
     reohakase-skills = {
@@ -45,7 +45,7 @@
       flake = false;
     };
     yomiyasu = {
-      url = "github:nanaism/yomiyasu/7b212ff2f037953b8c233ae315e5c08e7fc36da6";
+      url = "github:nanaism/yomiyasu/2318a6d0820a58d3f8cfadc75af86978bb739185";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
