@@ -317,7 +317,7 @@ nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [
 
 ### Capsaicin（GitHub Releases から導入）
 
-[Capsaicin](https://github.com/koutyuke/Capsaicin) は Apple Silicon / macOS 26 以降向けのスリープ防止アプリ。[`pkgs/gui/capsaicin.nix`](pkgs/gui/capsaicin.nix) の導入コマンドが `gh release download` で配布済みの ZIP と `SHA256SUMS.txt` を取得し、SHA-256、`gh attestation verify` による来歴、展開後のコード署名を検証してから配置する。Xcode は不要。GitHub CLI は Nix が用意し、認証が必要な場合は先に `gh auth login` を行う。
+[Capsaicin](https://github.com/koutyuke/Capsaicin) は Apple Silicon / macOS 26 以降向けのスリープ防止アプリ。[`pkgs/gui/capsaicin.nix`](pkgs/gui/capsaicin.nix) の導入コマンドが `gh release download` で ZIP を取得し、`gh attestation verify` によるファイルの整合性・来歴と、展開後のコード署名を検証してから配置する。GitHub CLI は Nix が用意する。
 
 実行前に `gh release list --repo koutyuke/Capsaicin` と `gh release view <tag> --repo koutyuke/Capsaicin` でリリースノートを確認する。2026-11-14 時点で公開されている [v0.0.0](https://github.com/koutyuke/Capsaicin/releases/tag/v0.0.0) は、作者が使用を避けるよう指定した配布テスト版のみ。
 
@@ -325,8 +325,8 @@ nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [
 # リポジトリ内で実行。適用済みなら capsaicin-install でもよい。
 nix run .#capsaicin-install
 
-# 特定のリリースを選ぶ場合は、確認したタグを指定する。
-nix run .#capsaicin-install -- <tag>
+# 特定のリリースを選ぶ場合（vX.Y.Z を確認したタグに置き換える）。
+nix run .#capsaicin-install -- vX.Y.Z
 ```
 
 タグを省略した場合は `gh release download` が選ぶ最新リリースを取得する。対応するリリースがなければ配置前に停止する。取得と検証にはネット接続が必要。`Capsaicin.app` を `~/Applications/` に配置し、既存のアプリは上書きしないため、再導入時はアプリを終了し、既存のアプリを別の場所へ移してから実行する。自動起動や特権ヘルパーのインストールは行わない。
