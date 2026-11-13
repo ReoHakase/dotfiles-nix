@@ -97,6 +97,7 @@
           openscreen = final.callPackage ./pkgs/gui/openscreen.nix { };
         }
         // _prev.lib.optionalAttrs _prev.stdenv.hostPlatform.isDarwin {
+          capsaicin-install = final.callPackage ./pkgs/gui/capsaicin.nix { };
           matio = _prev.matio.overrideAttrs (old: {
             postFixup = (old.postFixup or "") + ''
               hdf5Dylibs=(${final.hdf5}/lib/libhdf5.[0-9]*.dylib)
@@ -209,6 +210,7 @@
 
       packages.aarch64-darwin = {
         inherit (pkgsDarwin)
+          capsaicin-install
           harano-aji-fonts
           openscreen
           turso-cli

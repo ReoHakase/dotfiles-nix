@@ -20,6 +20,7 @@
 - [Homebrew](#homebrew)
 - [次の作業の目安](#次の作業の目安cask-以外)
 - [NixCasks（GUI）](#nixcasksgui)
+  - [Capsaicin（GitHub Releases から導入）](#capsaicingithub-releases-から導入)
 - [Agent Skills](#agent-skills)
 - [Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt](#linuxubuntu-gui-ghosttycursorproton-vpnveracrypt)
 - [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
@@ -313,6 +314,30 @@ nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [
 ```
 
 変更後は `nix flake lock`（初回追加時）と `darwin-rebuild` / `apply-system.sh` で適用する。
+
+### Capsaicin（GitHub Releases から導入）
+
+[Capsaicin](https://github.com/koutyuke/Capsaicin) は Apple Silicon / macOS 26 以降向けのスリープ防止アプリ。[`pkgs/gui/capsaicin.nix`](pkgs/gui/capsaicin.nix) の導入コマンドが `gh release download` で ZIP を取得し、`gh attestation verify` によるファイルの整合性・来歴と、展開後のコード署名を検証してから配置する。GitHub CLI は Nix が用意する。
+
+実行前に `gh release list --repo koutyuke/Capsaicin` と `gh release view <tag> --repo koutyuke/Capsaicin` でリリースノートを確認する。2026-11-14 時点で公開されている [v0.0.0](https://github.com/koutyuke/Capsaicin/releases/tag/v0.0.0) は、作者が使用を避けるよう指定した配布テスト版のみ。
+
+```bash
+# リポジトリ内で実行。適用済みなら capsaicin-install でもよい。
+nix run .#capsaicin-install
+
+# 特定のリリースを選ぶ場合（vX.Y.Z を確認したタグに置き換える）。
+nix run .#capsaicin-install -- vX.Y.Z
+```
+
+タグを省略した場合は `gh release download` が選ぶ最新リリースを取得する。対応するリリースがなければ配置前に停止する。取得と検証にはネット接続が必要。`Capsaicin.app` を `~/Applications/` に配置し、既存のアプリは上書きしないため、再導入時はアプリを終了し、既存のアプリを別の場所へ移してから実行する。自動起動や特権ヘルパーのインストールは行わない。
+
+起動前に次を行う。
+
+1. Amphetamine、Caffeine、KeepingYouAwake、Capsomnia、`caffeinate` など、起動中のスリープ防止アプリ・コマンドを完全に終了する。
+2. Karabiner-Elements の **Devices → 対象キーボード → Manipulate caps lock LED** をオフにする。他のキーマップ変更アプリも Caps Lock LED の制御を手放す設定にする。このリポジトリでは内蔵キーボードの設定を `config/karabiner/karabiner.json` に含める。外付けキーボードを追加したらその設定も確認する。
+3. `open "$HOME/Applications/Capsaicin.app"` で起動する。
+
+CLI は `~/Applications/Capsaicin.app/Contents/Helpers/capsaicin`。アプリの実行ファイルを CLI の代わりに使わない。
 
 ## Agent Skills
 

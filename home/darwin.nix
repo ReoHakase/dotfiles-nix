@@ -6,7 +6,10 @@
 
 let
   user = "ReoHakase";
-  nixCasks = [ pkgs.openscreen ];
+  nixCasks = [
+    pkgs.capsaicin-install
+    pkgs.openscreen
+  ];
 in
 {
   imports = [ ./common.nix ];
