@@ -9,7 +9,10 @@ let
   nixCasks = [ pkgs.openscreen ];
 in
 {
-  imports = [ ./common.nix ];
+  imports = [
+    ./common.nix
+    ./modules/strata.nix
+  ];
 
   home.username = user;
   home.homeDirectory = "/Users/${user}";
