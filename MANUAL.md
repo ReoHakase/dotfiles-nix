@@ -20,6 +20,7 @@
 - [Homebrew](#homebrew)
 - [次の作業の目安](#次の作業の目安cask-以外)
 - [NixCasks（GUI）](#nixcasksgui)
+  - [Capsaicin（ソースから導入）](#capsaicinソースから導入)
 - [Agent Skills](#agent-skills)
 - [Linux（Ubuntu）GUI: Ghostty・Cursor・Proton VPN・VeraCrypt](#linuxubuntu-gui-ghosttycursorproton-vpnveracrypt)
 - [Apptainer・GPU とコンテナ](#apptainergpu-とコンテナ)
@@ -313,6 +314,27 @@ nixCasks = with inputs.nix-casks.packages.${pkgs.system}; [
 ```
 
 変更後は `nix flake lock`（初回追加時）と `darwin-rebuild` / `apply-system.sh` で適用する。
+
+### Capsaicin（ソースから導入）
+
+[Capsaicin](https://github.com/koutyuke/Capsaicin) は Apple Silicon / macOS 26 以降向けのスリープ防止アプリ。公開されている [v0.0.0](https://github.com/koutyuke/Capsaicin/releases/tag/v0.0.0) は作者が使用を避けるよう指定した配布テスト版のため使わず、[`pkgs/gui/capsaicin.nix`](pkgs/gui/capsaicin.nix) でコミットとハッシュを固定したソースからビルドする。
+
+Xcode 27.2 以降（Swift 6.4）が必要。Nix は `just` と `xcodegen` を用意し、アプリ本体はホストの Xcode を使って Nix の sandbox 外でビルドする。既存の flake に統合し、別の devbox 環境は追加しない。
+
+```bash
+# リポジトリ内で実行。適用済みなら capsaicin-install でもよい。
+nix run .#capsaicin-install
+```
+
+Release 構成の `Capsaicin.app` を `~/Applications/` に配置する。初回ビルドには Swift Package の取得用にネット接続が必要。既存の `~/Applications/Capsaicin.app` は上書きしないため、再導入時はアプリを終了し、既存のアプリを別の場所へ移してから実行する。自動起動や特権ヘルパーのインストールは行わない。
+
+起動前に次を行う。
+
+1. Amphetamine、Caffeine、KeepingYouAwake、Capsomnia、`caffeinate` など、起動中のスリープ防止アプリ・コマンドを完全に終了する。
+2. Karabiner-Elements の **Devices → 対象キーボード → Manipulate caps lock LED** をオフにする。他のキーマップ変更アプリも Caps Lock LED の制御を手放す設定にする。このリポジトリでは内蔵キーボードの設定を `config/karabiner/karabiner.json` に含める。外付けキーボードを追加したらその設定も確認する。
+3. `open "$HOME/Applications/Capsaicin.app"` で起動する。
+
+CLI は `~/Applications/Capsaicin.app/Contents/Helpers/capsaicin`。アプリの実行ファイルを CLI の代わりに使わない。
 
 ## Agent Skills
 
