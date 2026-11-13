@@ -45,7 +45,7 @@
       flake = false;
     };
     yomiyasu = {
-      url = "github:nanaism/yomiyasu/2318a6d0820a58d3f8cfadc75af86978bb739185";
+      url = "github:nanaism/yomiyasu/db78b9bc5e868549b517a037df7a4d1c93edac23";
       flake = false;
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
